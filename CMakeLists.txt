@@ -14,7 +14,9 @@ endif ()
 add_subdirectory(libs/glew)
 add_subdirectory(libs/glm)
 add_subdirectory(libs/glfw)
-add_executable(model_viewer main.cpp)
+
+file(GLOB SRC_FILES src/*)
+add_executable(model_viewer main.cpp ${SRC_FILES})
 
 
 if (USE_PRE_COMPILED_HEADERS)
