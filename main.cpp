@@ -3,6 +3,10 @@
 
 int main()
 {
+    //testing pre compiled header 
+    std::vector vector{1,2,3,4};
+    std::cout << vector[0];
+    
     GLFWwindow* window;
 
     /* Initialize the library */
