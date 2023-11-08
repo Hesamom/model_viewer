@@ -1,15 +1,18 @@
-﻿//
-// Created by Hesam on 2023-11-07.
-//
-
-#ifndef MODEL_VIEWER_WINDOW_H
+﻿#ifndef MODEL_VIEWER_WINDOW_H
 #define MODEL_VIEWER_WINDOW_H
 
+#include "GLFW/glfw3.h"
 
-class window {
+class window{
+private:
+    GLFWwindow* m_Window;
+
 public:
-    void F1();
+    window(int width, int height, const char* windowTitle);
+    ~window();
+    bool isOpen();
 };
 
 
-#endif //MODEL_VIEWER_WINDOW_H
+#endif
+
