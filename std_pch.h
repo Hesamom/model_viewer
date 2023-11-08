@@ -7,6 +7,8 @@
 #include <iostream>
 #include <filesystem>
 #include <sstream>
+#include <fstream>
+#include <strstream>
 
 //data structures
 #include <vector>
@@ -19,13 +21,16 @@
 #include <unordered_set>
 #include <string>
 #include <string_view>
-#include <strstream>
+
+#include <memory>
 
 //algorithms 
 #include <cmath>
 #include <algorithm>
 #include <iterator>
 #include <ranges>
+#include <assert.h>
+
 
 
 #endif //MODEL_VIEWER_STD_PCH_H
