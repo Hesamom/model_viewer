@@ -7,9 +7,8 @@ set (USE_PRE_COMPILED_HEADERS ON)
 
 project(model_viewer)
 set(CMAKE_CXX_STANDARD 20)
-if(MSVC)
-    set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
-endif ()
+set(CMAKE_COMPILE_WARNING_AS_ERROR OFF)
+
 
 add_subdirectory(libs/glew)
 add_subdirectory(libs/glm)
@@ -32,3 +31,6 @@ endif ()
 
 
 target_link_libraries(model_viewer PRIVATE glfw glm libglew_static)
+
+file(COPY ${CMAKE_SOURCE_DIR}/res
+        DESTINATION ${CMAKE_BINARY_DIR})
