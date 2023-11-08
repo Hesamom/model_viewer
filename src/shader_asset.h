@@ -1,5 +1,5 @@
-﻿#ifndef MODEL_VIEWER_SHADERASSET_H
-#define MODEL_VIEWER_SHADERASSET_H
+﻿#ifndef MODEL_VIEWER_SHADER_ASSET_H
+#define MODEL_VIEWER_SHADER_ASSET_H
 
 namespace modelViewer::res {
 
@@ -10,15 +10,15 @@ namespace modelViewer::res {
         vertex
     };
 
-    class shaderAsset{
+    class shader_asset{
     private:
         std::string m_Source;
         shaderType m_Type;
     public:
-        shaderAsset(const std::string& source, shaderType type);
+        shader_asset(const std::string& source, shaderType type);
         std::string getSource();
         shaderType getType();
     };
 }
 
-#endif //MODEL_VIEWER_SHADERASSET_H
+#endif //MODEL_VIEWER_SHADER_ASSET_H

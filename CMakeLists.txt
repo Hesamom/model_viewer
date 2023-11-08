@@ -29,6 +29,7 @@ else ()
     endif ()
 endif ()
 
+target_include_directories(model_viewer PRIVATE libs/include)
 
 target_link_libraries(model_viewer PRIVATE glfw glm libglew_static)
 

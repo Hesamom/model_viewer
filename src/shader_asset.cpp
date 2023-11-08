@@ -1,8 +1,8 @@
-﻿#include "shaderasset.h"
+﻿#include "shader_asset.h"
 
 using namespace  modelViewer::res;
 
-shaderAsset::shaderAsset(const std::string& source, modelViewer::res::shaderType type) : m_Type{type} {
+shader_asset::shader_asset(const std::string& source, modelViewer::res::shaderType type) : m_Type{type} {
     
     if (source.empty())
     {
@@ -12,10 +12,11 @@ shaderAsset::shaderAsset(const std::string& source, modelViewer::res::shaderType
     m_Source = source;
 }
 
-std::string shaderAsset::getSource() {
+
+std::string shader_asset::getSource() {
     return m_Source;
 }
 
-shaderType shaderAsset::getType() {
+shaderType shader_asset::getType() {
     return m_Type;
 }
