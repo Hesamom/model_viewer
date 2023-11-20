@@ -11,4 +11,4 @@ namespace modelViewer::res {
         mesh_asset load(std::filesystem::path filePath);
     };
 }
-#endif //MODEL_VIEWER_MODEL_LOADER_H
+#endif

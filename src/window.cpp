@@ -1,7 +1,6 @@
 ﻿#include "window.h"
 
-window::window(int width, int height, const char *windowTitle)
-{
+window::window(int width, int height, const char *windowTitle){
     if (!glfwInit())
     {
         throw std::runtime_error("failed to initialize glfw");

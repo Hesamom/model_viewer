@@ -14,4 +14,4 @@ namespace modelViewer::res {
     };
 }
 
-#endif //MODEL_VIEWER_MODELASSET_H
+#endif
