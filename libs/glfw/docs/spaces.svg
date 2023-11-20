@@ -28,7 +28,7 @@
          id="path3888"
          style="fill-rule:evenodd;stroke-width:0.62500000;stroke-linejoin:round;"
          d="M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.9730900,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z "
-         m_Transform="scale(1.1) rotate(180) translate(1,0)" />
+         transform="scale(1.1) rotate(180) translate(1,0)" />
     </marker>
   </defs>
   <sodipodi:namedview
@@ -72,7 +72,7 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     m_Transform="translate(-12.627039,-339.86462)">
+     transform="translate(-12.627039,-339.86462)">
     <rect
        style="fill:#ffffff;fill-opacity:1;stroke:#0000ff;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:3,3;stroke-dashoffset:0"
        id="rect2985"
@@ -443,12 +443,12 @@
        sodipodi:rx="2.5253813"
        sodipodi:ry="2.5253813"
        d="m 355.06862,373.03461 c 0,1.39473 -1.13065,2.52538 -2.52538,2.52538 -1.39473,0 -2.52538,-1.13065 -2.52538,-2.52538 0,-1.39473 1.13065,-2.52538 2.52538,-2.52538 1.39473,0 2.52538,1.13065 2.52538,2.52538 z"
-       m_Transform="matrix(0.66107369,0,0,0.66107369,123.32145,119.41326)"
+       transform="matrix(0.66107369,0,0,0.66107369,123.32145,119.41326)"
        inkscape:export-filename="/home/elmindreda/projects/glfw/glfw/docs/spaces.png"
        inkscape:export-xdpi="109.89113"
        inkscape:export-ydpi="109.89113" />
     <path
-       m_Transform="matrix(0.66107369,0,0,0.66107369,-194.73594,119.44704)"
+       transform="matrix(0.66107369,0,0,0.66107369,-194.73594,119.44704)"
        d="m 355.06862,373.03461 c 0,1.39473 -1.13065,2.52538 -2.52538,2.52538 -1.39473,0 -2.52538,-1.13065 -2.52538,-2.52538 0,-1.39473 1.13065,-2.52538 2.52538,-2.52538 1.39473,0 2.52538,1.13065 2.52538,2.52538 z"
        sodipodi:ry="2.5253813"
        sodipodi:rx="2.5253813"
@@ -469,7 +469,7 @@
        sodipodi:rx="2.5253813"
        sodipodi:ry="2.5253813"
        d="m 355.06862,373.03461 c 0,1.39473 -1.13065,2.52538 -2.52538,2.52538 -1.39473,0 -2.52538,-1.13065 -2.52538,-2.52538 0,-1.39473 1.13065,-2.52538 2.52538,-2.52538 1.39473,0 2.52538,1.13065 2.52538,2.52538 z"
-       m_Transform="matrix(0.66107369,0,0,0.66107369,-73.218648,201.61091)"
+       transform="matrix(0.66107369,0,0,0.66107369,-73.218648,201.61091)"
        inkscape:export-filename="/home/elmindreda/projects/glfw/glfw/docs/spaces.png"
        inkscape:export-xdpi="109.89113"
        inkscape:export-ydpi="109.89113" />
@@ -733,7 +733,7 @@
        id="path3861"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc"
-       m_Transform="translate(12.627039,339.86462)" />
+       transform="translate(12.627039,339.86462)" />
     <path
        sodipodi:nodetypes="cc"
        inkscape:connector-curvature="0"

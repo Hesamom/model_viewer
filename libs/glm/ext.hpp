@@ -236,7 +236,7 @@
 #if !(GLM_COMPILER & GLM_COMPILER_CUDA)
 #	include "./gtx/string_cast.hpp"
 #endif
-#include "./gtx/m_Transform.hpp"
+#include "./gtx/transform.hpp"
 #include "./gtx/transform2.hpp"
 #include "./gtx/vec_swizzle.hpp"
 #include "./gtx/vector_angle.hpp"
