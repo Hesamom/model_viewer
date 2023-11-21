@@ -2,7 +2,8 @@
 
 using namespace  modelViewer::res;
 
-shader_asset::shader_asset(const std::string& source, modelViewer::res::shaderType type) : m_Type{type} {
+shader_asset::shader_asset(const std::string& source, modelViewer::res::shaderType type,  const std::string& path)
+: m_Type{type}, m_Path{path} {
     
     if (source.empty())
     {
@@ -19,4 +20,8 @@ std::string shader_asset::getSource() {
 
 shaderType shader_asset::getType() {
     return m_Type;
+}
+
+const std::string &shader_asset::getPath() const {
+    return m_Path;
 }

@@ -43,7 +43,7 @@ std::shared_ptr<shader_asset> modelViewer::res::shader_loader::load(std::filesys
     }
     
     auto source = readFile(path);
-    auto asset = std::make_shared<shader_asset>(source, type);
+    auto asset = std::make_shared<shader_asset>(source, type, path.string());
     m_LoadedAssets[path] = asset;
     
     assert(m_LoadedAssets.contains(path));

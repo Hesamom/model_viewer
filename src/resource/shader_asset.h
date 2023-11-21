@@ -7,17 +7,23 @@ namespace modelViewer::res {
     {
         none,
         fragment,
-        vertex
+        vertex,
+        tesselation_control,
+        tesselation_evaluation,
+        geometry,
+        compute
     };
 
     class shader_asset{
     private:
         std::string m_Source;
         shaderType m_Type;
+        const std::string m_Path;
     public:
-        shader_asset(const std::string& source, shaderType type);
+        shader_asset(const std::string& source, shaderType type, const std::string& path);
         std::string getSource();
         shaderType getType();
+        const std::string& getPath() const;
     };
 }
 

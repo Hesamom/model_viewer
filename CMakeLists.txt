@@ -15,7 +15,7 @@ add_subdirectory(libs/assimp)
 set (USE_PRE_COMPILED_HEADERS ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_COMPILE_WARNING_AS_ERROR OFF)
-file(GLOB SRC_FILES src/*)
+file(GLOB_RECURSE SRC_FILES src/*)
 add_executable(model_viewer main.cpp ${SRC_FILES})
 
 

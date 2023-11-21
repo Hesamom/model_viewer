@@ -21,6 +21,7 @@
 #include <unordered_set>
 #include <string>
 #include <string_view>
+#include <functional>
 
 #include <memory>
 

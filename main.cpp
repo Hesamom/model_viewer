@@ -1,29 +1,19 @@
-﻿#include "src/window.h"
-#include "src/shader_loader.h"
-#include "src/shader_asset.h"
-#include "src/texture_loader.h"
-#include "src/model_loader.h"
-#include "src/mesh_asset.h"
+﻿#include "src/resource/shader_loader.h"
+#include "src/resource/shader_asset.h"
+#include "src/resource/texture_loader.h"
+#include "src/resource/mesh_loader.h"
+#include "src/window/modelviewer_window.h"
 
 int main()
 {
-    //an example of loading a shader 
-    //'res' folder in the source directory is copied to bin folder in each build to be accessible 
-    using namespace modelViewer::res;
-    shader_loader sLoader;
-    std::filesystem::path sPath("res/shaders/sample/sample_vert.glsl");
-    auto shader = sLoader.load(sPath, shaderType::fragment);
-
-    //an example of loading a texture
-    texture_loader tLoader;
-    std::filesystem::path tPath("res/textures/sample.png");
-    auto texture = tLoader.load(tPath);
-
-    //an example of loading a model
-    model_loader mLoader;
-    std::filesystem::path mPath("res/models/primitives/sphere.fbx");
-    mesh_asset mesh = mLoader.load(mPath);
+    modelviewer_window window(1024, 1024, "Playground", false);
+    modelViewer::res::model_info info;
+    info.fragmentShaderPath = "res/shaders/sample/sample_frag.glsl";
+    info.vertexShaderPath = "res/shaders/sample/static_test_vert.glsl";
+    info.texturePath = "res/textures/sample.png";
+    info.meshPath = "res/models/primitives/cube.fbx";
+    window.addModel(info);
     
-    window window(500, 500, "Playground");
+    window.draw();
     return 0;
 }

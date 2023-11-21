@@ -2,7 +2,7 @@
 #include <assimp/scene.h>           // Output data structure
 #include <assimp/postprocess.h>   // Post processing flags
 #include "mesh_asset.h"
-#include "model_loader.h"
+#include "mesh_loader.h"
 
 using namespace modelViewer::res;
 
@@ -17,7 +17,7 @@ glm::vec2 to_vec2(const aiVector3D& vec)
     return {vec.x,vec.y};
 }
 
-mesh_asset model_loader::load(std::filesystem::path filePath) {
+std::shared_ptr<mesh_asset> mesh_loader::load(std::filesystem::path filePath) {
     // Create an instance of the Importer class
     Assimp::Importer importer;
 
@@ -46,34 +46,44 @@ mesh_asset model_loader::load(std::filesystem::path filePath) {
     }
     
     auto vertexCount = scene->mMeshes[0]->mNumVertices;
-    auto positions = new glm::vec3[vertexCount];
+    auto positions = std::vector<glm::vec3>(vertexCount);
     for (int i = 0; i < vertexCount; ++i)
     {
         auto vertex = scene->mMeshes[0]->mVertices[i];
         positions[i] = to_vec3(vertex);
     }
+
+    auto facesCount = scene->mMeshes[0]->mNumFaces;
+    auto indices = std::vector<unsigned int>();
+    for (int i = 0; i < facesCount; ++i)
+    {
+        auto face = scene->mMeshes[0]->mFaces[i];
+        for (int j = 0; j < face.mNumIndices; ++j) {
+            indices.push_back(face.mIndices[j]);
+        }
+    }
     
-    glm::vec3* normals = nullptr;
+    std::vector<glm::vec3> normals;
     if (scene->mMeshes[0]->HasNormals())
     {
-        normals = new glm::vec3[vertexCount];
+        normals.reserve(vertexCount);
         for (int i = 0; i < vertexCount; ++i)
         {
             auto normal = scene->mMeshes[0]->mNormals[i];
-            normals[i] = to_vec3(normal);
+            normals.push_back(to_vec3(normal));
         }
     }
 
-    glm::vec2* uv0 = nullptr;
+    std::vector<glm::vec2> uv0;
     if (scene->mMeshes[0]->HasTextureCoords(0))
     {
-        uv0 = new glm::vec2[vertexCount];
+        uv0.reserve(vertexCount);
         for (int i = 0; i < vertexCount; ++i)
         {
             auto uv = scene->mMeshes[0]->mTextureCoords[0][i];
-            uv0[i] = to_vec2(uv);
+            uv0.push_back(to_vec2(uv));
         }
     }
     
-    return mesh_asset(vertexCount, positions, normals, uv0);
+    return std::make_shared<mesh_asset>(positions, indices, normals, uv0);
 }
