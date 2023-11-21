@@ -11,7 +11,6 @@
 namespace modelViewer::render {
     class mesh {
     private:
-        
         //TODO add uv0
         vertex_buffer m_PositionBuffer;
         vertex_buffer m_NormalBuffer;
@@ -22,7 +21,6 @@ namespace modelViewer::render {
     public:
         void bindAttributes(shader_program& program);
         void bind();
-        void drawIndexed();
         void draw();
         explicit mesh(std::shared_ptr<modelViewer::res::mesh_asset>& asset);
         ~mesh();

@@ -1,5 +1,4 @@
-﻿#include <GL/glew.h>
-#include "mesh.h"
+﻿#include "mesh.h"
 
 void modelViewer::render::mesh::bind() {
     m_VertexArray.bind();
@@ -31,16 +30,15 @@ void modelViewer::render::mesh::bindAttributes(modelViewer::render::shader_progr
 
 }
 
-void modelViewer::render::mesh::drawIndexed() {
-    
-    m_IndexBuffer.bind();
-    m_IndexBuffer.draw();
-}
-
 void modelViewer::render::mesh::draw() {
-    
-    m_PositionBuffer.bind();
-    m_PositionBuffer.draw();
+
+    if(m_IndexBuffer.getCount() != 0){
+        m_IndexBuffer.bind();
+        m_IndexBuffer.draw();
+    } else{
+        m_PositionBuffer.bind();
+        m_PositionBuffer.draw();
+    }
 }
 
 

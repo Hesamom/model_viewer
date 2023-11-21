@@ -15,7 +15,7 @@ void render_object::render(glm::mat4 viewProjection) {
     int index = m_ShaderProgram->getUniformLocation("m_MVP");
     m_ShaderProgram->setUniformMatrix4(index,mvp);
     m_Mesh->bind();
-    m_Mesh->drawIndexed();
+    m_Mesh->draw();
 }
 
 render_object::render_object(std::shared_ptr<shader_program>& program, std::shared_ptr<mesh>& mesh,
