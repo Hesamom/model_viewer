@@ -24,6 +24,6 @@ int modelViewer::render::index_buffer::getCount() {
 }
 
 void modelViewer::render::index_buffer::draw() {
-    glDrawElements(GL_TRIANGLES, m_Count, GL_UNSIGNED_SHORT, 0);
+    glDrawElements(GL_TRIANGLES, m_Count, GL_UNSIGNED_INT, 0);
 }
 
