@@ -11,7 +11,7 @@ int main()
     info.fragmentShaderPath = "res/shaders/sample/sample_frag.glsl";
     info.vertexShaderPath = "res/shaders/sample/static_test_vert.glsl";
     info.texturePath = "res/textures/sample.png";
-    info.meshPath = "res/models/primitives/cube.fbx";
+    info.meshPath = "res/models/primitives/plane.fbx";
     window.addModel(info);
     
     window.draw();
