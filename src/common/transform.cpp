@@ -2,7 +2,7 @@
 #include "transform.h"
 #include "glm/gtc/matrix_transform.hpp"
 
-using namespace modelViewer::render;
+using namespace modelViewer::common;
 
 glm::mat4 transform::getMatrix() const {
     
@@ -17,14 +17,28 @@ glm::mat4 transform::getMatrix() const {
     return transform;
 }
 
-glm::vec3 &transform::getPosition() {
+glm::vec3 transform::getPosition() {
     return m_Position;
 }
 
-glm::vec3 &transform::getRotation() {
+glm::vec3 transform::getRotation() {
     return m_Rotation;
 }
 
-glm::vec3 &transform::getScale() {
+glm::vec3 transform::getScale() {
     return m_Scale;
 }
+
+void transform::setPosition(glm::vec3 position) {
+    m_Position = position;
+}
+
+void transform::setRotation(glm::vec3 eular) {
+    m_Rotation = eular;
+}
+
+void transform::setScale(glm::vec3 scale) {
+    m_Scale = scale;
+}
+
+

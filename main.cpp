@@ -11,8 +11,17 @@ int main()
     info.fragmentShaderPath = "res/shaders/sample/sample_frag.glsl";
     info.vertexShaderPath = "res/shaders/sample/static_test_vert.glsl";
     info.texturePath = "res/textures/sample.png";
-    info.meshPath = "res/models/primitives/plane.fbx";
+    info.meshPath = "res/models/primitives/sphere.fbx";
     window.addModel(info);
+
+    modelViewer::res::model_info info2;
+    info2.fragmentShaderPath = "res/shaders/sample/sample_frag.glsl";
+    info2.vertexShaderPath = "res/shaders/sample/static_test_vert.glsl";
+    info2.texturePath = "res/textures/sample.png";
+    info2.meshPath = "res/models/primitives/cube.fbx";
+    info2.transform.setPosition(glm::vec3(2,0,-2));
+    info2.transform.setScale(glm::vec3(0.5f));
+    window.addModel(info2);
     
     window.draw();
     return 0;

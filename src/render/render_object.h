@@ -11,7 +11,7 @@ namespace modelViewer::render
 {
     class render_object {
     private:
-        transform m_Transform{};
+        common::transform m_Transform{};
         
         std::shared_ptr<shader_program> m_ShaderProgram;
         std::shared_ptr<mesh> m_Mesh;
@@ -21,7 +21,8 @@ namespace modelViewer::render
         render_object(std::shared_ptr<shader_program>& program , std::shared_ptr<mesh>& mesh,  
                       std::shared_ptr<texture>& 
                 texture);
-        transform& getTransform();
+        common::transform& getTransform();
+        void setTransform(common::transform& t);
         std::shared_ptr<shader_program>& getProgram();
         
         void render(glm::mat4 viewProjection);

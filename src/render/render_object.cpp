@@ -2,10 +2,16 @@
 #include "gl/glew.h"
 
 using namespace modelViewer::render;
+using namespace modelViewer::common;
 
 transform& render_object::getTransform() {
     return m_Transform;
 }
+
+void render_object::setTransform(transform &t) {
+    m_Transform = t;
+}
+
 
 void render_object::render(glm::mat4 viewProjection) {
     
@@ -30,3 +36,4 @@ render_object::render_object(std::shared_ptr<shader_program>& program, std::shar
 std::shared_ptr<shader_program>& render_object::getProgram() {
     return m_ShaderProgram;
 }
+

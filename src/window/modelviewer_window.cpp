@@ -16,7 +16,7 @@ void modelviewer_window::onRender() {
         auto mesh = getMesh(info);
         auto texture = getTexture(info);
         auto object = std::make_shared<render_object>(program, mesh, texture);
-
+        object->setTransform(info.transform);
         m_Scene.addObject(object);
     }
 
