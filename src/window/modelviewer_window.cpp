@@ -7,9 +7,10 @@ using namespace modelViewer::res;
 using namespace modelViewer::render;
 using namespace modelViewer::common;
 
-void modelviewer_window::onRender() {
-
-    static float angle = 0.001f;
+void modelviewer_window::onRender(float elapsed) {
+    
+    static float rotationSpeed = 2.0f;
+    static float angle = 0;
     static const GLfloat green[] = { 0.0f, 0.25f, 0.0f, 1.0f };
     glClearBufferfv(GL_COLOR, 0, green);
     
@@ -34,17 +35,14 @@ void modelviewer_window::onRender() {
     
     auto viewProjection = projection * viewMatrix;
     for (auto& object : m_Scene.getObjects()) {
-
-        auto rot = object->getTransform().getEularRotation();
-        rot.x += angle;
-        object->getTransform().setEularRotation(rot);
+        
+        auto added = rotationSpeed * elapsed;
+        angle += added;
+        object->getTransform().setEularRotation(glm::vec3(angle,0,0));
         object->render(viewProjection);
     }
 }
 
-void modelviewer_window::onInit() {
-    
-}
 
 void modelviewer_window::addModel(modelViewer::res::model_info& info) {
     
@@ -99,7 +97,7 @@ modelviewer_window::modelviewer_window(int width, int height, std::string title,
                                                                                                            height,
                                                                                                            title,
                                                                                                            fullscreen) {
-
+    //setTargetFrameRate(120);
 }
 
 modelviewer_window::~modelviewer_window() {

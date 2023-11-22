@@ -1,7 +1,8 @@
 ﻿#include <GL/glew.h>
 #include "window.h"
-
-
+#include "chrono"
+#include "../common/stopwatch.h"
+#include "thread"
 
 void window::onSizeChanged(int width, int height)
 {
@@ -63,17 +64,43 @@ bool window::isOpen() {
     return true;
 }
 
+float getTargetFrameRateElapsed(float elapsed, int targetFps)
+{
+    if(targetFps == -1)
+    {
+        return 0;
+    }
+
+    int fps = 1/elapsed;
+    if (fps > targetFps)
+    {
+        float targetElapsedTime = 1.0/targetFps ;
+        float remaining = (targetElapsedTime - elapsed) * 1000;
+        std::this_thread::sleep_for(std::chrono::milliseconds((int)remaining));
+        return remaining/1000;
+    }
+    
+    return 0;
+}
+
 void window::draw() 
 {
+    stopwatch watch;
+    watch.start();
     while (!glfwWindowShouldClose(m_Window))
     {
+        watch.stop();
+        float elapsed = watch.getSeconds();
+        watch.start();
+        elapsed += getTargetFrameRateElapsed(elapsed, m_TargetFrameRate);
+
         glfwSwapBuffers(m_Window);
-        onRender();
+        onRender(elapsed);
         glfwPollEvents();
     }
 }
 
-void window::onRender() {
+void window::onRender(float elapsedTime) {
 
 }
 
@@ -105,11 +132,9 @@ int window::getWidth() {
 void window::initContext() {
     
     glfwMakeContextCurrent(m_Window);
-
-    //TODO need to learn more about the interval and its connection to swap chains 
-    glfwSwapInterval(1);
     glewExperimental = GL_TRUE; // Enable experimental features
     glewInit();
+    glfwSwapInterval(1);
     
     std::cout<< "window with title: \"" << m_Title << "\" was created successfully \n";
     std::cout << glGetString(GL_VERSION) << " OpenGL Driver Version \n";
@@ -124,7 +149,11 @@ std::string window::getTitle() {
     return m_Title;
 }
 
-void window::onInit() {
+int window::getTargetFrameRate() {
+    return m_TargetFrameRate;
+}
 
+void window::setTargetFrameRate(int fps) {
+    m_TargetFrameRate = std::clamp(fps,-1,std::numeric_limits<int>::max());
 }
 

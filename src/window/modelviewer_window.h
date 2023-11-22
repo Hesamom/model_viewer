@@ -24,8 +24,7 @@ private:
     std::shared_ptr<modelViewer::render::texture> getTexture(modelViewer::res::model_info& info);
     
 protected:
-    void onRender() override;
-    void onInit() override;
+    void onRender(float elapsed) override;
     
 public:
     modelviewer_window(int width, int height, std::string title, bool fullscreen);
