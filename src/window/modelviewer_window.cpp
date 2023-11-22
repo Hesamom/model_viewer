@@ -5,9 +5,11 @@
 #include "modelviewer_window.h"
 using namespace modelViewer::res;
 using namespace modelViewer::render;
+using namespace modelViewer::common;
 
 void modelviewer_window::onRender() {
 
+    static float angle = 0.001f;
     static const GLfloat green[] = { 0.0f, 0.25f, 0.0f, 1.0f };
     glClearBufferfv(GL_COLOR, 0, green);
     
@@ -32,6 +34,10 @@ void modelviewer_window::onRender() {
     
     auto viewProjection = projection * viewMatrix;
     for (auto& object : m_Scene.getObjects()) {
+
+        auto rot = object->getTransform().getEularRotation();
+        rot.x += angle;
+        object->getTransform().setEularRotation(rot);
         object->render(viewProjection);
     }
 }
