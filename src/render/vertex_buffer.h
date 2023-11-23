@@ -18,4 +18,4 @@ namespace modelViewer::render {
     };
 }
 
-#endif //MODEL_VIEWER_VERTEXBUFFER_H
+#endif

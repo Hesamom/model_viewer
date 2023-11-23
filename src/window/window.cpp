@@ -27,7 +27,10 @@ window::window(int width, int height, const std::string& title, bool fullscreen)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
-    
+
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_DEPTH_TEST);
+
     if (fullscreen)
     {
         m_Monitor = glfwGetPrimaryMonitor();
@@ -79,11 +82,11 @@ float getTargetFrameRateElapsed(float elapsed, int targetFps)
         std::this_thread::sleep_for(std::chrono::milliseconds((int)remaining));
         return remaining/1000;
     }
-    
+
     return 0;
 }
 
-void window::draw() 
+void window::draw()
 {
     stopwatch watch;
     watch.start();
@@ -135,7 +138,7 @@ void window::initContext() {
     glewExperimental = GL_TRUE; // Enable experimental features
     glewInit();
     glfwSwapInterval(1);
-    
+
     std::cout<< "window with title: \"" << m_Title << "\" was created successfully \n";
     std::cout << glGetString(GL_VERSION) << " OpenGL Driver Version \n";
 }

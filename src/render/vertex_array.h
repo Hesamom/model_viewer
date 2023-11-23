@@ -17,4 +17,4 @@ namespace modelViewer::render {
     };
 }
 
-#endif //MODEL_VIEWER_VERTEX_ARRAY_H
+#endif

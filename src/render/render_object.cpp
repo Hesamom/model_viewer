@@ -1,5 +1,4 @@
 ﻿#include "render_object.h"
-#include "gl/glew.h"
 
 using namespace modelViewer::render;
 using namespace modelViewer::common;
@@ -18,8 +17,13 @@ void render_object::render(glm::mat4 viewProjection) {
     m_ShaderProgram->bind();
     glm::mat4 Model = glm::mat4(1.0f);
     auto mvp = viewProjection * m_Transform.getMatrix();
-    int index = m_ShaderProgram->getUniformLocation("m_MVP");
-    m_ShaderProgram->setUniformMatrix4(index,mvp);
+    int mvpIndex = m_ShaderProgram->getUniformLocation("m_MVP");
+    int modelIndex = m_ShaderProgram->getUniformLocation("m_Model");
+    int textureIndex = m_ShaderProgram->getUniformLocation("m_TextureSampler");
+    m_ShaderProgram->setUniformMatrix4(modelIndex, Model);
+    m_ShaderProgram->setUniformMatrix4(mvpIndex, mvp);
+    m_Texture->bind();
+    m_ShaderProgram->setUniform1i(textureIndex,0);
     m_Mesh->bind();
     m_Mesh->draw();
 }
