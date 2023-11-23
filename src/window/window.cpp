@@ -138,6 +138,9 @@ void window::initContext() {
     glewExperimental = GL_TRUE; // Enable experimental features
     glewInit();
     glfwSwapInterval(1);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
 
     std::cout<< "window with title: \"" << m_Title << "\" was created successfully \n";
     std::cout << glGetString(GL_VERSION) << " OpenGL Driver Version \n";
