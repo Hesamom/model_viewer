@@ -17,22 +17,24 @@ modelViewer::render::mesh::~mesh() = default;
 
 void modelViewer::render::mesh::bindAttributes(modelViewer::render::shader_program &program) {
     
+    m_VertexArray.bind();
+    
     int positionIndex = program.getAttributeLocation("v_position");
     if (positionIndex >= 0)
     {
-        m_VertexArray.setBuffer(m_PositionBuffer, positionIndex);
+        m_PositionBuffer.bindBuffer(positionIndex);
     }
 
     int uv0Index = program.getAttributeLocation("v_uv0");
     if (uv0Index >= 0)
     {
-        m_VertexArray.setBuffer(m_UV0, uv0Index);
+        m_UV0.bindBuffer(uv0Index);
     }
     
     int normalIndex = program.getAttributeLocation("v_normal");
     if(normalIndex >= 0)
     {
-        m_VertexArray.setBuffer(m_NormalBuffer, normalIndex);
+        m_NormalBuffer.bindBuffer(normalIndex);
     }
 
 }

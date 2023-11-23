@@ -14,10 +14,11 @@ namespace modelViewer::res {
         std::vector<unsigned int> m_Indices;
 
         std::vector<glm::vec3> m_Normals;
-        std::vector<glm::vec3> m_UV0;
+        std::vector<glm::vec2> m_UV0;
 
+        std::string m_Name;
         mesh_asset(std::vector<glm::vec3>& positions, std::vector<unsigned int>& indices, std::vector<glm::vec3>& 
-                normals, std::vector<glm::vec3>& UV0) {
+                normals, std::vector<glm::vec2>& UV0) {
             m_Indices = indices;
             m_Positions = positions;
             m_Normals = normals;

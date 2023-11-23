@@ -11,10 +11,9 @@
 namespace modelViewer::render {
     class mesh {
     private:
-        //TODO add uv0
-        vertex_buffer m_PositionBuffer;
-        vertex_buffer m_NormalBuffer;
-        vertex_buffer m_UV0;
+        vertex_buffer<float,3> m_PositionBuffer;
+        vertex_buffer<float,3> m_NormalBuffer;
+        vertex_buffer<float,2> m_UV0;
         index_buffer  m_IndexBuffer;
         vertex_array m_VertexArray;
         

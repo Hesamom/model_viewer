@@ -1,4 +1,5 @@
 ﻿#include <GL/glew.h>
+#include "GLFW/glfw3.h"
 #include "window.h"
 #include "chrono"
 #include "../common/stopwatch.h"

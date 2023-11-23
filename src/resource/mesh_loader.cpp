@@ -74,14 +74,14 @@ std::shared_ptr<mesh_asset> mesh_loader::load(std::filesystem::path filePath) {
         }
     }
 
-    std::vector<glm::vec3> uv0;
+    std::vector<glm::vec2> uv0;
     if (scene->mMeshes[0]->HasTextureCoords(0))
     {
         uv0.reserve(vertexCount);
         for (int i = 0; i < vertexCount; ++i)
         {
             auto uv = scene->mMeshes[0]->mTextureCoords[0][i];
-            uv0.push_back(to_vec3(uv));
+            uv0.push_back(to_vec2(uv));
         }
     }
     

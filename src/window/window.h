@@ -1,7 +1,8 @@
 ﻿#ifndef MODEL_VIEWER_WINDOW_H
 #define MODEL_VIEWER_WINDOW_H
 
-#include "GLFW/glfw3.h"
+class GLFWwindow;
+class GLFWmonitor;
 
 class window{
 private:
