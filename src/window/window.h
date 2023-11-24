@@ -12,6 +12,7 @@ private:
     int m_Width = 0; 
     int m_Height = 0;
     int m_TargetFrameRate = -1;
+    long double m_elapsedTimeSinceStart;
     
     void initContext();
     
@@ -32,6 +33,7 @@ public:
     std::string  getTitle();
     void draw();
     bool isOpen();
+    long double getTimeSinceStart();
 };
 
 #endif

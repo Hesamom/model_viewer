@@ -68,23 +68,27 @@ bool window::isOpen() {
     return true;
 }
 
-float getTargetFrameRateElapsed(float elapsed, int targetFps)
+void capTargetFrameRate(double elapsed, int targetFps)
 {
     if(targetFps == -1)
     {
-        return 0;
+        return;
     }
 
     int fps = 1/elapsed;
     if (fps > targetFps)
     {
-        float targetElapsedTime = 1.0/targetFps ;
-        float remaining = (targetElapsedTime - elapsed) * 1000;
-        std::this_thread::sleep_for(std::chrono::milliseconds((int)remaining));
-        return remaining/1000;
-    }
+        double targetElapsedTime = 1.0/targetFps ;
+        double remaining = (targetElapsedTime - elapsed);
+        stopwatch stopwatch;
+        stopwatch.start();
+        do{
+            stopwatch.stop();
+        }
+        while(stopwatch.getSeconds() < remaining);
 
-    return 0;
+        stopwatch.stop();
+    }
 }
 
 void window::draw()
@@ -94,13 +98,16 @@ void window::draw()
     while (!glfwWindowShouldClose(m_Window))
     {
         watch.stop();
-        float elapsed = watch.getSeconds();
+        double elapsed = watch.getSeconds();
         watch.start();
-        elapsed += getTargetFrameRateElapsed(elapsed, m_TargetFrameRate);
-
-        glfwSwapBuffers(m_Window);
-        onRender(elapsed);
+        
         glfwPollEvents();
+        onRender((float)elapsed);
+        glfwSwapBuffers(m_Window);
+
+        watch.stop();
+        m_elapsedTimeSinceStart += watch.getSeconds();
+        capTargetFrameRate(watch.getSeconds(), m_TargetFrameRate);
     }
 }
 
@@ -192,5 +199,9 @@ int window::getTargetFrameRate() {
 
 void window::setTargetFrameRate(int fps) {
     m_TargetFrameRate = std::clamp(fps,-1,std::numeric_limits<int>::max());
+}
+
+long double window::getTimeSinceStart() {
+    return m_elapsedTimeSinceStart;
 }
 
