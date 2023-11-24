@@ -85,5 +85,8 @@ std::shared_ptr<mesh_asset> mesh_loader::load(std::filesystem::path filePath) {
         }
     }
     
-    return std::make_shared<mesh_asset>(positions, indices, normals, uv0);
+    auto mesh = std::make_shared<mesh_asset>(positions, indices, normals, uv0);
+    mesh->m_Name = filePath.string();
+    
+    return mesh;
 }

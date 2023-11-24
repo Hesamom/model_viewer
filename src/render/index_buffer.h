@@ -12,6 +12,7 @@ namespace modelViewer::render {
             explicit index_buffer(std::vector<unsigned int>& data);
             ~index_buffer();
             void bind();
+            void setName(const std::string& name);
             int getCount();
             void draw();
         };

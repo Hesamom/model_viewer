@@ -13,6 +13,7 @@ namespace modelViewer::res {
         std::filesystem::path vertexShaderPath;
         std::filesystem::path fragmentShaderPath;
         modelViewer::common::transform transform;
+        std::string  name;
     };
 }
 

@@ -14,11 +14,11 @@ void modelviewer_window::onRender(float elapsed) {
     static const GLfloat green[] = { 0.0f, 0.25f, 0.0f, 1.0f };
     glClearBufferfv(GL_COLOR, 0, green);
     
-    for (auto info: m_NewModelsQueue) {
+    for (auto& info: m_NewModelsQueue) {
         auto program = getProgram(info);
         auto mesh = getMesh(info);
         auto texture = getTexture(info);
-        auto object = std::make_shared<render_object>(program, mesh, texture);
+        auto object = std::make_shared<render_object>(program, mesh, texture, info.name);
         object->setTransform(info.transform);
         m_Scene.addObject(object);
     }

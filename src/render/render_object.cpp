@@ -13,6 +13,8 @@ void render_object::setTransform(transform &t) {
 
 
 void render_object::render(glm::mat4 viewProjection) {
+
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, ("render: " + m_Name).c_str());
     
     m_ShaderProgram->bind();
     glm::mat4 Model = glm::mat4(1.0f);
@@ -26,14 +28,16 @@ void render_object::render(glm::mat4 viewProjection) {
     m_ShaderProgram->setUniform1i(textureIndex,0);
     m_Mesh->bind();
     m_Mesh->draw();
+
+    glPopDebugGroup();
 }
 
 render_object::render_object(std::shared_ptr<shader_program>& program, std::shared_ptr<mesh>& mesh,
-                             std::shared_ptr<texture>& texture) {
+                             std::shared_ptr<texture>& texture, const std::string& name) {
     m_Mesh = mesh;
     m_ShaderProgram = program;
     m_Texture = texture;
-
+    m_Name = name;
     m_Mesh->bindAttributes(*m_ShaderProgram);
 }
 

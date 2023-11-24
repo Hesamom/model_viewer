@@ -29,7 +29,7 @@ namespace modelViewer::render {
         //TODO pass wrapping and filtering 
         explicit texture(std::shared_ptr<modelViewer::res::texture_asset> asset);
         ~texture();
-        void bind();
+        void bind() const;
     };
 }
 

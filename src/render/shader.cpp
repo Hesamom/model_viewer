@@ -35,8 +35,14 @@ unsigned int getShaderType(shaderType type)
 }
 
 void modelViewer::render::shader::compile() {
+
+    if (m_ShaderId != 0)
+    {
+        return;
+    }
     
     m_ShaderId = glCreateShader(getShaderType(m_Asset->getType()));
+    glObjectLabel(GL_SHADER, m_ShaderId, -1, m_Asset->getPath().data());
     auto sourceString = m_Asset->getSource();
     auto source = sourceString.c_str();
     glShaderSource(m_ShaderId, 1, &source, nullptr);

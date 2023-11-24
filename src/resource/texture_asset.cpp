@@ -2,7 +2,7 @@
 
 using namespace modelViewer::res;
 
-texture_asset::texture_asset(modelViewer::res::byte* content, textureInfo info) : m_Info{info} {
+texture_asset::texture_asset(modelViewer::res::byte* content, textureInfo info, std::string name) : m_Info{info}, m_Name{name} {
     std::unique_ptr<byte []> p(content);
     m_Content = std::move(p);
 }
@@ -21,4 +21,8 @@ byte* texture_asset::getContent() {
 
 int texture_asset::getChannelCount() {
     return m_Info.channels;
+}
+
+std::string &texture_asset::getName() {
+    return m_Name;
 }

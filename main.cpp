@@ -12,6 +12,7 @@ int main()
     info.vertexShaderPath = "res/shaders/sample/static_test_vert.glsl";
     info.texturePath = "res/textures/sample.png";
     info.meshPath = "res/models/primitives/sphere.fbx";
+    info.name = "sphere";
     window.addModel(info);
 
     modelViewer::res::model_info info2;
@@ -21,6 +22,7 @@ int main()
     info2.meshPath = "res/models/primitives/cube.fbx";
     info2.transform.setPosition(glm::vec3(2,0,-2));
     info2.transform.setScale(glm::vec3(0.5f));
+    info2.name = "cube";
     window.addModel(info2);
     
     window.draw();

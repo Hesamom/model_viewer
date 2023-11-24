@@ -17,6 +17,7 @@ texture::texture(std::shared_ptr<modelViewer::res::texture_asset> asset) : m_Ass
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_Asset->getWidth(), m_Asset->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
                  m_Asset->getContent());
 
+    glObjectLabel(GL_TEXTURE, m_TextureId, -1, m_Asset->getName().data());
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
@@ -24,7 +25,7 @@ texture::~texture() {
     glDeleteTextures(1, &m_TextureId);
 }
 
-void texture::bind() {
+void texture::bind() const {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_TextureId);
 }

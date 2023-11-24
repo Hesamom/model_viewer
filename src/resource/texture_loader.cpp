@@ -34,7 +34,7 @@ std::shared_ptr<texture_asset> modelViewer::res::texture_loader::load(std::files
 
     textureInfo info;
     auto content = readFile(path, &info);
-    auto asset = std::make_shared<texture_asset>(content, info);
+    auto asset = std::make_shared<texture_asset>(content, info, path.string());
     m_LoadedAssets[path] = asset;
 
     assert(m_LoadedAssets.contains(path));

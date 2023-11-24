@@ -17,12 +17,14 @@ namespace modelViewer::res
     private:
         std::unique_ptr<byte[]> m_Content;
         textureInfo m_Info;
+        std::string  m_Name;
     public: 
-        texture_asset(byte* content, textureInfo info);
+        texture_asset(byte* content, textureInfo info, std::string name);
         byte* getContent(); 
         int getWidth();
         int getHeight();
         int getChannelCount();
+        std::string& getName();
     };
 
 }

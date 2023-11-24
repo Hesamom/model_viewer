@@ -11,6 +11,11 @@ modelViewer::render::mesh::mesh(std::shared_ptr<modelViewer::res::mesh_asset>& a
       m_UV0{asset->m_UV0},
       m_IndexBuffer{asset->m_Indices}
       {
+
+          m_PositionBuffer.setName(m_Asset->m_Name + "_pos");
+          m_NormalBuffer.setName(m_Asset->m_Name + "_normal");
+          m_UV0.setName(m_Asset->m_Name + "_uv0");
+          m_IndexBuffer.setName(m_Asset->m_Name + "_index");
 }
 
 modelViewer::render::mesh::~mesh() = default;

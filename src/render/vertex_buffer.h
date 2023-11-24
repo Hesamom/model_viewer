@@ -30,6 +30,11 @@ namespace modelViewer::render {
             glDeleteBuffers(1, &m_BufferId);
         }
         
+        void setName(const std::string& name)
+        {
+            glObjectLabel(GL_BUFFER,m_BufferId,-1,name.data());    
+        }
+        
         constexpr int getGlType()
         {
             if constexpr (std::is_same<T, float>::value)

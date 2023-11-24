@@ -133,6 +133,22 @@ int window::getWidth() {
     return m_Width;
 }
 
+std::ostream& getStream(GLenum severity)
+{
+   
+    
+    return std::cout;
+}
+
+void APIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
+    switch (severity) {
+        case GL_DEBUG_SEVERITY_HIGH:
+        case GL_DEBUG_SEVERITY_MEDIUM:
+            std::cerr << "OpenGL Debug Message: " << message << std::endl;
+            break;
+    }
+}
+
 void window::initContext() {
     
     glfwMakeContextCurrent(m_Window);
@@ -142,6 +158,20 @@ void window::initContext() {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
+    
+    if (GLEW_KHR_debug) {
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        
+        glDebugMessageCallback(debugCallback, nullptr);
+        // Enable only high-severity error messages
+        glDebugMessageControl(GL_DEBUG_SOURCE_API, GL_DEBUG_TYPE_ERROR, GL_DEBUG_SEVERITY_HIGH, 0, nullptr, GL_TRUE);
+
+    } 
+    else 
+    {
+        std::cerr << "KHR_debug extension not supported" << std::endl;
+    }
 
     std::cout<< "window with title: \"" << m_Title << "\" was created successfully \n";
     std::cout << glGetString(GL_VERSION) << " OpenGL Driver Version \n";

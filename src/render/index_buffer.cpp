@@ -19,11 +19,17 @@ void modelViewer::render::index_buffer::bind() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_BufferId);
 }
 
+
+
 int modelViewer::render::index_buffer::getCount() {
     return m_Count;
 }
 
 void modelViewer::render::index_buffer::draw() {
     glDrawElements(GL_TRIANGLES, m_Count, GL_UNSIGNED_INT, 0);
+}
+
+void modelViewer::render::index_buffer::setName(const std::string &name) {
+    glObjectLabel(GL_BUFFER,m_BufferId,-1,name.data());
 }
 
