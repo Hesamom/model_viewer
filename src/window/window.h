@@ -18,7 +18,6 @@ private:
     
 protected:
     virtual void onRender(float elapsedTime);
-    virtual void onSizeChanged(int width, int height);
     
 public:
     window(int width, int height, const std::string& title, bool fullscreen);

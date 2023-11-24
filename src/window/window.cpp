@@ -5,11 +5,9 @@
 #include "../common/stopwatch.h"
 #include "thread"
 
-void window::onSizeChanged(int width, int height)
+void onSizeChanged(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
-    m_Width = width;
-    m_Height = height;
 }
 
 window::window(int width, int height, const std::string& title, bool fullscreen) 
@@ -37,13 +35,12 @@ window::window(int width, int height, const std::string& title, bool fullscreen)
         m_Monitor = glfwGetPrimaryMonitor();
     }
     
+    //BUG fullscreen mode casues exception 
     m_Window = glfwCreateWindow(width, height, title.c_str(), m_Monitor, nullptr);
     glViewport(0, 0, width, height);
    
     
-    //auto callback = [this](GLFWwindow* window, int width, int height){onSizeChanged(width,height);};
-   // std::function function = callback;
-    //glfwSetWindowSizeCallback(m_Window, callback);
+    glfwSetWindowSizeCallback(m_Window, onSizeChanged);
     
     m_Width = width;
     m_Height = height;
@@ -133,11 +130,13 @@ void window::setSize(int width, int height) {
 }
 
 int window::getHeight() {
+    glfwGetWindowSize(m_Window, &m_Width, &m_Height);
     return m_Height;
 }
 
 int window::getWidth() {
-    return m_Width;
+     glfwGetWindowSize(m_Window, &m_Width, &m_Height);
+     return m_Width;
 }
 
 std::ostream& getStream(GLenum severity)
