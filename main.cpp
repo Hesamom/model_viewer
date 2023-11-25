@@ -7,6 +7,7 @@
 int main()
 {
     modelviewer_window window(1024, 1024, "Playground", false);
+    window.setClearFlag(glm::vec4(0.15f,0.15f,0.15f,0));
     modelViewer::res::model_info info;
     info.fragmentShaderPath = "res/shaders/sample/sample_frag.glsl";
     info.vertexShaderPath = "res/shaders/sample/static_test_vert.glsl";

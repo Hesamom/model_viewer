@@ -18,6 +18,7 @@ private:
     modelViewer::render::render_scene m_Scene;
     glm::mat4 m_ViewProjection;
     std::vector<modelViewer::res::model_info> m_NewModelsQueue;
+    glm::vec4 m_ClearFlag;
     
     std::shared_ptr<modelViewer::render::shader_program> getProgram(modelViewer::res::model_info& info);
     std::shared_ptr<modelViewer::render::mesh> getMesh(modelViewer::res::model_info& info);
@@ -30,6 +31,7 @@ public:
     modelviewer_window(int width, int height, std::string title, bool fullscreen);
      ~modelviewer_window() override;
      void addModel(modelViewer::res::model_info& info);
+     void setClearFlag(glm::vec4 color);
 };
 
 

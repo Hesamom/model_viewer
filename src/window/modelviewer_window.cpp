@@ -11,8 +11,7 @@ void modelviewer_window::onRender(float elapsed) {
     
     static float rotationSpeed = 2.0f;
     static float angle = 0;
-    static const GLfloat green[] = { 0.0f, 0.25f, 0.0f, 1.0f };
-    glClearBufferfv(GL_COLOR, 0, green);
+    glClearBufferfv(GL_COLOR, 0, &m_ClearFlag.x);
     
     for (auto& info: m_NewModelsQueue) {
         auto program = getProgram(info);
@@ -103,4 +102,8 @@ modelviewer_window::modelviewer_window(int width, int height, std::string title,
 
 modelviewer_window::~modelviewer_window() {
     
+}
+
+void modelviewer_window::setClearFlag(glm::vec4 color) {
+    m_ClearFlag = color;
 }
