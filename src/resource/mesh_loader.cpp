@@ -85,6 +85,7 @@ std::shared_ptr<mesh_asset> mesh_loader::load(std::filesystem::path filePath) {
         }
     }
     
+    importer.FreeScene();
     auto mesh = std::make_shared<mesh_asset>(positions, indices, normals, uv0);
     mesh->m_Name = filePath.string();
     

@@ -97,7 +97,8 @@ modelviewer_window::modelviewer_window(int width, int height, std::string title,
                                                                                                            height,
                                                                                                            title,
                                                                                                            fullscreen) {
-    setTargetFrameRate(120);
+    setVsync(false);
+    setTargetFrameRate(360);
 }
 
 modelviewer_window::~modelviewer_window() {

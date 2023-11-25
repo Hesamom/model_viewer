@@ -14,13 +14,13 @@ private:
     int m_TargetFrameRate = -1;
     long double m_elapsedTimeSinceStart;
     
-    void initContext();
+    void initContext(bool vSync);
     
 protected:
     virtual void onRender(float elapsedTime);
     
 public:
-    window(int width, int height, const std::string& title, bool fullscreen);
+    window(int width, int height, const std::string& title, bool fullscreen, bool vSync = true);
     virtual ~window();
     
     void setSize(int width, int height);
@@ -29,6 +29,7 @@ public:
     int getTargetFrameRate();
     void setTargetFrameRate(int fps);
     void setTitle(std::string title);
+    void setVsync(bool enabled);
     std::string  getTitle();
     void draw();
     bool isOpen();

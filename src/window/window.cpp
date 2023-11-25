@@ -10,7 +10,7 @@ void onSizeChanged(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-window::window(int width, int height, const std::string& title, bool fullscreen) 
+window::window(int width, int height, const std::string& title, bool fullscreen, bool vSync) 
 {
     if (title.empty())
     {
@@ -52,7 +52,7 @@ window::window(int width, int height, const std::string& title, bool fullscreen)
         throw std::runtime_error("failed to create a window");
     }
 
-    initContext();
+    initContext(vSync);
 }
 
 
@@ -155,12 +155,12 @@ void APIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severi
     }
 }
 
-void window::initContext() {
+void window::initContext(bool vSync) {
     
     glfwMakeContextCurrent(m_Window);
     glewExperimental = GL_TRUE; // Enable experimental features
     glewInit();
-    glfwSwapInterval(1);
+    glfwSwapInterval(vSync ? 1 : 0);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
@@ -172,7 +172,6 @@ void window::initContext() {
         glDebugMessageCallback(debugCallback, nullptr);
         // Enable only high-severity error messages
         glDebugMessageControl(GL_DEBUG_SOURCE_API, GL_DEBUG_TYPE_ERROR, GL_DEBUG_SEVERITY_HIGH, 0, nullptr, GL_TRUE);
-
     } 
     else 
     {
@@ -202,5 +201,9 @@ void window::setTargetFrameRate(int fps) {
 
 long double window::getTimeSinceStart() {
     return m_elapsedTimeSinceStart;
+}
+
+void window::setVsync(bool enabled) {
+    glfwSwapInterval(enabled ? 1 : 0);
 }
 
