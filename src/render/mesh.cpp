@@ -11,7 +11,6 @@ modelViewer::render::mesh::mesh(std::shared_ptr<modelViewer::res::mesh_asset>& a
       m_UV0{asset->m_UV0},
       m_IndexBuffer{asset->m_Indices}
       {
-
           m_PositionBuffer.setName(m_Asset->m_Name + "_pos");
           m_NormalBuffer.setName(m_Asset->m_Name + "_normal");
           m_UV0.setName(m_Asset->m_Name + "_uv0");
@@ -50,7 +49,7 @@ void modelViewer::render::mesh::draw() {
         m_IndexBuffer.bind();
         m_UV0.bind();
         m_NormalBuffer.bind();
-        m_IndexBuffer.draw();
+        m_IndexBuffer.drawShaded();
     } else{
         m_PositionBuffer.bind();
         m_UV0.bind();

@@ -18,12 +18,12 @@ namespace modelViewer::render {
 
         typedef glm::vec<components, T, glm::defaultp>		valueType;
         
-        explicit vertex_buffer(std::vector <glm::vec<components, float, glm::defaultp>> &data) : m_BufferId{0}, m_Size{0}
+        explicit vertex_buffer(std::vector <glm::vec<components, T, glm::defaultp>> &data) : m_BufferId{0}, m_Size{0}
         {
             glGenBuffers(1, &m_BufferId);
             glBindBuffer(GL_ARRAY_BUFFER, m_BufferId);
             m_Size = static_cast<int>(data.size());
-            glBufferData(GL_ARRAY_BUFFER, m_Size * sizeof (glm::vec<components, float, glm::defaultp>), &data[0], GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, m_Size * sizeof (glm::vec<components, T, glm::defaultp>), &data[0], GL_STATIC_DRAW);
         }
         ~vertex_buffer()
         {
