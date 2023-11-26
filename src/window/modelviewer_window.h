@@ -21,14 +21,19 @@ private:
     glm::vec4 m_ClearFlag;
     glm::vec3 m_CameraPosition{0.0f,4.0f,5.0f};
     bool m_IsMouseButtonDown = false;
-    float m_ViewAngle = 0;
-    float m_ZoomLevel = m_CameraPosition.z;
+    float m_PitchAngle = 0;
+    float m_YawAngle = 0;
+    float m_ZoomLevel = 5;
+    const glm::vec2 PitchAngleRange{-80,80};
+    const float AngleChangeMul = 0.5f;
+            
     glm::vec<2,double,glm::defaultp> m_LastMousePosition;
     
     std::shared_ptr<modelViewer::render::shader_program> getProgram(modelViewer::res::model_info& info);
     std::shared_ptr<modelViewer::render::mesh> getMesh(modelViewer::res::model_info& info);
     std::shared_ptr<modelViewer::render::texture> getTexture(modelViewer::res::model_info& info);
     
+    void updateCameraPosition();
 protected:
     void onRender(float elapsed) override;
     void onScrollChanged(double yOffset) override;

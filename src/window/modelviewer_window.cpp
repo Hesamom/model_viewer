@@ -29,7 +29,8 @@ void modelviewer_window::onRender(float elapsed) {
             glm::vec3(0,0,0), // and looks at the origin
             glm::vec3(0,1,0));  // Head is up (set to 0,-1,0 to look upside-down
             
-    auto projection = glm::perspective<float>(glm::radians(45.0),1,0.1,100.0);
+    auto aspectRatio = (float)getWidth()/getHeight();
+    auto projection = glm::perspective<float>(glm::radians(45.0),aspectRatio,0.1,100.0);
     
     auto viewProjection = projection * viewMatrix;
     for (auto& object : m_Scene.getObjects()) {
@@ -93,18 +94,9 @@ modelviewer_window::modelviewer_window(int width, int height, std::string title,
                                                                                                            title,
                                                                                                            fullscreen) {
     
-    struct functor
-    {
-        
-        void operator()(GLFWwindow* window, double xoffset, double yoffset)
-        {
-            
-        }
-    };
-    
-    
     setVsync(false);
     setTargetFrameRate(360);
+    updateCameraPosition();
 }
 
 modelviewer_window::~modelviewer_window() {
@@ -115,12 +107,22 @@ void modelviewer_window::setClearFlag(glm::vec4 color) {
     m_ClearFlag = color;
 }
 
+
+glm::vec3 getPosition(float pitch, float yaw, float zoomLevel)
+{
+    float xPos = cos(glm::radians(pitch)) * sin(glm::radians(yaw)) * zoomLevel;
+    float yPos = sin(glm::radians(pitch)) * zoomLevel;
+    float zPos = cos(glm::radians(pitch)) * cos(glm::radians(yaw)) * zoomLevel;
+    return {xPos,yPos, zPos};
+}
+
 void modelviewer_window::onScrollChanged(double yOffset) {
     
     //down -1, up 1
-    m_CameraPosition.z += yOffset * -1 * 3;
-    m_CameraPosition.z = std::clamp<float>(m_CameraPosition.z, 1, 50);
-    m_ZoomLevel = m_CameraPosition.z;
+    m_ZoomLevel += yOffset * -1 * 3;
+    m_ZoomLevel = std::clamp<float>(m_ZoomLevel, 1, 50);
+    
+    updateCameraPosition();
 }
 
 void modelviewer_window::onMouseButtonChanged(int button, int action, int mods) {
@@ -139,22 +141,22 @@ void modelviewer_window::onMousePositionChanged(double xpos, double ypos) {
     if (m_IsMouseButtonDown)
     {
         auto deltaY = m_LastMousePosition.y - ypos;
-        float step = 0.05f;
-        float direction = deltaY > 0 ? -1 : 1;
-        //m_CameraPosition.y += step * direction;
-        //m_CameraPosition.y = std::clamp<float>( m_CameraPosition.y, -50, 50);
+        m_PitchAngle += -deltaY * AngleChangeMul;
+        m_PitchAngle = std::clamp<float>(m_PitchAngle, PitchAngleRange.x,PitchAngleRange.y);
 
         auto deltaX = m_LastMousePosition.x - xpos;
-        float angleChange = 0.5f;
-        float angleChangeMul = deltaX > 0 ? 1 : -1;
-        m_ViewAngle += angleChangeMul * angleChange;
+        m_YawAngle += deltaX * AngleChangeMul;
         
-        float xPos = sin(glm::radians((float)m_ViewAngle)) * m_ZoomLevel;
-        m_CameraPosition.x = xPos;
-        float zPos = cos(glm::radians((float)m_ViewAngle)) * m_ZoomLevel;
-        m_CameraPosition.z = zPos;
+        updateCameraPosition();
     }
 
     m_LastMousePosition.x = xpos;
     m_LastMousePosition.y = ypos;
+}
+
+void modelviewer_window::updateCameraPosition() {
+    auto pos = getPosition(m_PitchAngle, m_YawAngle, m_ZoomLevel);
+    m_CameraPosition.x = pos.x;
+    m_CameraPosition.y = pos.y;
+    m_CameraPosition.z = pos.z;
 }
