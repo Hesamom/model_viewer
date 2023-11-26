@@ -3,14 +3,13 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "modelviewer_window.h"
+#include "glfw/glfw3.h"
+
 using namespace modelViewer::res;
 using namespace modelViewer::render;
 using namespace modelViewer::common;
 
 void modelviewer_window::onRender(float elapsed) {
-    
-    static float rotationSpeed = 0.5f;
-    static float angle = 0;
     glClearBufferfv(GL_COLOR, 0, &m_ClearFlag.x);
     
     for (auto& info: m_NewModelsQueue) {
@@ -26,7 +25,7 @@ void modelviewer_window::onRender(float elapsed) {
 
 
     auto viewMatrix = glm::lookAt(
-            glm::vec3(4,3,0), // Camera is at (4,3,3), in World Space
+            m_CameraPosition, // Camera is at (4,3,3), in World Space
             glm::vec3(0,0,0), // and looks at the origin
             glm::vec3(0,1,0));  // Head is up (set to 0,-1,0 to look upside-down
             
@@ -35,9 +34,6 @@ void modelviewer_window::onRender(float elapsed) {
     auto viewProjection = projection * viewMatrix;
     for (auto& object : m_Scene.getObjects()) {
         
-        auto added = rotationSpeed * elapsed;
-        angle += added;
-        object->getTransform().setEularRotation(glm::vec3(angle,0,0));
         object->render(viewProjection);
     }
 }
@@ -96,6 +92,17 @@ modelviewer_window::modelviewer_window(int width, int height, std::string title,
                                                                                                            height,
                                                                                                            title,
                                                                                                            fullscreen) {
+    
+    struct functor
+    {
+        
+        void operator()(GLFWwindow* window, double xoffset, double yoffset)
+        {
+            
+        }
+    };
+    
+    
     setVsync(false);
     setTargetFrameRate(360);
 }
@@ -106,4 +113,48 @@ modelviewer_window::~modelviewer_window() {
 
 void modelviewer_window::setClearFlag(glm::vec4 color) {
     m_ClearFlag = color;
+}
+
+void modelviewer_window::onScrollChanged(double yOffset) {
+    
+    //down -1, up 1
+    m_CameraPosition.z += yOffset * -1 * 3;
+    m_CameraPosition.z = std::clamp<float>(m_CameraPosition.z, 1, 50);
+    m_ZoomLevel = m_CameraPosition.z;
+}
+
+void modelviewer_window::onMouseButtonChanged(int button, int action, int mods) {
+    
+    if (button !=  GLFW_MOUSE_BUTTON_MIDDLE)
+    {
+        return;
+    }
+
+    m_IsMouseButtonDown = action == GLFW_REPEAT || action == GLFW_PRESS;
+}
+
+
+void modelviewer_window::onMousePositionChanged(double xpos, double ypos) {
+    
+    if (m_IsMouseButtonDown)
+    {
+        auto deltaY = m_LastMousePosition.y - ypos;
+        float step = 0.05f;
+        float direction = deltaY > 0 ? -1 : 1;
+        //m_CameraPosition.y += step * direction;
+        //m_CameraPosition.y = std::clamp<float>( m_CameraPosition.y, -50, 50);
+
+        auto deltaX = m_LastMousePosition.x - xpos;
+        float angleChange = 0.5f;
+        float angleChangeMul = deltaX > 0 ? 1 : -1;
+        m_ViewAngle += angleChangeMul * angleChange;
+        
+        float xPos = sin(glm::radians((float)m_ViewAngle)) * m_ZoomLevel;
+        m_CameraPosition.x = xPos;
+        float zPos = cos(glm::radians((float)m_ViewAngle)) * m_ZoomLevel;
+        m_CameraPosition.z = zPos;
+    }
+
+    m_LastMousePosition.x = xpos;
+    m_LastMousePosition.y = ypos;
 }

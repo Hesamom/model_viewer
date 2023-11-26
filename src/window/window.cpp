@@ -52,6 +52,7 @@ window::window(int width, int height, const std::string& title, bool fullscreen,
         throw std::runtime_error("failed to create a window");
     }
 
+    subscribeEvents();
     initContext(vSync);
 }
 
@@ -205,5 +206,54 @@ long double window::getTimeSinceStart() {
 
 void window::setVsync(bool enabled) {
     glfwSwapInterval(enabled ? 1 : 0);
+}
+
+void window::onScrollChanged(double yOffset) {
+
+}
+
+void window::subscribeEvents() {
+    
+    static auto callback_static = [this](GLFWwindow* window, double xoffset, double yoffset){
+        onScrollChanged(yoffset);
+    };
+    
+    glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset)
+                       {
+                           // only static methods can be called here as we cannot change glfw function parameter list to include instance pointer
+                           callback_static(window, xOffset, yOffset);
+                       }
+    );
+
+    static auto callback_static_2 = [this](GLFWwindow* window, int button, int action, int mods){
+        onMouseButtonChanged(button, action, mods);
+    };
+
+    glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
+                          {
+                              // only static methods can be called here as we cannot change glfw function parameter list to include instance pointer
+                              callback_static_2(window, button, action, mods);
+                          }
+    );
+
+    static auto callback_static_3 = [this](GLFWwindow* window, double xpos, double ypos){
+        onMousePositionChanged(xpos, ypos);
+    };
+
+    glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xpos, double ypos)
+                               {
+                                   // only static methods can be called here as we cannot change glfw function parameter list to include instance pointer
+                                   callback_static_3(window, xpos, ypos);
+                               }
+    );
+}
+
+void window::onMouseButtonChanged(int button, int action, int mods) {
+    
+
+}
+
+void window::onMousePositionChanged(double xpos, double ypos) {
+    
 }
 

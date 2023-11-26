@@ -15,9 +15,13 @@ private:
     long double m_elapsedTimeSinceStart;
     
     void initContext(bool vSync);
+    void subscribeEvents();
     
 protected:
     virtual void onRender(float elapsedTime);
+    virtual void onScrollChanged(double yOffset);
+    virtual void onMouseButtonChanged(int button, int action, int mods);
+    virtual void onMousePositionChanged(double xpos, double ypos);
     
 public:
     window(int width, int height, const std::string& title, bool fullscreen, bool vSync = true);
@@ -34,6 +38,8 @@ public:
     void draw();
     bool isOpen();
     long double getTimeSinceStart();
+
+    
 };
 
 #endif
