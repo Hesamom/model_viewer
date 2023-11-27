@@ -10,7 +10,7 @@ void onSizeChanged(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-window::window(int width, int height, const std::string& title, bool fullscreen, bool vSync) 
+window::window(int width, int height, const std::string& title, bool fullscreen, bool vSync,  int mssaLevel ) 
 {
     if (title.empty())
     {
@@ -26,6 +26,7 @@ window::window(int width, int height, const std::string& title, bool fullscreen,
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
+    glfwWindowHint(GLFW_SAMPLES, mssaLevel);
 
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_DEPTH_TEST);

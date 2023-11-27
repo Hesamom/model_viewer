@@ -24,7 +24,7 @@ protected:
     virtual void onMousePositionChanged(double xpos, double ypos);
     
 public:
-    window(int width, int height, const std::string& title, bool fullscreen, bool vSync = true);
+    window(int width, int height, const std::string& title, bool fullscreen, bool vSync = true, int mssaLevel = 8);
     virtual ~window();
     
     void setSize(int width, int height);
