@@ -16,6 +16,7 @@ namespace modelViewer::render {
             int getCount() const;
             void drawShaded();
             void drawWireframe();
+            void drawLines();
         };
 
     }

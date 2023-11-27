@@ -11,10 +11,11 @@
 namespace modelViewer::render {
     class mesh {
     private:
-        vertex_buffer<float,3> m_PositionBuffer;
-        vertex_buffer<float,3> m_NormalBuffer;
-        vertex_buffer<float,2> m_UV0;
-        index_buffer  m_IndexBuffer;
+        std::unique_ptr<vertex_buffer<float,3>> m_PositionBuffer;
+        std::unique_ptr<vertex_buffer<float,4>> m_ColorBuffer;
+        std::unique_ptr< vertex_buffer<float,3>> m_NormalBuffer;
+        std::unique_ptr<vertex_buffer<float,2>> m_UV0;
+        std::unique_ptr<index_buffer>  m_IndexBuffer;
         vertex_array m_VertexArray;
         
         std::shared_ptr<modelViewer::res::mesh_asset> m_Asset;
@@ -22,6 +23,7 @@ namespace modelViewer::render {
         void bindAttributes(shader_program& program);
         void bind();
         void draw();
+        void drawLines();
         explicit mesh(std::shared_ptr<modelViewer::res::mesh_asset>& asset);
         ~mesh();
     };

@@ -9,3 +9,7 @@ modelViewer::render::vertex_array::vertex_array() {
 void modelViewer::render::vertex_array::bind() {
     glBindVertexArray(m_arrayId);
 }
+
+void modelViewer::render::vertex_array::unbind() {
+    glBindVertexArray(0);
+}

@@ -9,7 +9,14 @@
 
 namespace modelViewer::render
 {
+    enum class render_mode
+    {
+        triangles,
+        lines
+    };
+    
     class render_object {
+        
     private:
         common::transform m_Transform{};
         
@@ -19,14 +26,13 @@ namespace modelViewer::render
         
         std::string m_Name;
     public:
-        render_object(std::shared_ptr<shader_program>& program , std::shared_ptr<mesh>& mesh,  
-                      std::shared_ptr<texture>& 
-                texture, const std::string& name);
+        render_object(std::shared_ptr<shader_program>& program , std::shared_ptr<mesh>& mesh, const std::string& name);
         common::transform& getTransform();
         void setTransform(common::transform& t);
+        void setTexture(std::shared_ptr<texture>& texture);
         std::shared_ptr<shader_program>& getProgram();
         
-        void render(glm::mat4 viewProjection);
+        void render(glm::mat4 viewProjection, render_mode mode);
     };
 }
 #endif

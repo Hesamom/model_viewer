@@ -15,13 +15,20 @@ void modelviewer_window::onRender(float elapsed) {
     for (auto& info: m_NewModelsQueue) {
         auto program = getProgram(info);
         auto mesh = getMesh(info);
+        auto object = std::make_shared<render_object>(program, mesh, info.name);
+        
         auto texture = getTexture(info);
-        auto object = std::make_shared<render_object>(program, mesh, texture, info.name);
+        if(texture)
+        {
+            object->setTexture(texture);
+        }
+        
         object->setTransform(info.transform);
         m_Scene.addObject(object);
     }
 
     m_NewModelsQueue.clear();
+
 
 
     auto viewMatrix = glm::lookAt(
@@ -33,9 +40,11 @@ void modelviewer_window::onRender(float elapsed) {
     auto projection = glm::perspective<float>(glm::radians(45.0),aspectRatio,0.1,100.0);
     
     auto viewProjection = projection * viewMatrix;
+
+    m_Platform.draw(viewProjection);
     for (auto& object : m_Scene.getObjects()) {
         
-        object->render(viewProjection);
+        object->render(viewProjection, render_mode::triangles);
     }
 }
 
@@ -50,21 +59,20 @@ std::shared_ptr<modelViewer::render::shader_program> modelviewer_window::getProg
     auto vertShaderAsset = m_ShaderLoader.load(info.vertexShaderPath, shaderType::vertex );
     auto fragShaderAsset = m_ShaderLoader.load(info.fragmentShaderPath, shaderType::fragment);
     
-    auto vertShader = std::make_shared<shader>(vertShaderAsset);
-    vertShader->compile();
-    if(!vertShader->isCompiled())
+    shader vertShader(vertShaderAsset);
+    vertShader.compile();
+    if(!vertShader.isCompiled())
     {
-        std::cerr<< vertShader->getCompilationLog() << std::endl;
+        std::cerr<< vertShader.getCompilationLog() << std::endl;
     }
-    auto fragShader = std::make_shared<shader>(fragShaderAsset);
-    fragShader->compile();
-    if(!fragShader->isCompiled())
+    shader fragShader (fragShaderAsset);
+    fragShader.compile();
+    if(!fragShader.isCompiled())
     {
-        std::cerr<< fragShader->getCompilationLog() << std::endl;
+        std::cerr<< fragShader.getCompilationLog() << std::endl;
     }
     
-    auto program = std::make_shared<shader_program>(std::initializer_list<std::shared_ptr<shader>>{vertShader, 
-                                                                                                fragShader});
+    auto program = std::make_shared<shader_program>(std::initializer_list<shader>{vertShader, fragShader});
     if(!program->isLinked())
     {
         std::cerr<< program->getLinkLog() << std::endl;
@@ -83,6 +91,9 @@ std::shared_ptr<modelViewer::render::mesh> modelviewer_window::getMesh(model_inf
 
 std::shared_ptr<modelViewer::render::texture> modelviewer_window::getTexture(model_info &info) {
 
+    if (info.texturePath.empty())
+        return nullptr;
+    
     auto textureAsset = m_TextureLoader.load(info.texturePath);
     auto texturePtr = std::make_shared<texture>(textureAsset);
     
@@ -92,11 +103,18 @@ std::shared_ptr<modelViewer::render::texture> modelviewer_window::getTexture(mod
 modelviewer_window::modelviewer_window(int width, int height, std::string title, bool fullscreen) : window(width,
                                                                                                            height,
                                                                                                            title,
-                                                                                                           fullscreen) {
+                                                                                                           fullscreen)
+                                                                                                           {
     
     setVsync(false);
     setTargetFrameRate(360);
     updateCameraPosition();
+    
+    model_platform_info info;
+    info.sizeY = 12;
+    info.sizeX = 12;
+    info.lineSpace = 1;
+    m_Platform.init(m_ShaderLoader, info);
 }
 
 modelviewer_window::~modelviewer_window() {

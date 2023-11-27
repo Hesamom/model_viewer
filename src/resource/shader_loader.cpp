@@ -3,7 +3,7 @@
 
 using namespace modelViewer::res;
 
-std::string readFile(std::filesystem::path &path) {
+std::string readFile(const std::filesystem::path &path) {
 
     std::ifstream stream(path);
 
@@ -24,7 +24,7 @@ std::string readFile(std::filesystem::path &path) {
 }
 
 
-std::shared_ptr<shader_asset> modelViewer::res::shader_loader::load(std::filesystem::path &path, shaderType type)
+std::shared_ptr<shader_asset> modelViewer::res::shader_loader::load(const std::filesystem::path &path, shaderType type)
 {
     if (m_LoadedAssets.contains(path))
     {

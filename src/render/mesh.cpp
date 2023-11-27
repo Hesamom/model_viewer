@@ -5,16 +5,34 @@ void modelViewer::render::mesh::bind() {
 }
 
 modelViewer::render::mesh::mesh(std::shared_ptr<modelViewer::res::mesh_asset>& asset)
-    : m_Asset{asset},
-      m_PositionBuffer{asset->m_Positions} ,
-      m_NormalBuffer{asset->m_Normals},
-      m_UV0{asset->m_UV0},
-      m_IndexBuffer{asset->m_Indices}
+    : m_Asset{asset}
       {
-          m_PositionBuffer.setName(m_Asset->m_Name + "_pos");
-          m_NormalBuffer.setName(m_Asset->m_Name + "_normal");
-          m_UV0.setName(m_Asset->m_Name + "_uv0");
-          m_IndexBuffer.setName(m_Asset->m_Name + "_index");
+          m_VertexArray.bind();
+          m_PositionBuffer = std::make_unique<vertex_buffer<float,3>>(*m_Asset->positions);
+          m_PositionBuffer->setName(m_Asset->name + "_pos");
+
+          m_IndexBuffer = std::make_unique<index_buffer>(*m_Asset->indices);
+          m_IndexBuffer->setName(m_Asset->name + "_index");
+          
+          if (m_Asset->normals)
+          {
+              m_NormalBuffer = std::make_unique<vertex_buffer<float,3>>(*m_Asset->normals);
+              m_NormalBuffer->setName(m_Asset->name + "_normal");
+          }
+
+          if (m_Asset->colors)
+          {
+              m_ColorBuffer = std::make_unique<vertex_buffer<float,4>>(*m_Asset->colors);
+              m_ColorBuffer->setName(m_Asset->name + "_color");
+          }
+
+          if (m_Asset->UV0)
+          {
+              m_UV0 = std::make_unique<vertex_buffer<float,2>>(*m_Asset->UV0);
+              m_UV0->setName(m_Asset->name + "_uv0");
+          }
+          m_VertexArray.unbind();
+   
 }
 
 modelViewer::render::mesh::~mesh() = default;
@@ -26,36 +44,36 @@ void modelViewer::render::mesh::bindAttributes(modelViewer::render::shader_progr
     int positionIndex = program.getAttributeLocation("v_position");
     if (positionIndex >= 0)
     {
-        m_PositionBuffer.bindBuffer(positionIndex);
+        m_PositionBuffer->bindBuffer(positionIndex);
     }
 
     int uv0Index = program.getAttributeLocation("v_uv0");
-    if (uv0Index >= 0)
+    if (m_UV0 && uv0Index >= 0)
     {
-        m_UV0.bindBuffer(uv0Index);
+        m_UV0->bindBuffer(uv0Index);
+    }
+
+    int colorIndex = program.getAttributeLocation("v_color");
+    if (m_ColorBuffer && colorIndex >= 0)
+    {
+        m_ColorBuffer->bindBuffer(colorIndex);
     }
     
     int normalIndex = program.getAttributeLocation("v_normal");
-    if(normalIndex >= 0)
+    if(m_NormalBuffer && normalIndex >= 0)
     {
-        m_NormalBuffer.bindBuffer(normalIndex);
+        m_NormalBuffer->bindBuffer(normalIndex);
     }
 
 }
 
-void modelViewer::render::mesh::draw() {
+void modelViewer::render::mesh::draw()
+{
+    m_IndexBuffer->drawShaded();
+}
 
-    if(m_IndexBuffer.getCount() != 0){
-        m_IndexBuffer.bind();
-        m_UV0.bind();
-        m_NormalBuffer.bind();
-        m_IndexBuffer.drawShaded();
-    } else{
-        m_PositionBuffer.bind();
-        m_UV0.bind();
-        m_NormalBuffer.bind();
-        m_PositionBuffer.draw();
-    }
+void modelViewer::render::mesh::drawLines() {
+    m_IndexBuffer->drawLines();
 }
 
 

@@ -5,13 +5,13 @@
 using namespace modelViewer::render;
 
 
-shader_program::shader_program(std::initializer_list<std::shared_ptr<shader>> shaders) {
+shader_program::shader_program(std::initializer_list<shader> shaders) {
     
     m_ProgramId = glCreateProgram();
     
     for(auto& shader : shaders)
     {
-        glAttachShader(m_ProgramId, shader->getId());
+        glAttachShader(m_ProgramId, shader.getId());
     }
     
     glLinkProgram(m_ProgramId);
@@ -60,6 +60,7 @@ void shader_program::setUniformVector3(int location, glm::vec3 vec3) {
 }
 
 void shader_program::setUniformVector4(int location, glm::vec4 vec4) {
+    bind();
     glUniform4f(location, vec4.x,vec4.y,vec4.z,vec4.w);
 }
 
@@ -67,7 +68,7 @@ void shader_program::setUniformFloat(int location, float value) {
     glUniform1f(location, value);
 }
 
-void shader_program::setUniform1i(int location, int value) {
+void shader_program::setUniformInt(int location, int value) {
     glUniform1i(location, value);
 }
 

@@ -11,7 +11,7 @@ namespace modelViewer::render{
 private:
         unsigned int m_ProgramId = 0;
     public:
-        shader_program(std::initializer_list<std::shared_ptr<shader>> shaders);
+        shader_program(std::initializer_list<shader> shaders);
         ~shader_program();
         std::string getLinkLog();
         bool isLinked();
@@ -21,7 +21,7 @@ private:
         void setUniformVector3(int location, glm::vec3 vec3);
         void setUniformVector4(int location, glm::vec4 vec4);
         void setUniformFloat(int location, float value);
-        void setUniform1i(int location, int value);
+        void setUniformInt(int location, int value);
         void setUniformMatrix4(int index, glm::mat4 mat);
 };
 }

@@ -37,3 +37,7 @@ void modelViewer::render::index_buffer::drawWireframe() {
     glDrawElements(GL_LINE_STRIP, m_Count, GL_UNSIGNED_INT, 0);
 }
 
+void modelViewer::render::index_buffer::drawLines() {
+    glDrawElements(GL_LINES, m_Count, GL_UNSIGNED_INT, 0);
+}
+

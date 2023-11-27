@@ -32,6 +32,8 @@ unsigned int getShaderType(shaderType type)
         case shaderType::compute:
             return GL_COMPUTE_SHADER;
     }
+    
+    return -1;
 }
 
 void modelViewer::render::shader::compile() {
@@ -76,6 +78,6 @@ modelViewer::render::shader::~shader() {
     glDeleteShader(m_ShaderId);
 }
 
-unsigned int modelViewer::render::shader::getId() {
+unsigned int modelViewer::render::shader::getId() const {
     return m_ShaderId;
 }

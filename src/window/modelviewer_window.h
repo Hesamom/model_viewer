@@ -8,6 +8,7 @@
 #include "../resource/shader_loader.h"
 #include "../render/render_scene.h"
 #include "glm/glm.hpp"
+#include "../render/model_platform_buffer.h"
 
 class modelviewer_window : public window {
     
@@ -16,6 +17,7 @@ private:
     modelViewer::res::texture_loader m_TextureLoader;
     modelViewer::res::shader_loader m_ShaderLoader;
     modelViewer::render::render_scene m_Scene;
+    modelViewer::render::model_platform_buffer m_Platform;
     glm::mat4 m_ViewProjection;
     std::vector<modelViewer::res::model_info> m_NewModelsQueue;
     glm::vec4 m_ClearFlag;
@@ -24,8 +26,11 @@ private:
     float m_PitchAngle = 0;
     float m_YawAngle = 0;
     float m_ZoomLevel = 5;
+    
+    
     const glm::vec2 PitchAngleRange{-80,80};
     const float AngleChangeMul = 0.5f;
+    
             
     glm::vec<2,double,glm::defaultp> m_LastMousePosition;
     

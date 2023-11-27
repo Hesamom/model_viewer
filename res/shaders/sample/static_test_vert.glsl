@@ -4,7 +4,6 @@ layout (location = 1) in vec2 v_uv0;
 layout (location = 2) in vec3 v_normal;
 
 uniform mat4 m_MVP;
-uniform mat4 m_Model;
 
 
 out vec2 TexCoord;
@@ -14,5 +13,5 @@ void main()
 {
 	gl_Position = m_MVP * v_position;
 	TexCoord = v_uv0;
-	Normal = mat3(transpose(inverse(m_Model))) * v_normal;
+	Normal = v_normal;
 }

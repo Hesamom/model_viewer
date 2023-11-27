@@ -12,6 +12,7 @@ namespace modelViewer::render {
     public:
         vertex_array();
         void bind();
+        void unbind();
     };
 }
 

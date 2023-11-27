@@ -11,7 +11,7 @@ namespace modelViewer::res {
     private:
         std::unordered_map<std::filesystem::path, std::shared_ptr<shader_asset>> m_LoadedAssets;
     public:
-        std::shared_ptr<shader_asset> load(std::filesystem::path& filePath, shaderType type);
+        std::shared_ptr<shader_asset> load(const std::filesystem::path& filePath, shaderType type);
     };
 
 }
