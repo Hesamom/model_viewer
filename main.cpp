@@ -9,13 +9,13 @@ int main()
     modelviewer_window window(1024, 1024, "Playground", false);
     window.setClearFlag(glm::vec4(0.15f,0.15f,0.15f,0));
     
-    modelViewer::res::model_info info2;
-    info2.fragmentShaderPath = "res/shaders/sample/sample_frag.glsl";
-    info2.vertexShaderPath = "res/shaders/sample/static_test_vert.glsl";
-    info2.texturePath = "res/textures/sample.png";
-    info2.meshPath = "res/models/primitives/cube.fbx";
-    info2.name = "cube";
-    window.addModel(info2);
+    modelViewer::res::model_info info;
+    info.fragmentShaderPath = "res/shaders/sample/sample_frag.glsl";
+    info.vertexShaderPath = "res/shaders/sample/static_test_vert.glsl";
+    info.texturePath = "res/textures/sample.png";
+    info.meshPath = "res/models/primitives/cube.fbx";
+    info.name = "cube";
+    window.addModel(info);
     
     window.draw();
     return 0;
