@@ -39,12 +39,12 @@ void modelviewer_window::onRender(float elapsed) {
     auto aspectRatio = (float)getWidth()/getHeight();
     auto projection = glm::perspective<float>(glm::radians(45.0),aspectRatio,0.1,100.0);
     
-    auto viewProjection = projection * viewMatrix;
+    //auto viewProjection = projection * viewMatrix;
 
-    m_Platform.draw(viewProjection);
+    m_Platform.draw(viewMatrix, projection);
     for (auto& object : m_Scene.getObjects()) {
-        
-        object->render(viewProjection, render_mode::triangles);
+
+        object->render(viewMatrix, projection, render_mode::triangles);
     }
 }
 

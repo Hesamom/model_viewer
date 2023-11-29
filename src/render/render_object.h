@@ -32,7 +32,7 @@ namespace modelViewer::render
         void setTexture(std::shared_ptr<texture>& texture);
         std::shared_ptr<shader_program>& getProgram();
         
-        void render(glm::mat4 viewProjection, render_mode mode);
+        void render(glm::mat4 view, glm::mat4 projection, render_mode mode);
     };
 }
 #endif

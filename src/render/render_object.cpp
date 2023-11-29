@@ -12,14 +12,19 @@ void render_object::setTransform(transform &t) {
 }
 
 
-void render_object::render(glm::mat4 viewProjection, render_mode mode) {
+void render_object::render(glm::mat4 view, glm::mat4 projection, render_mode mode) {
 
     glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, ("render: " + m_Name).c_str());
     
     m_ShaderProgram->bind();
-    auto mvp = viewProjection * m_Transform.getMatrix();
-    int mvpIndex = m_ShaderProgram->getUniformLocation("m_MVP");
-    m_ShaderProgram->setUniformMatrix4(mvpIndex, mvp);
+    
+    
+    auto modelView = view * m_Transform.getMatrix();
+    int modelViewIndex = m_ShaderProgram->getUniformLocation("m_MV");
+    m_ShaderProgram->setUniformMatrix4(modelViewIndex, modelView);
+    
+    int projectionIndex = m_ShaderProgram->getUniformLocation("m_Projection");
+    m_ShaderProgram->setUniformMatrix4(projectionIndex, projection);
     
     if(m_Texture)
     {

@@ -25,7 +25,7 @@ namespace modelViewer::render
         
     public:
        void init(modelViewer::res::shader_loader& shaderLoader, const model_platform_info& info);
-       void draw(glm::mat4 viewProjection);
+       void draw(glm::mat4 view, glm::mat4 projection);
     };
 }
 

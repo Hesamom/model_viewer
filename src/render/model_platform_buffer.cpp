@@ -71,8 +71,8 @@ std::shared_ptr<mesh> generateMesh(const model_platform_info& info)
     return meshPtr;
 }
 
-void model_platform_buffer::draw(glm::mat4 viewProjection) {
-    m_Object->render(viewProjection, render_mode::lines);
+void model_platform_buffer::draw(glm::mat4 view, glm::mat4 projection) {
+    m_Object->render(view, projection, render_mode::lines);
 }
 
 void model_platform_buffer::init(shader_loader &shaderLoader,
