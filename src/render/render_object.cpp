@@ -66,4 +66,7 @@ void render_object::setTexture(std::shared_ptr<texture> &texture) {
     m_Texture = texture;
 }
 
+void render_object::setMaterial(const modelViewer::res::material &material) {
+}
+
 

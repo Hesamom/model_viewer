@@ -11,8 +11,9 @@ add_subdirectory(libs/glew)
 add_subdirectory(libs/glm)
 add_subdirectory(libs/glfw)
 add_subdirectory(libs/assimp)
+add_subdirectory(libs/imgui)
 
-set (USE_PRE_COMPILED_HEADERS ON)
+set(USE_PRE_COMPILED_HEADERS ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_COMPILE_WARNING_AS_ERROR OFF)
 file(GLOB_RECURSE SRC_FILES src/*)
@@ -32,7 +33,7 @@ endif ()
 
 target_include_directories(model_viewer PRIVATE libs/include)
 
-target_link_libraries(model_viewer PRIVATE glfw glm assimp libglew_static)
+target_link_libraries(model_viewer PRIVATE glfw glm assimp libglew_static imgui)
 
 
 #todo find a way to copy this after every build not every time cmake is reloaded!
