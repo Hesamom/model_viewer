@@ -12,12 +12,15 @@ texture::texture(std::shared_ptr<modelViewer::res::texture_asset> asset, texture
     setFilteringModeMin(m_TextureFilteringMin);
     setWrappingMode(m_TextureWrapping);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_Asset->getWidth(), m_Asset->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+    
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_ASTC_5x5x5_OES, m_Asset->getWidth(), m_Asset->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
                  m_Asset->getContent());
 
     glObjectLabel(GL_TEXTURE, m_TextureId, -1, m_Asset->getName().data());
-    glBindTexture(GL_TEXTURE_2D, 0);
 
+    //TODO should unbind in the end
+    glBindTexture(GL_TEXTURE_2D, 0);
+    
     if (m_IsMipMapActive)
     {
         glGenerateMipmap(GL_TEXTURE_2D);
@@ -29,6 +32,7 @@ texture::~texture() {
 }
 
 void texture::bind() const {
+    //TODO seems like one this is redundant 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_TextureId);
 }
@@ -55,9 +59,11 @@ texture::setFilteringMode(
     setFilteringModeMig(textureFilteringMig);
 }
 
+//TODO min and mag are almost duplicates, extract a function to call in both of them instead
 void
 texture::setFilteringModeMin(
         textureFiltering textureFiltering){
+    //TODO ensure the texture is bound 
     m_TextureFilteringMig = textureFiltering;
     switch (textureFiltering) {
 
@@ -152,12 +158,16 @@ texture::getMipMapMaxLevel() {
     return m_MipMapMaxLevel;
 }
 
+//TODO forgot to set fields 
+//TODO add some range checks 
+//TODO combine setting min and max together to make sure their values make sense
 void
 texture::setMipMapMinLevel(
         unsigned int minLevel) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, minLevel);
 }
 
+//TODO forgot to set fields 
 void
 texture::setMipMapMaxLevel(
         unsigned int maxLevel) {

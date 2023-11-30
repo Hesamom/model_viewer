@@ -6,6 +6,8 @@
 
 namespace modelViewer::render {
     
+    //TODO rename enums to match other class names 
+    //TODO only specify per texture filtering mode (linear, nearest)
     enum class textureFiltering
     {
         nearest,
@@ -14,6 +16,13 @@ namespace modelViewer::render {
         linear_Mipmap_Nearest,
         nearest_Mipmap_Linear,
         linear_Mipmap_Linear
+    };
+    
+    enum class texture_mipmap_mode
+    {
+        none,
+        linear,
+        nearest
     };
     enum class textureWrapping
     {
@@ -40,6 +49,7 @@ namespace modelViewer::render {
         void setFilteringModeMin(textureFiltering textureFiltering);
         void setFilteringModeMig(textureFiltering textureFiltering);
     public:
+        //TODO wrap these params in a struct/class 
         explicit texture(std::shared_ptr<modelViewer::res::texture_asset> asset, textureFiltering m_TextureFilteringMin = textureFiltering::linear, textureFiltering textureFilteringMig = textureFiltering::linear, textureWrapping textureWrapping = textureWrapping::clamp_To_Edge, bool isMipMapActive = false, unsigned int mipMapMinLevel = 2, unsigned int mipMapMaxLevel = 16);
         ~texture();
         void bind() const;
