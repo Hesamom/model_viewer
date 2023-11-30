@@ -15,6 +15,7 @@ int main()
     //info.texturePath = "res/textures/sample.png";
     info.meshPath = "res/models/primitives/cylinder.obj";
     info.name = "sphere";
+    info.material.specularIntensity = 50;
     window.addModel(info);
     
     window.draw();

@@ -6,6 +6,7 @@
 #include "shader_program.h"
 #include "mesh.h"
 #include "texture.h"
+#include "../resource/material.h"
 
 namespace modelViewer::render
 {
@@ -30,6 +31,7 @@ namespace modelViewer::render
         common::transform& getTransform();
         void setTransform(common::transform& t);
         void setTexture(std::shared_ptr<texture>& texture);
+        void setMaterial(const modelViewer::res::material& material);
         std::shared_ptr<shader_program>& getProgram();
         
         void render(glm::mat4 view, glm::mat4 projection, render_mode mode);
