@@ -30,17 +30,27 @@ namespace modelViewer::render {
     private:
         std::shared_ptr<modelViewer::res::texture_asset> m_Asset;
         unsigned int m_TextureId;
-        textureFiltering m_TextureFiltering = textureFiltering::linear;
+        unsigned int m_MipMapMinLevel;
+        unsigned int m_MipMapMaxLevel;
+        bool m_IsMipMapActive;
+        textureFiltering m_TextureFilteringMin = textureFiltering::linear;
+        textureFiltering m_TextureFilteringMig = textureFiltering::linear;
         textureWrapping m_TextureWrapping = textureWrapping::clamp_To_Edge;
+
+        void setFilteringModeMin(textureFiltering textureFiltering);
+        void setFilteringModeMig(textureFiltering textureFiltering);
     public:
-        
-        //TODO pass wrapping and filtering 
-        explicit texture(std::shared_ptr<modelViewer::res::texture_asset> asset, textureFiltering textureFiltering = textureFiltering::linear ,textureWrapping textureWrapping = textureWrapping::clamp_To_Edge);
+        explicit texture(std::shared_ptr<modelViewer::res::texture_asset> asset, textureFiltering m_TextureFilteringMin = textureFiltering::linear, textureFiltering textureFilteringMig = textureFiltering::linear, textureWrapping textureWrapping = textureWrapping::clamp_To_Edge, bool isMipMapActive = false, unsigned int mipMapMinLevel = 2, unsigned int mipMapMaxLevel = 16);
         ~texture();
         void bind() const;
-        textureFiltering  getFilteringMode() const;
+        textureFiltering  getFilteringModeMin() const;
+        textureFiltering  getFilteringModeMig() const;
         textureWrapping getWrappingMode() const;
-        void setFilteringMode(textureFiltering textureFiltering);
+        unsigned int getMipMapMinLevel();
+        unsigned int getMipMapMaxLevel();
+        void setMipMapMinLevel(unsigned int minLevel);
+        void setMipMapMaxLevel(unsigned int maxLevel);
+        void setFilteringMode(textureFiltering textureFilteringMin, textureFiltering textureFilteringMig);
         void setWrappingMode(textureWrapping textureWrapping);
     };
 }
