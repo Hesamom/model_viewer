@@ -4,6 +4,9 @@
 #include "chrono"
 #include "../common/stopwatch.h"
 #include "thread"
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
 
 void onSizeChanged(GLFWwindow* window, int width, int height)
 {
@@ -59,6 +62,9 @@ window::window(int width, int height, const std::string& title, bool fullscreen,
 
 
 window::~window() {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
     glfwDestroyWindow(m_Window);
 }
 
@@ -99,11 +105,19 @@ void window::draw()
         watch.stop();
         double elapsed = watch.getSeconds();
         watch.start();
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+        ImGui::ShowDemoWindow();
         
         glfwPollEvents();
         onRender((float)elapsed);
+        
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        
         glfwSwapBuffers(m_Window);
-
         watch.stop();
         m_elapsedTimeSinceStart += watch.getSeconds();
         capTargetFrameRate(watch.getSeconds(), m_TargetFrameRate);
@@ -183,6 +197,15 @@ void window::initContext(bool vSync) {
         std::cerr << "KHR_debug extension not supported" << std::endl;
     }
 
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+    ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
+    ImGui_ImplOpenGL3_Init();
+    
     std::cout<< "window with title: \"" << m_Title << "\" was created successfully \n";
     std::cout << glGetString(GL_VERSION) << " OpenGL Driver Version \n";
 }
@@ -224,7 +247,10 @@ void window::subscribeEvents() {
     
     glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset)
                        {
-                           // only static methods can be called here as we cannot change glfw function parameter list to include instance pointer
+                           if(ImGui::GetIO().WantCaptureMouse)
+                           {
+                               return;
+                           }
                            callback_static(window, xOffset, yOffset);
                        }
     );
@@ -235,7 +261,10 @@ void window::subscribeEvents() {
 
     glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
                           {
-                              // only static methods can be called here as we cannot change glfw function parameter list to include instance pointer
+                              if(ImGui::GetIO().WantCaptureMouse)
+                              {
+                                  return;
+                              }
                               callback_static_2(window, button, action, mods);
                           }
     );
@@ -246,7 +275,10 @@ void window::subscribeEvents() {
 
     glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xpos, double ypos)
                                {
-                                   // only static methods can be called here as we cannot change glfw function parameter list to include instance pointer
+                                   if(ImGui::GetIO().WantCaptureMouse)
+                                   {
+                                       return;
+                                   }
                                    callback_static_3(window, xpos, ypos);
                                }
     );
