@@ -42,7 +42,6 @@ void render_object::render(glm::mat4 view, glm::mat4 projection, render_mode mod
             m_Mesh->draw();
             break;
         case render_mode::lines:
-            glLineWidth(2);
             m_Mesh->drawLines();
             break;
     }
