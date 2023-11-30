@@ -22,6 +22,7 @@ protected:
     virtual void onScrollChanged(double yOffset);
     virtual void onMouseButtonChanged(int button, int action, int mods);
     virtual void onMousePositionChanged(double xpos, double ypos);
+    virtual void onRenderImGUI();
     
 public:
     window(int width, int height, const std::string& title, bool fullscreen, bool vSync = true, int mssaLevel = 8);

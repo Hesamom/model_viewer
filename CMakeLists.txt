@@ -33,7 +33,7 @@ endif ()
 
 target_include_directories(model_viewer PRIVATE libs/include)
 
-target_link_libraries(model_viewer PRIVATE glfw glm assimp libglew_static imgui)
+target_link_libraries(model_viewer PRIVATE glfw glm assimp libglew_static imgui Comdlg32.dll)
 
 
 #todo find a way to copy this after every build not every time cmake is reloaded!

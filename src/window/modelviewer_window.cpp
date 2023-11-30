@@ -1,5 +1,6 @@
 ﻿
 #include <GL/glew.h>
+#include <imgui/imgui.h>
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "modelviewer_window.h"
@@ -177,4 +178,39 @@ void modelviewer_window::updateCameraPosition() {
     m_CameraPosition.x = pos.x;
     m_CameraPosition.y = pos.y;
     m_CameraPosition.z = pos.z;
+}
+
+
+void modelviewer_window::onRenderImGUI() {
+
+    const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x, main_viewport->WorkPos.y), ImGuiCond_None);
+    ImGui::SetNextWindowSize(ImVec2(main_viewport->Size.x, 100), ImGuiCond_FirstUseEver);
+
+    ImGuiWindowFlags window_flags = 0;
+    window_flags |= ImGuiWindowFlags_NoTitleBar;
+    window_flags |= ImGuiWindowFlags_NoMove;
+    window_flags |= ImGuiWindowFlags_NoResize;
+    window_flags |= ImGuiWindowFlags_NoCollapse;
+
+    *m_isImGUIOpen = true;
+    if (!ImGui::Begin("Title", m_isImGUIOpen, window_flags))
+    {
+        ImGui::End();
+        return;
+    }
+
+    ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
+
+    // Menu Bar
+    if (ImGui::BeginMenuBar()) {
+        if (ImGui::BeginMenu("Menu"))
+        {
+            //IMGUI_DEMO_MARKER("Menu/File");
+            //ShowExampleMenuFile();
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMenuBar();
+    }
 }

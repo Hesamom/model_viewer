@@ -109,7 +109,6 @@ void window::draw()
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        ImGui::ShowDemoWindow();
         
         glfwPollEvents();
         onRender((float)elapsed);
@@ -291,5 +290,9 @@ void window::onMouseButtonChanged(int button, int action, int mods) {
 
 void window::onMousePositionChanged(double xpos, double ypos) {
     
+}
+
+void window::onRenderImGUI() {
+
 }
 

@@ -26,7 +26,7 @@ private:
     float m_PitchAngle = 0;
     float m_YawAngle = 0;
     float m_ZoomLevel = 5;
-    
+    bool* m_isImGUIOpen;
     
     const glm::vec2 PitchAngleRange{-80,80};
     const float AngleChangeMul = 0.5f;
@@ -39,11 +39,13 @@ private:
     std::shared_ptr<modelViewer::render::texture> getTexture(modelViewer::res::model_info& info);
     
     void updateCameraPosition();
+    void drawImGUI();
 protected:
     void onRender(float elapsed) override;
     void onScrollChanged(double yOffset) override;
     void onMouseButtonChanged(int button, int action, int mods) override;
     void onMousePositionChanged(double xpos, double ypos) override;
+    void onRenderImGUI() override;
     
 public:
     modelviewer_window(int width, int height, std::string title, bool fullscreen);
