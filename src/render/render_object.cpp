@@ -67,11 +67,6 @@ void render_object::setTexture(std::shared_ptr<texture> &texture) {
 }
 
 void render_object::setMaterial(const modelViewer::res::material &material) {
-    int diffuseAlbedoIndex = m_ShaderProgram->getUniformLocation("u_diffuseAlbedo");
-    if (diffuseAlbedoIndex > -1)
-    {
-        m_ShaderProgram->setUniformVector3(diffuseAlbedoIndex, material.diffuseAlbedo);
-    }
 }
 
 
