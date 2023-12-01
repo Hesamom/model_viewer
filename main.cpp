@@ -11,10 +11,10 @@ int main()
     window.setClearFlag(glm::vec4(0.15f,0.15f,0.15f,0));
     
     modelViewer::res::model_info info;
-    info.fragmentShaderPath = "res/shaders/sample/phong_gouraud_frag.glsl";
-    info.vertexShaderPath = "res/shaders/sample/phong_gouraud_vert.glsl";
-    info.texturePath = "res/textures/sample.png";
-    info.meshPath = "res/models/primitives/cylinder.obj";
+    info.fragmentShaderPath = "res/shaders/sample/phong_phong_frag.glsl";
+    info.vertexShaderPath = "res/shaders/sample/phong_phong_vert.glsl";
+    //info.texturePath = "res/textures/sample.png";
+    info.meshPath = "res/models/complex/monkey.fbx";
     info.name = "sphere";
     window.addModel(info);
     

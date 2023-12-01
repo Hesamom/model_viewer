@@ -12,6 +12,7 @@ using namespace modelViewer::common;
 
 void modelviewer_window::onRender(float elapsed) {
     glClearBufferfv(GL_COLOR, 0, &m_ClearFlag.x);
+    glClear(GL_DEPTH_BUFFER_BIT);
     
     for (auto& info: m_NewModelsQueue) {
         auto program = getProgram(info);
