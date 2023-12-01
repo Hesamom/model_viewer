@@ -176,9 +176,12 @@ void window::initContext(bool vSync) {
     glewExperimental = GL_TRUE; // Enable experimental features
     glewInit();
     glfwSwapInterval(vSync ? 1 : 0);
+    
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-    glFrontFace(GL_CCW);
+
+    glEnable(GL_DEPTH_TEST);
+    
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);

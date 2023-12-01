@@ -25,9 +25,10 @@ std::shared_ptr<mesh_asset> mesh_loader::load(std::filesystem::path filePath) {
             aiProcess_CalcTangentSpace       |
             aiProcess_Triangulate            |
             aiProcess_JoinIdenticalVertices  |
-            aiProcess_SortByPType;
+            aiProcess_SortByPType | aiProcess_ImproveCacheLocality;
     
     const aiScene* scene = importer.ReadFile(filePath.string(), proccessing);
+    
 
     if (scene == nullptr) 
     {
