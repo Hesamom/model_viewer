@@ -96,7 +96,8 @@ std::shared_ptr<modelViewer::render::texture> modelviewer_window::getTexture(mod
         return nullptr;
     
     auto textureAsset = m_TextureLoader.load(info.texturePath);
-    auto texturePtr = std::make_shared<texture>(textureAsset);
+
+    auto texturePtr = std::make_shared<texture>(texture_setup{textureAsset,modelViewer::render::texture_filtering_mode::linear_linear,modelViewer::render::texture_filtering_mode::linear,modelViewer::render::texture_wrapping_mode::clamp_to_edge,true});
     
     return texturePtr;
 }

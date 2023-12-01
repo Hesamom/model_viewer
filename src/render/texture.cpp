@@ -4,11 +4,11 @@
 
 using namespace modelViewer::render;
 
-texture::texture(std::shared_ptr<modelViewer::res::texture_asset> asset, textureFiltering textureFilteringMin, textureFiltering textureFilteringMig, textureWrapping textureWrapping, bool isMipMapActive, unsigned int mipMapMinLevel ,unsigned int mipMapMaxLevel) : m_Asset{std::move(asset)}, m_TextureFilteringMin{textureFilteringMin}, m_TextureFilteringMig{textureFilteringMig}, m_TextureWrapping{textureWrapping}, m_IsMipMapActive{isMipMapActive}, m_MipMapMinLevel{mipMapMinLevel}, m_MipMapMaxLevel{mipMapMaxLevel} {
+texture::texture(texture_setup texture_setup) : m_Asset{std::move(texture_setup.m_Asset)}, m_TextureFilteringMin{texture_setup.m_Texture_Filtering_Min}, m_TextureFilteringMig{texture_setup.m_Texture_Filtering_Mig}, m_TextureWrapping{texture_setup.m_Texture_Wrapping}, m_IsMipMapActive{texture_setup.m_Is_Mip_Map_Active}, m_MipMapMinLevel{texture_setup.m_Mip_Map_Min_Level}, m_MipMapMaxLevel{texture_setup.m_Mip_Map_Max_Level} {
     
     glGenTextures(1, &m_TextureId);
     glBindTexture(GL_TEXTURE_2D, m_TextureId);
-    setFilteringModeMig(m_TextureFilteringMig);
+    setFilteringModeMag(m_TextureFilteringMig);
     setFilteringModeMin(m_TextureFilteringMin);
     setWrappingMode(m_TextureWrapping);
 
@@ -17,14 +17,15 @@ texture::texture(std::shared_ptr<modelViewer::res::texture_asset> asset, texture
                  m_Asset->getContent());
 
     glObjectLabel(GL_TEXTURE, m_TextureId, -1, m_Asset->getName().data());
-
-    //TODO should unbind in the end
-    glBindTexture(GL_TEXTURE_2D, 0);
     
     if (m_IsMipMapActive)
     {
         glGenerateMipmap(GL_TEXTURE_2D);
     }
+
+    glActiveTexture(GL_TEXTURE0);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 texture::~texture() {
@@ -32,116 +33,109 @@ texture::~texture() {
 }
 
 void texture::bind() const {
-    //TODO seems like one this is redundant 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_TextureId);
+
 }
 
-textureFiltering
+texture_filtering_mode
 texture::getFilteringModeMin() const {
     return m_TextureFilteringMin;
 }
 
-textureFiltering
-texture::getFilteringModeMig() const {
+texture_filtering_mode
+texture::getFilteringModeMag() const {
     return m_TextureFilteringMig;
 }
 
-textureWrapping
+texture_wrapping_mode
 texture::getWrappingMode() const {
     return m_TextureWrapping;
 }
 
 void
 texture::setFilteringMode(
-        textureFiltering textureFilteringMin, textureFiltering textureFilteringMig){
+        texture_filtering_mode textureFilteringMin, texture_filtering_mode textureFilteringMig){
     setFilteringModeMin(textureFilteringMin);
-    setFilteringModeMig(textureFilteringMig);
+    setFilteringModeMag(textureFilteringMig);
 }
 
-//TODO min and mag are almost duplicates, extract a function to call in both of them instead
 void
 texture::setFilteringModeMin(
-        textureFiltering textureFiltering){
-    //TODO ensure the texture is bound 
-    m_TextureFilteringMig = textureFiltering;
-    switch (textureFiltering) {
-
-        case textureFiltering::nearest:
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            break;
-        case textureFiltering::linear:
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            break;
-        case textureFiltering::nearest_Mipmap_Nearest:
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-            break;
-        case textureFiltering::linear_Mipmap_Nearest:
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-            break;
-        case textureFiltering::nearest_Mipmap_Linear:
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
-            break;
-        case textureFiltering::linear_Mipmap_Linear:
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-            break;
+        texture_filtering_mode textureFiltering){
+    if (isTextureOutOfMemory())
+    {
+        throw std::invalid_argument("texture is out of memory");
     }
+
+    m_TextureFilteringMig = textureFiltering;
+    setFilteringMode(m_TextureFilteringMig, GL_TEXTURE_MIN_FILTER);
 }
 
 void
-texture::setFilteringModeMig(
-        textureFiltering textureFiltering){
+texture::setFilteringModeMag(
+        texture_filtering_mode textureFiltering){
+    if (isTextureOutOfMemory())
+    {
+        throw std::invalid_argument("texture is out of memory");
+    }
+
     m_TextureFilteringMig = textureFiltering;
+    setFilteringMode(m_TextureFilteringMig, GL_TEXTURE_MAG_FILTER);
+}
+
+void
+texture::setFilteringMode(
+        texture_filtering_mode textureFiltering,
+        GLint filterType) {
     switch (textureFiltering) {
 
-        case textureFiltering::nearest:
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        case texture_filtering_mode::nearest:
+            glTexParameteri(GL_TEXTURE_2D, filterType, GL_NEAREST);
             break;
-        case textureFiltering::linear:
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        case texture_filtering_mode::linear:
+            glTexParameteri(GL_TEXTURE_2D, filterType, GL_LINEAR);
             break;
-        case textureFiltering::nearest_Mipmap_Nearest:
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+        case texture_filtering_mode::linear_nearest:
+            glTexParameteri(GL_TEXTURE_2D, filterType, GL_LINEAR_MIPMAP_NEAREST);
             break;
-        case textureFiltering::linear_Mipmap_Nearest:
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+        case texture_filtering_mode::nearest_linear:
+            glTexParameteri(GL_TEXTURE_2D, filterType, GL_NEAREST_MIPMAP_LINEAR);
             break;
-        case textureFiltering::nearest_Mipmap_Linear:
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+        case texture_filtering_mode::linear_linear:
+            glTexParameteri(GL_TEXTURE_2D, filterType, GL_LINEAR_MIPMAP_LINEAR);
             break;
-        case textureFiltering::linear_Mipmap_Linear:
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        case texture_filtering_mode::nearest_nearest:
+            glTexParameteri(GL_TEXTURE_2D, filterType, GL_NEAREST_MIPMAP_NEAREST);
             break;
     }
 }
 
 void
 texture::setWrappingMode(
-        textureWrapping textureWrapping){
+        texture_wrapping_mode textureWrapping){
     m_TextureWrapping = textureWrapping;
     switch (textureWrapping) {
 
-        case textureWrapping::clamp_To_Edge:
+        case texture_wrapping_mode::clamp_to_edge:
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             break;
-        case textureWrapping::mirror_Clamp_ToEdge:
+        case texture_wrapping_mode::mirror_clamp_to_edge:
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRROR_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRROR_CLAMP_TO_EDGE);
             break;
-        case textureWrapping::clamp_To_Border:
+        case texture_wrapping_mode::clamp_to_border:
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
             break;
-        case textureWrapping::wrap:
+        case texture_wrapping_mode::wrap:
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_WRAP_BORDER);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_WRAP_BORDER);
             break;
-        case textureWrapping::repeat:
+        case texture_wrapping_mode::repeat:
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
             break;
-        case textureWrapping::mirrored_Repeat:
+        case texture_wrapping_mode::mirrored_repeat:
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
             break;
@@ -158,18 +152,32 @@ texture::getMipMapMaxLevel() {
     return m_MipMapMaxLevel;
 }
 
-//TODO forgot to set fields 
-//TODO add some range checks 
-//TODO combine setting min and max together to make sure their values make sense
 void
 texture::setMipMapMinLevel(
         unsigned int minLevel) {
+    if (m_MipMapMaxLevel < minLevel)
+    {
+        throw std::invalid_argument( "mipmap min level is bigger than mipmap max level");
+    }
+
+    m_MipMapMinLevel = minLevel;
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, minLevel);
 }
 
-//TODO forgot to set fields 
 void
 texture::setMipMapMaxLevel(
         unsigned int maxLevel) {
+    if (maxLevel < m_MipMapMinLevel)
+    {
+        throw std::invalid_argument( "mipmap max level is smaller than mipmap min level");
+    }
+
+    m_MipMapMaxLevel = maxLevel;
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, maxLevel);
+}
+
+bool
+texture::isTextureOutOfMemory() {
+    GLboolean state;
+    return glAreTexturesResident(1, &m_TextureId, &state);
 }
