@@ -30,5 +30,5 @@ void main()
     vec3 color = diffuse + specular + u_ambient;
     
     vec3 texel = texture(m_sampler, fs_in.texCoord).rgb;
-    FragColor = vec4(color, 1.0);
+    FragColor = vec4(texel * color, 1.0);
 }

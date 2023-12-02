@@ -107,7 +107,7 @@ std::shared_ptr<modelViewer::render::texture> modelviewer_window::getTexture(mod
     texture_setup setup;
     setup.m_Asset = textureAsset;
     setup.m_Is_Mip_Map_Active = true;
-    setup.m_Mip_Map_Max_Level = 6;
+    setup.m_Mip_Map_Max_Level = 1000;
     setup.m_Mip_Map_Min_Level = 0;
    
     auto texturePtr = std::make_shared<texture>(setup);

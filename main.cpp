@@ -14,7 +14,7 @@ int main()
     info.fragmentShaderPath = "res/shaders/sample/phong_phong_frag.glsl";
     info.vertexShaderPath = "res/shaders/sample/phong_phong_vert.glsl";
     info.texturePath = "res/textures/sample.png";
-    info.meshPath = "res/models/complex/monkey.fbx";
+    info.meshPath = "res/models/primitives/cube.fbx";
     info.name = "sphere";
     window.addModel(info);
     
