@@ -8,22 +8,23 @@ texture::texture(texture_setup texture_setup) : m_Asset{std::move(texture_setup.
     
     glGenTextures(1, &m_TextureId);
     glBindTexture(GL_TEXTURE_2D, m_TextureId);
-    setFilteringModeMag(m_TextureFilteringMig);
-    setFilteringModeMin(m_TextureFilteringMin);
-    setWrappingMode(m_TextureWrapping);
-
     
     glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_ASTC_5x5x5_OES, m_Asset->getWidth(), m_Asset->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
                  m_Asset->getContent());
 
     glObjectLabel(GL_TEXTURE, m_TextureId, -1, m_Asset->getName().data());
-    
+
+    glActiveTexture(GL_TEXTURE0);
+
     if (m_IsMipMapActive)
     {
         glGenerateMipmap(GL_TEXTURE_2D);
     }
 
-    glActiveTexture(GL_TEXTURE0);
+    setFilteringModeMag(m_TextureFilteringMig);
+    setFilteringModeMin(m_TextureFilteringMin);
+    setWrappingMode(m_TextureWrapping);
+
 
     glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -179,5 +180,5 @@ texture::setMipMapMaxLevel(
 bool
 texture::isTextureOutOfMemory() {
     GLboolean state;
-    return glAreTexturesResident(1, &m_TextureId, &state);
+    return !glAreTexturesResident(1, &m_TextureId, &state);
 }
