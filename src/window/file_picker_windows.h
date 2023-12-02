@@ -8,7 +8,7 @@ class file_picker_windows {
 private:
     std::string m_Title;
 public:
-    explicit file_picker_windows(std::string& title);
+    explicit file_picker_windows(const std::string& title);
     bool tryOpenPicker(std::string& path);
 };
 

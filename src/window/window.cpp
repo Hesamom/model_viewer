@@ -109,6 +109,8 @@ void window::draw()
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+        onRenderImGUI();
+        //ImGui::ShowDemoWindow();
         
         glfwPollEvents();
         onRender((float)elapsed);

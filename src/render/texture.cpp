@@ -1,90 +1,68 @@
 ﻿#include "texture.h"
-#include <utility>
 #include <GL/glew.h>
 
 using namespace modelViewer::render;
 
-texture::texture(texture_setup texture_setup) : m_Asset{std::move(texture_setup.m_Asset)}, m_TextureFilteringMin{texture_setup.m_Texture_Filtering_Min}, m_TextureFilteringMig{texture_setup.m_Texture_Filtering_Mig}, m_TextureWrapping{texture_setup.m_Texture_Wrapping}, m_IsMipMapActive{texture_setup.m_Is_Mip_Map_Active}, m_MipMapMinLevel{texture_setup.m_Mip_Map_Min_Level}, m_MipMapMaxLevel{texture_setup.m_Mip_Map_Max_Level} {
-    
+texture::texture(texture_setup texture_setup) : m_Asset{std::move(texture_setup.m_Asset)} 
+{
+    m_Setup = texture_setup;
     glGenTextures(1, &m_TextureId);
-    glBindTexture(GL_TEXTURE_2D, m_TextureId);
+    setBind(true);
     
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_ASTC_5x5x5_OES, m_Asset->getWidth(), m_Asset->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+    
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_Asset->getWidth(), m_Asset->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
                  m_Asset->getContent());
 
-    glObjectLabel(GL_TEXTURE, m_TextureId, -1, m_Asset->getName().data());
+    //glObjectLabel(GL_TEXTURE, m_TextureId, -1, m_Asset->getName().data());
 
-    glActiveTexture(GL_TEXTURE0);
-
-    if (m_IsMipMapActive)
+    if (m_Setup.m_Is_Mip_Map_Active)
     {
+        //TODO have to check if specifying the level before generation affects generation or not 
         glGenerateMipmap(GL_TEXTURE_2D);
+        setMipMapLevels(m_Setup.m_Mip_Map_Min_Level, m_Setup.m_Mip_Map_Max_Level);
     }
 
-    setFilteringModeMag(m_TextureFilteringMig);
-    setFilteringModeMin(m_TextureFilteringMin);
-    setWrappingMode(m_TextureWrapping);
+    setFilteringModeMag(m_Setup.m_Texture_Filtering_Mag);
+    setFilteringModeMin(m_Setup.m_Texture_Filtering_Min);
+    setWrappingMode(m_Setup.m_Texture_Wrapping);
 
-
-    glBindTexture(GL_TEXTURE_2D, 0);
+    setBind(false);
 }
 
 texture::~texture() {
     glDeleteTextures(1, &m_TextureId);
 }
 
-void texture::bind() const {
-
+void texture::active(int index) {
+    int firstIndex = GL_TEXTURE0;
+    int slotIndex = firstIndex + index;
+    glActiveTexture(slotIndex);
+    setBind(true);
 }
 
 texture_filtering_mode
 texture::getFilteringModeMin() const {
-    return m_TextureFilteringMin;
+    return m_Setup.m_Texture_Filtering_Min;
 }
 
 texture_filtering_mode
 texture::getFilteringModeMag() const {
-    return m_TextureFilteringMig;
+    return m_Setup.m_Texture_Filtering_Mag;
 }
 
 texture_wrapping_mode
 texture::getWrappingMode() const {
-    return m_TextureWrapping;
+    return m_Setup.m_Texture_Wrapping;
 }
 
 void
 texture::setFilteringMode(
-        texture_filtering_mode textureFilteringMin, texture_filtering_mode textureFilteringMig){
+        texture_filtering_mode textureFilteringMin, texture_filtering_mode textureFilteringMag){
     setFilteringModeMin(textureFilteringMin);
-    setFilteringModeMag(textureFilteringMig);
+    setFilteringModeMag(textureFilteringMag);
 }
 
-void
-texture::setFilteringModeMin(
-        texture_filtering_mode textureFiltering){
-    if (isTextureOutOfMemory())
-    {
-        throw std::invalid_argument("texture is out of memory");
-    }
-
-    m_TextureFilteringMig = textureFiltering;
-    setFilteringMode(m_TextureFilteringMig, GL_TEXTURE_MIN_FILTER);
-}
-
-void
-texture::setFilteringModeMag(
-        texture_filtering_mode textureFiltering){
-    if (isTextureOutOfMemory())
-    {
-        throw std::invalid_argument("texture is out of memory");
-    }
-
-    m_TextureFilteringMig = textureFiltering;
-    setFilteringMode(m_TextureFilteringMig, GL_TEXTURE_MAG_FILTER);
-}
-
-void
-texture::setFilteringMode(
+void setFilteringModeInternal(
         texture_filtering_mode textureFiltering,
         GLint filterType) {
     switch (textureFiltering) {
@@ -111,9 +89,36 @@ texture::setFilteringMode(
 }
 
 void
+texture::setFilteringModeMin(
+        texture_filtering_mode textureFiltering){
+    if (!isTextureResident())
+    {
+        throw std::runtime_error("texture is not resident");
+    }
+
+    m_Setup.m_Texture_Filtering_Min = textureFiltering;
+    setBind(true);
+    setFilteringModeInternal(textureFiltering, GL_TEXTURE_MIN_FILTER);
+}
+
+void
+texture::setFilteringModeMag(
+        texture_filtering_mode textureFiltering){
+    if (!isTextureResident())
+    {
+        throw std::runtime_error("texture is not resident");
+    }
+
+    m_Setup.m_Texture_Filtering_Mag = textureFiltering;
+    setBind(true);
+    setFilteringModeInternal(textureFiltering, GL_TEXTURE_MAG_FILTER);
+}
+
+void
 texture::setWrappingMode(
         texture_wrapping_mode textureWrapping){
-    m_TextureWrapping = textureWrapping;
+    m_Setup.m_Texture_Wrapping = textureWrapping;
+    setBind(true);
     switch (textureWrapping) {
 
         case texture_wrapping_mode::clamp_to_edge:
@@ -145,40 +150,62 @@ texture::setWrappingMode(
 
 unsigned int
 texture::getMipMapMinLevel() {
-    return m_MipMapMinLevel;
+    return m_Setup.m_Mip_Map_Min_Level;
 }
 
 unsigned int
 texture::getMipMapMaxLevel() {
-    return m_MipMapMaxLevel;
+    return  m_Setup.m_Mip_Map_Max_Level;
 }
 
-void
-texture::setMipMapMinLevel(
-        unsigned int minLevel) {
-    if (m_MipMapMaxLevel < minLevel)
+
+bool
+texture::isTextureResident() {
+    GLboolean state;
+    //return !glAreTexturesResident(1, &m_TextureId, &state);
+    return true;
+}
+
+void texture::setMipMapLevels(unsigned int min, unsigned int max) {
+    if (max <= min)
     {
         throw std::invalid_argument( "mipmap min level is bigger than mipmap max level");
     }
-
-    m_MipMapMinLevel = minLevel;
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, minLevel);
-}
-
-void
-texture::setMipMapMaxLevel(
-        unsigned int maxLevel) {
-    if (maxLevel < m_MipMapMinLevel)
+    if (!m_Setup.m_Is_Mip_Map_Active)
     {
-        throw std::invalid_argument( "mipmap max level is smaller than mipmap min level");
+        throw std::runtime_error( "mipmap levels can not be set when mip map is not active!");
     }
 
-    m_MipMapMaxLevel = maxLevel;
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, maxLevel);
+    if(m_Setup.m_Mip_Map_Min_Level != min)
+    {
+        setBind(true);
+        m_Setup.m_Mip_Map_Min_Level = min;
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, min);
+    }
+    if ( m_Setup.m_Mip_Map_Max_Level != max)
+    {
+        setBind(true);
+        m_Setup.m_Mip_Map_Max_Level = max;
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, max);
+    }
 }
 
-bool
-texture::isTextureOutOfMemory() {
-    GLboolean state;
-    return !glAreTexturesResident(1, &m_TextureId, &state);
+void texture::setBind(bool bind) {
+
+    static unsigned int m_BoundTexture;
+    if(bind && m_BoundTexture == m_TextureId)
+    {
+        return;
+    }
+    
+    if (bind)
+    {
+        m_BoundTexture = m_TextureId;
+    }
+    else
+    {
+        m_BoundTexture = 0;
+    }
+
+    glBindTexture(GL_TEXTURE_2D, m_BoundTexture);
 }

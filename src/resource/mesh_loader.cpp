@@ -17,7 +17,7 @@ glm::vec2 to_vec2(const aiVector3D& vec)
     return {vec.x,vec.y};
 }
 
-std::shared_ptr<mesh_asset> mesh_loader::load(std::filesystem::path filePath) {
+std::shared_ptr<mesh_asset> mesh_loader::load(std::string filePath) {
     // Create an instance of the Importer class
     Assimp::Importer importer;
 
@@ -27,7 +27,7 @@ std::shared_ptr<mesh_asset> mesh_loader::load(std::filesystem::path filePath) {
             aiProcess_JoinIdenticalVertices  |
             aiProcess_SortByPType | aiProcess_ImproveCacheLocality;
     
-    const aiScene* scene = importer.ReadFile(filePath.string(), proccessing);
+    const aiScene* scene = importer.ReadFile(filePath, proccessing);
     
 
     if (scene == nullptr) 
@@ -38,12 +38,12 @@ std::shared_ptr<mesh_asset> mesh_loader::load(std::filesystem::path filePath) {
 
     if (!scene->HasMeshes())
     {
-        throw std::runtime_error("model in path:" + filePath.string() + " has no mesh defined in it!");
+        throw std::runtime_error("model in path:" + filePath + " has no mesh defined in it!");
     }
 
     if (!scene->mMeshes[0]->HasPositions())
     {
-        throw std::runtime_error("first mesh in path:" + filePath.string() + " has no positions defined in it!");
+        throw std::runtime_error("first mesh in path:" + filePath + " has no positions defined in it!");
     }
     
     auto vertexCount = scene->mMeshes[0]->mNumVertices;
@@ -92,7 +92,7 @@ std::shared_ptr<mesh_asset> mesh_loader::load(std::filesystem::path filePath) {
     mesh->normals = normals;
     mesh->indices = indices;
     mesh->UV0 = uv0;
-    mesh->name = filePath.string();
+    mesh->name = filePath;
     
     return mesh;
 }

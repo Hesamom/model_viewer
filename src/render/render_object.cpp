@@ -26,12 +26,11 @@ void render_object::render(glm::mat4 view, glm::mat4 projection, render_mode mod
     int projectionIndex = m_ShaderProgram->getUniformLocation("m_Projection");
     m_ShaderProgram->setUniformMatrix4(projectionIndex, projection);
     
-    if(m_Texture)
+    int index = 0;
+    for(auto& t : m_Textures)
     {
-        //TODO need to move this to texture class
-        int textureIndex = m_ShaderProgram->getUniformLocation("m_TextureSampler");
-        m_Texture->bind();
-        m_ShaderProgram->setUniformInt(textureIndex, 0);
+        t->active(index);
+        index++;
     }
     
     m_Mesh->bind();
@@ -61,8 +60,16 @@ std::shared_ptr<shader_program>& render_object::getProgram() {
     return m_ShaderProgram;
 }
 
-void render_object::setTexture(std::shared_ptr<texture> &texture) {
-    m_Texture = texture;
+void
+render_object::addTexture(std::shared_ptr<texture> &texture, std::string samplerName) {
+    
+    m_Textures.push_back(texture);
+    
+    m_ShaderProgram->bind();
+    auto loc = m_ShaderProgram->getUniformLocation(samplerName);
+    m_ShaderProgram->setUniformInt(loc, m_BoundTextures);
+    
+    m_BoundTextures++;
 }
 
 void render_object::setMaterial(const modelViewer::res::material &material) {

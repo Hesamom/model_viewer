@@ -20,8 +20,8 @@ namespace modelViewer::render
 
     private:
         std::unique_ptr<modelViewer::render::render_object> m_Object;
-        const std::filesystem::path m_FragShaderPath = "res/shaders/sample/lines_frag.glsl";
-        const std::filesystem::path m_VertShaderPath = "res/shaders/sample/lines_vert.glsl";
+        const std::string m_FragShaderPath = "res/shaders/sample/lines_frag.glsl";
+        const std::string m_VertShaderPath = "res/shaders/sample/lines_vert.glsl";
         
     public:
        void init(modelViewer::res::shader_loader& shaderLoader, const model_platform_info& info);

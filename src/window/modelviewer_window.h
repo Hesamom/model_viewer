@@ -9,6 +9,7 @@
 #include "../render/render_scene.h"
 #include "glm/glm.hpp"
 #include "../render/model_platform_buffer.h"
+#include "file_picker_windows.h"
 
 class modelviewer_window : public window {
     
@@ -18,6 +19,7 @@ private:
     modelViewer::res::shader_loader m_ShaderLoader;
     modelViewer::render::render_scene m_Scene;
     modelViewer::render::model_platform_buffer m_Platform;
+    file_picker_windows m_FilePicker {"select the model file"};
     glm::mat4 m_ViewProjection;
     std::vector<modelViewer::res::model_info> m_NewModelsQueue;
     glm::vec4 m_ClearFlag;
@@ -26,7 +28,8 @@ private:
     float m_PitchAngle = 0;
     float m_YawAngle = 0;
     float m_ZoomLevel = 5;
-    bool* m_isImGUIOpen;
+    bool m_isImGUIOpen = true;
+    const int MaxRenderingObjects = 1;
     
     const glm::vec2 PitchAngleRange{-80,80};
     const float AngleChangeMul = 0.5f;
@@ -39,7 +42,8 @@ private:
     std::shared_ptr<modelViewer::render::texture> getTexture(modelViewer::res::model_info& info);
     
     void updateCameraPosition();
-    void drawImGUI();
+    void openModelFile();
+    
 protected:
     void onRender(float elapsed) override;
     void onScrollChanged(double yOffset) override;

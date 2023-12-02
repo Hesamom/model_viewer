@@ -5,17 +5,17 @@
 
 using namespace modelViewer::res;
 
-byte * readFile(std::filesystem::path &path, textureInfo* info) {
+byte * readFile(std::string &path, textureInfo* info) {
     
     //TODO add a flag later?
     stbi_set_flip_vertically_on_load(1);
     
-    byte* content = stbi_load(path.string().c_str(), &(info->width), &(info->height), &(info->channels), 4);
+    byte* content = stbi_load(path.c_str(), &(info->width), &(info->height), &(info->channels), 4);
     return content;
 }
 
 
-std::shared_ptr<texture_asset> modelViewer::res::texture_loader::load(std::filesystem::path &path) {
+std::shared_ptr<texture_asset> modelViewer::res::texture_loader::load(std::string &path) {
 
     if (m_LoadedAssets.contains(path))
     {
@@ -29,12 +29,12 @@ std::shared_ptr<texture_asset> modelViewer::res::texture_loader::load(std::files
 
     if (!std::filesystem::exists(path))
     {
-        throw std::runtime_error("file at given path does not exits!, path:" + path.string());
+        throw std::runtime_error("file at given path does not exits!, path:" + path);
     }
 
     textureInfo info;
     auto content = readFile(path, &info);
-    auto asset = std::make_shared<texture_asset>(content, info, path.string());
+    auto asset = std::make_shared<texture_asset>(content, info, path);
     m_LoadedAssets[path] = asset;
 
     assert(m_LoadedAssets.contains(path));

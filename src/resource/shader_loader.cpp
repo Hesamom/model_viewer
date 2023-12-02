@@ -24,29 +24,29 @@ std::string readFile(const std::filesystem::path &path) {
 }
 
 
-std::shared_ptr<shader_asset> modelViewer::res::shader_loader::load(const std::filesystem::path &path, shaderType type)
+std::shared_ptr<shader_asset> modelViewer::res::shader_loader::load(const std::string& filePath, shaderType type)
 {
-    if (m_LoadedAssets.contains(path))
+    if (m_LoadedAssets.contains(filePath))
     {
-        return m_LoadedAssets[path];
+        return m_LoadedAssets[filePath];
     }
 
-    if (path.empty())
+    if (filePath.empty())
     {
         throw std::runtime_error("can not load empty path!");
     }
 
     using namespace std::string_literals;
-    if (!std::filesystem::exists(path))
+    if (!std::filesystem::exists(filePath))
     {
-        throw std::runtime_error("file at given path does not exits!, path:" + path.string());
+        throw std::runtime_error("file at given path does not exits!, path:" + filePath);
     }
     
-    auto source = readFile(path);
-    auto asset = std::make_shared<shader_asset>(source, type, path.string());
-    m_LoadedAssets[path] = asset;
+    auto source = readFile(filePath);
+    auto asset = std::make_shared<shader_asset>(source, type, filePath);
+    m_LoadedAssets[filePath] = asset;
     
-    assert(m_LoadedAssets.contains(path));
+    assert(m_LoadedAssets.contains(filePath));
     return asset;
 }
 

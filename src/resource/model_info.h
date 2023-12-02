@@ -9,10 +9,10 @@
 namespace modelViewer::res {
     //TODO update to support a list of shaders 
     struct model_info {
-        std::filesystem::path meshPath;
-        std::filesystem::path texturePath;
-        std::filesystem::path vertexShaderPath;
-        std::filesystem::path fragmentShaderPath;
+        std::string meshPath;
+        std::string texturePath;
+        std::string vertexShaderPath;
+        std::string fragmentShaderPath;
         modelViewer::common::transform transform;
         material material;
         std::string  name;

@@ -23,14 +23,16 @@ namespace modelViewer::render
         
         std::shared_ptr<shader_program> m_ShaderProgram;
         std::shared_ptr<mesh> m_Mesh;
-        std::shared_ptr<texture> m_Texture;
         
+        std::vector<std::shared_ptr<texture>> m_Textures;
         std::string m_Name;
+        int m_BoundTextures = 0;
+        
     public:
         render_object(std::shared_ptr<shader_program>& program , std::shared_ptr<mesh>& mesh, const std::string& name);
         common::transform& getTransform();
         void setTransform(common::transform& t);
-        void setTexture(std::shared_ptr<texture>& texture);
+        void addTexture(std::shared_ptr<texture> &texture, std::string samplerName);
         void setMaterial(const modelViewer::res::material& material);
         std::shared_ptr<shader_program>& getProgram();
         

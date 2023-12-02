@@ -1,7 +1,7 @@
 #version 330 core
-layout(location = 0) in vec4 v_position;
-layout(location = 1) in vec3 v_normal;
-layout (location = 2) in vec2 v_uv0;
+in vec4 v_position;
+in vec3 v_normal;
+in vec2 v_uv0;
 
 uniform vec3 light_pos = vec3(100.0, 100.0, 100.0);
 uniform vec3 u_diffuseLight = vec3(1, 1, 1);

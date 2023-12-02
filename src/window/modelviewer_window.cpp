@@ -5,6 +5,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "modelviewer_window.h"
 #include "glfw/glfw3.h"
+#include "regex"
 
 using namespace modelViewer::res;
 using namespace modelViewer::render;
@@ -22,7 +23,7 @@ void modelviewer_window::onRender(float elapsed) {
         auto texture = getTexture(info);
         if(texture)
         {
-            object->setTexture(texture);
+            object->addTexture(texture, std::string());
         }
         
         object->setTransform(info.transform);
@@ -30,6 +31,11 @@ void modelviewer_window::onRender(float elapsed) {
     }
 
     m_NewModelsQueue.clear();
+
+    if (m_Scene.getObjects().size() > MaxRenderingObjects)
+    {
+        m_Scene.getObjects().resize(MaxRenderingObjects);
+    }
 
 
 
@@ -98,7 +104,13 @@ std::shared_ptr<modelViewer::render::texture> modelviewer_window::getTexture(mod
     
     auto textureAsset = m_TextureLoader.load(info.texturePath);
 
-    auto texturePtr = std::make_shared<texture>(texture_setup{textureAsset,modelViewer::render::texture_filtering_mode::linear_linear,modelViewer::render::texture_filtering_mode::linear,modelViewer::render::texture_wrapping_mode::clamp_to_edge,true});
+    texture_setup setup;
+    setup.m_Asset = textureAsset;
+    setup.m_Is_Mip_Map_Active = true;
+    setup.m_Mip_Map_Max_Level = 6;
+    setup.m_Mip_Map_Min_Level = 0;
+   
+    auto texturePtr = std::make_shared<texture>(setup);
     
     return texturePtr;
 }
@@ -187,32 +199,53 @@ void modelviewer_window::onRenderImGUI() {
 
     const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x, main_viewport->WorkPos.y), ImGuiCond_None);
-    ImGui::SetNextWindowSize(ImVec2(main_viewport->Size.x, 100), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(main_viewport->Size.x, 0), ImGuiCond_None);
 
-    ImGuiWindowFlags window_flags = 0;
-    window_flags |= ImGuiWindowFlags_NoTitleBar;
-    window_flags |= ImGuiWindowFlags_NoMove;
-    window_flags |= ImGuiWindowFlags_NoResize;
-    window_flags |= ImGuiWindowFlags_NoCollapse;
+    ImGuiWindowFlags window_flags = 
+            ImGuiWindowFlags_MenuBar |
+            ImGuiWindowFlags_NoResize | 
+            ImGuiWindowFlags_NoCollapse | 
+            ImGuiWindowFlags_NoTitleBar |
+            ImGuiWindowFlags_NoBackground;
 
-    *m_isImGUIOpen = true;
-    if (!ImGui::Begin("Title", m_isImGUIOpen, window_flags))
+    if (!ImGui::Begin("Title", &m_isImGUIOpen, window_flags))
     {
         ImGui::End();
         return;
     }
 
-    ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
+    //ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
 
     // Menu Bar
-    if (ImGui::BeginMenuBar()) {
-        if (ImGui::BeginMenu("Menu"))
+    if (ImGui::BeginMenuBar()) 
+    {
+        if (ImGui::BeginMenu("File"))
         {
-            //IMGUI_DEMO_MARKER("Menu/File");
-            //ShowExampleMenuFile();
+            if(ImGui::MenuItem("Open"))
+            {
+                openModelFile();
+            }
             ImGui::EndMenu();
         }
 
         ImGui::EndMenuBar();
+    }
+
+    ImGui::End();
+}
+
+void modelviewer_window::openModelFile() {
+    
+    std::string path;
+    path.reserve(256);
+    if(m_FilePicker.tryOpenPicker(path))
+    {
+        modelViewer::res::model_info info;
+        info.fragmentShaderPath = "res/shaders/sample/phong_phong_frag.glsl";
+        info.vertexShaderPath = "res/shaders/sample/phong_phong_vert.glsl";
+        info.meshPath = path.c_str();
+        info.name = "loaded model";
+        
+        addModel(info);
     }
 }

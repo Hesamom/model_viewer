@@ -4,15 +4,13 @@
 
 bool file_picker_windows::tryOpenPicker(std::string& path) {
 
-    std::string fileName;
-    fileName.reserve(256);
- 
+    
     OPENFILENAMEA ofn;
     ZeroMemory(&ofn, sizeof(ofn));
     ofn.lStructSize = sizeof(ofn);
     ofn.hwndOwner = nullptr;
     ofn.lpstrFilter = "FBX\0*.fbx\0";
-    ofn.lpstrFile = fileName.data(); 
+    ofn.lpstrFile = path.data(); 
     ofn.nMaxFile = MAX_PATH;
     ofn.lpstrFileTitle = nullptr;
     ofn.nMaxFileTitle = MAX_PATH;
@@ -28,6 +26,6 @@ bool file_picker_windows::tryOpenPicker(std::string& path) {
     }
 }
 
-file_picker_windows::file_picker_windows(std::string &title) {
+file_picker_windows::file_picker_windows(const std::string &title) {
     m_Title = title;
 }
