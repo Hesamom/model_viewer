@@ -12,33 +12,12 @@ using namespace modelViewer::render;
 using namespace modelViewer::common;
 
 void modelviewer_window::onRender(float elapsed) {
+
+    addNewModels();
+  
     glClearBufferfv(GL_COLOR, 0, &m_ClearFlag.x);
     glClear(GL_DEPTH_BUFFER_BIT);
     
-    for (auto& info: m_NewModelsQueue) {
-        auto program = getProgram(info);
-        auto mesh = getMesh(info);
-        auto object = std::make_shared<render_object>(program, mesh, info.name);
-        
-        auto texture = getTexture(info);
-        if(texture)
-        {
-            object->addTexture(texture, std::string());
-        }
-        
-        object->setTransform(info.transform);
-        m_Scene.addObject(object);
-    }
-
-    m_NewModelsQueue.clear();
-
-    if (m_Scene.getObjects().size() > MaxRenderingObjects)
-    {
-        m_Scene.getObjects().resize(MaxRenderingObjects);
-    }
-
-
-
     auto viewMatrix = glm::lookAt(
             m_CameraPosition, // Camera is at (4,3,3), in World Space
             glm::vec3(0,0,0), // and looks at the origin
@@ -237,6 +216,22 @@ void modelviewer_window::onRenderImGUI() {
             }
             ImGui::EndMenu();
         }
+        
+
+      if (ImGui::BeginMenu("Demo"))
+      {
+        
+        std::string demoObjects[4] = {"cube","sphere","cylinder","plane"};
+
+        for (auto& model : demoObjects)
+        {
+          if(ImGui::MenuItem(model.data()))
+          {
+            openDemoModel(model);
+          }
+        }
+        ImGui::EndMenu();
+      }
 
         ImGui::EndMenuBar();
     }
@@ -253,9 +248,50 @@ void modelviewer_window::openModelFile() {
         modelViewer::res::model_info info;
         info.fragmentShaderPath = "res/shaders/sample/phong_phong_frag.glsl";
         info.vertexShaderPath = "res/shaders/sample/phong_phong_vert.glsl";
+        info.texturePath = "res/textures/Transparent.png";
         info.meshPath = path.c_str();
         info.name = "loaded model";
         
         addModel(info);
     }
+}
+
+
+void modelviewer_window::addNewModels()
+{
+    //TODO the current imp is not efficient since it first loads the objects then applies limit, a better one should apply the limit when adding objects 
+    for (auto& info: m_NewModelsQueue)
+    {
+        auto program = getProgram(info);
+        auto mesh = getMesh(info);
+        auto texture = getTexture(info);
+        auto object = std::make_shared<render_object>(program, mesh, info.name);
+        if(texture)
+        {
+            object->addTexture(texture, "m_sampler");
+        }
+
+        object->setTransform(info.transform);
+        m_Scene.addObject(object);
+    }
+
+    m_NewModelsQueue.clear();
+
+    auto& objects = m_Scene.getObjects();
+    if (objects.size() > MaxRenderingObjects)
+    {
+        int extraObjects =  objects.size() - MaxRenderingObjects;
+        objects.erase(objects.begin(), objects.begin() + extraObjects);
+    }
+}
+void modelviewer_window::openDemoModel(std::string name)
+{
+    modelViewer::res::model_info info;
+    info.fragmentShaderPath = "res/shaders/sample/phong_phong_frag.glsl";
+    info.vertexShaderPath = "res/shaders/sample/phong_phong_vert.glsl";
+    info.texturePath = "res/textures/Transparent.png";
+    info.meshPath = "res/models/primitives/" + name + ".fbx";
+    info.name = name;
+  
+    addModel(info);
 }

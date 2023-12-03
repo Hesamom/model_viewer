@@ -26,13 +26,14 @@ std::shared_ptr<mesh_asset> mesh_loader::load(std::string filePath) {
             aiProcess_Triangulate            |
             aiProcess_JoinIdenticalVertices  |
             aiProcess_SortByPType | aiProcess_ImproveCacheLocality;
-    
+
     const aiScene* scene = importer.ReadFile(filePath, proccessing);
     
 
     if (scene == nullptr) 
     {
-        throw std::runtime_error(importer.GetErrorString());
+        std::cerr << importer.GetErrorString() << std::endl;
+        throw std::runtime_error("could not load the file");
     }
 
 
@@ -86,7 +87,6 @@ std::shared_ptr<mesh_asset> mesh_loader::load(std::string filePath) {
         }
     }
     
-    importer.FreeScene();
     auto mesh = std::make_shared<mesh_asset>();
     mesh->positions = positions;
     mesh->normals = normals;
