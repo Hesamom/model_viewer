@@ -55,13 +55,17 @@ std::string modelViewer::render::shader::getCompilationLog() {
     
     if(m_ShaderId == 0)
     {
-        return std::string();
+        throw std::runtime_error("shader is not compiled yet!");
     }
     
     int length;
     glGetShaderiv(m_ShaderId, GL_INFO_LOG_LENGTH, &length);
-    std::string message = "compilation of shader in path: " + m_Asset->getPath() + " failed due to following error(s)"
-                                                                                   ": \n";
+    if (length == 0)
+    {
+        return {};
+    }
+    
+    std::string message = "compilation result of shader in path: " + m_Asset->getPath() + ": \n";
     std::string buffer(length, ' ');
     glGetShaderInfoLog(m_ShaderId, length, &length, buffer.data());
     message.append(buffer);

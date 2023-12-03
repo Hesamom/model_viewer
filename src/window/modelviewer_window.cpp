@@ -62,6 +62,22 @@ void modelviewer_window::addModel(modelViewer::res::model_info& info) {
     m_NewModelsQueue.push_back(info);
 }
 
+
+void verifyShader(shader& shader)
+{
+    shader.compile();
+    if(!shader.isCompiled())
+    {
+        throw std::runtime_error("shader compilation failed: \n" + shader.getCompilationLog());
+    }
+
+    auto log = shader.getCompilationLog();
+    if(!log.empty())
+    {
+        std::cout<< shader.getCompilationLog();
+    }
+}
+
 std::shared_ptr<modelViewer::render::shader_program> modelviewer_window::getProgram(model_info &info) {
 
     auto vertShaderAsset = m_ShaderLoader.load(info.vertexShaderPath, shaderType::vertex );
@@ -69,16 +85,10 @@ std::shared_ptr<modelViewer::render::shader_program> modelviewer_window::getProg
     
     shader vertShader(vertShaderAsset);
     vertShader.compile();
-    if(!vertShader.isCompiled())
-    {
-        std::cerr<< vertShader.getCompilationLog() << std::endl;
-    }
+    verifyShader(vertShader);
+    
     shader fragShader (fragShaderAsset);
-    fragShader.compile();
-    if(!fragShader.isCompiled())
-    {
-        std::cerr<< fragShader.getCompilationLog() << std::endl;
-    }
+    verifyShader(fragShader);
     
     auto program = std::make_shared<shader_program>(std::initializer_list<shader>{vertShader, fragShader});
     if(!program->isLinked())
