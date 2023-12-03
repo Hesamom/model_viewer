@@ -5,6 +5,12 @@
 namespace modelViewer::res
 {
     using byte = unsigned char;
+
+    enum class texture_channel_type{
+        RGB,
+        RGBA,
+        NormalMap
+    };
     
     struct textureInfo
     {
@@ -24,6 +30,8 @@ namespace modelViewer::res
         int getWidth();
         int getHeight();
         int getChannelCount();
+        texture_channel_type getChannelType();
+
         std::string& getName();
     };
 
