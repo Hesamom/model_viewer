@@ -26,3 +26,15 @@ int texture_asset::getChannelCount() {
 std::string &texture_asset::getName() {
     return m_Name;
 }
+
+texture_channel_type
+texture_asset::getChannelType() {
+    switch (m_Info.channels) {
+        case 3:
+            return texture_channel_type::RGB;
+        case 4:
+            return texture_channel_type::RGBA;
+            default:
+                throw std::runtime_error("unsupported channel type");
+    }
+}

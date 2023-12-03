@@ -10,12 +10,12 @@ byte * readFile(std::string &path, textureInfo* info) {
     //TODO add a flag later?
     stbi_set_flip_vertically_on_load(1);
     
-    byte* content = stbi_load(path.c_str(), &(info->width), &(info->height), &(info->channels), 4);
+    byte* content = stbi_load(path.c_str(), &(info->width), &(info->height), &(info->channels), info->channels);
     return content;
 }
 
 
-std::shared_ptr<texture_asset> modelViewer::res::texture_loader::load(std::string &path) {
+std::shared_ptr<texture_asset> modelViewer::res::texture_loader::load(std::string &path, int channelsCount) {
 
     if (m_LoadedAssets.contains(path))
     {
@@ -33,6 +33,7 @@ std::shared_ptr<texture_asset> modelViewer::res::texture_loader::load(std::strin
     }
 
     textureInfo info;
+    info.channels = channelsCount;
     auto content = readFile(path, &info);
     auto asset = std::make_shared<texture_asset>(content, info, path);
     m_LoadedAssets[path] = asset;

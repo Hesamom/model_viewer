@@ -8,7 +8,6 @@
 namespace modelViewer::render {
     class texture{
     private:
-        std::shared_ptr<modelViewer::res::texture_asset> m_Asset;
         unsigned int m_TextureId;
         texture_setup m_Setup;
         
@@ -17,7 +16,7 @@ namespace modelViewer::render {
         void setFilteringModeMag(texture_filtering_mode textureFiltering);
         void setBind(bool bind);
     public:
-        texture(texture_setup texture_setup);
+        texture(texture_setup& texture_setup);
         ~texture();
         void active(int index);
         texture_filtering_mode  getFilteringModeMin() const;

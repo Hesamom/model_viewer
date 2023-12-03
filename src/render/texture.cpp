@@ -1,17 +1,32 @@
 ﻿#include "texture.h"
+#include "texture_format.h"
 #include <GL/glew.h>
 
 using namespace modelViewer::render;
 
-texture::texture(texture_setup texture_setup) : m_Asset{std::move(texture_setup.m_Asset)} 
+GLint getFormat(int channelsCount)
+{
+    switch (channelsCount) {
+        case 3:
+            return GL_RGB;
+        case 4:
+            return GL_RGBA;
+
+        default:
+            throw std::runtime_error("not supported color channel");
+    }
+}
+
+texture::texture(texture_setup& texture_setup)
 {
     m_Setup = texture_setup;
+    auto optimalFormat = texture_format::getOptimalFormat(m_Setup.m_Asset->getChannelType());
+
     glGenTextures(1, &m_TextureId);
     setBind(true);
     
-    
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_Asset->getWidth(), m_Asset->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                 m_Asset->getContent());
+    glTexImage2D(GL_TEXTURE_2D, 0, optimalFormat, m_Setup.m_Asset->getWidth(), m_Setup.m_Asset->getHeight(), 0, getFormat(m_Setup.m_Asset->getChannelCount()), GL_UNSIGNED_BYTE,
+                 m_Setup.m_Asset->getContent());
 
     //glObjectLabel(GL_TEXTURE, m_TextureId, -1, m_Asset->getName().data());
 

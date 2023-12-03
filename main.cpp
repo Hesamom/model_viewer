@@ -13,7 +13,7 @@ int main()
     modelViewer::res::model_info info;
     info.fragmentShaderPath = "res/shaders/sample/phong_phong_frag.glsl";
     info.vertexShaderPath = "res/shaders/sample/phong_phong_vert.glsl";
-    info.texturePath = "res/textures/sample.png";
+    info.texturePath = "res/textures/Transparent.png";
     info.meshPath = "res/models/primitives/cube.fbx";
     info.name = "sphere";
     window.addModel(info);

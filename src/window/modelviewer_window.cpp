@@ -112,7 +112,7 @@ std::shared_ptr<modelViewer::render::texture> modelviewer_window::getTexture(mod
     if (info.texturePath.empty())
         return nullptr;
     
-    auto textureAsset = m_TextureLoader.load(info.texturePath);
+    auto textureAsset = m_TextureLoader.load(info.texturePath, 4);
 
     texture_setup setup;
     setup.m_Asset = textureAsset;
