@@ -41,6 +41,8 @@ private:
     std::shared_ptr<modelViewer::render::mesh> getMesh(modelViewer::res::model_info& info);
     std::shared_ptr<modelViewer::render::texture> getTexture(modelViewer::res::model_info& info);
     
+    void addNewModels();
+    void openDemoModel(std::string name);
     void updateCameraPosition();
     void openModelFile();
     
@@ -56,6 +58,8 @@ public:
      ~modelviewer_window() override;
      void addModel(modelViewer::res::model_info& info);
      void setClearFlag(glm::vec4 color);
+
+    void file();
 };
 
 
