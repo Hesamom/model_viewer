@@ -14,9 +14,6 @@ namespace modelViewer::render {
     };
 
     class texture_format {
-    private:
-        static texture_format_type types[4];
-
     public:
         static GLint
         getOptimalFormat(
