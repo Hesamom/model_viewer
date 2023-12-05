@@ -78,10 +78,14 @@ bool modelViewer::render::shader::isCompiled() {
     return result == GL_TRUE;
 }
 
-modelViewer::render::shader::~shader() {
-    glDeleteShader(m_ShaderId);
-}
-
 unsigned int modelViewer::render::shader::getId() const {
     return m_ShaderId;
+}
+
+void modelViewer::render::shader::destroy() const {
+    if(m_ShaderId <= 0)
+    {
+        return;
+    }
+    glDeleteShader(m_ShaderId);
 }

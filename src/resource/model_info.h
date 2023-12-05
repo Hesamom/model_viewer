@@ -4,19 +4,70 @@
 
 #include "mesh_asset.h"
 #include "../common/transform.h"
-#include "material.h"
+#include "shader_loader.h"
 
-namespace modelViewer::res {
-    //TODO update to support a list of shaders 
+using color = glm::vec3;
+
+namespace modelViewer::res
+{
+    enum class texture_asset_type
+    {
+        none,
+        diffuse,
+        normal
+    };
+    
+    enum class texture_asset_mapping_mode
+    {
+        unsupported,
+        uv
+    };
+    
+    enum class texture_asset_wrapping_mode
+    {
+        unsupported,
+        wrap,
+        clamp,
+        mirror
+    };
+    
+    struct texture_asset_info
+    {
+        std::string path;
+        unsigned int uvIndex = 0;
+        texture_asset_mapping_mode mappingMode = texture_asset_mapping_mode::uv;
+        texture_asset_wrapping_mode wrappingMode = texture_asset_wrapping_mode::wrap;
+        texture_asset_type type = texture_asset_type::diffuse;
+        bool isNormal = false;
+    };
+    
+    struct shader_asset_info
+    {
+        std::string path;
+        shaderType type;
+    };
+    
+    struct material_property_set
+    {
+       color diffuseAlbedo = color(0.2f);
+       color ambient =  color(0.5f);
+       color specularAlbedo =  color(0.5f);
+       float shininess = 128;
+    };
+    
+    struct material_info
+    {
+        std::vector<texture_asset_info> textures;
+        std::vector<shader_asset_info> shaders;
+        material_property_set propertySet;
+    };
+    
     struct model_info {
-        std::string meshPath;
-        std::string texturePath;
-        std::string vertexShaderPath;
-        std::string fragmentShaderPath;
+        std::shared_ptr<mesh_asset> mesh;
+        material_info material;
         modelViewer::common::transform transform;
-        material material;
-        std::string  name;
-        
+        std::string name;
+        std::string path;
     };
 }
 

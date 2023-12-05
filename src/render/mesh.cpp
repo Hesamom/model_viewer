@@ -1,4 +1,5 @@
 ﻿#include "mesh.h"
+#include "material.h"
 
 void modelViewer::render::mesh::bind() {
     m_VertexArray.bind();
@@ -37,29 +38,29 @@ modelViewer::render::mesh::mesh(std::shared_ptr<modelViewer::res::mesh_asset>& a
 
 modelViewer::render::mesh::~mesh() = default;
 
-void modelViewer::render::mesh::bindAttributes(modelViewer::render::shader_program &program) {
+void modelViewer::render::mesh::bindAttributes(modelViewer::render::material &material) {
     
     m_VertexArray.bind();
     
-    int positionIndex = program.getAttributeLocation("v_position");
+    int positionIndex = material.getAttributeLocation("v_position");
     if (positionIndex >= 0)
     {
         m_PositionBuffer->bindBuffer(positionIndex);
     }
 
-    int uv0Index = program.getAttributeLocation("v_uv0");
+    int uv0Index = material.getAttributeLocation("v_uv0");
     if (m_UV0 && uv0Index >= 0)
     {
         m_UV0->bindBuffer(uv0Index);
     }
 
-    int colorIndex = program.getAttributeLocation("v_color");
+    int colorIndex = material.getAttributeLocation("v_color");
     if (m_ColorBuffer && colorIndex >= 0)
     {
         m_ColorBuffer->bindBuffer(colorIndex);
     }
     
-    int normalIndex = program.getAttributeLocation("v_normal");
+    int normalIndex = material.getAttributeLocation("v_normal");
     if(m_NormalBuffer && normalIndex >= 0)
     {
         m_NormalBuffer->bindBuffer(normalIndex);

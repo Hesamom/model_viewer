@@ -7,7 +7,7 @@
 namespace modelViewer::render {
 
     struct texture_format_type{
-        GLboolean extension;
+        std::function<unsigned char()> isSupported;
         GLint format_rgb = 0;
         GLint format_rgba = 0;
         std::string name;
@@ -16,8 +16,7 @@ namespace modelViewer::render {
     class texture_format {
     public:
         static GLint
-        getOptimalFormat(
-                modelViewer::res::texture_channel_type channelType);
+        getOptimalFormat(modelViewer::res::texture_channel_type channelType, bool compress);
     };
 }
 

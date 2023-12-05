@@ -3,7 +3,7 @@
 #define MODEL_VIEWER_MODELVIEWER_WINDOW_H
 #include "window.h"
 #include "../resource/model_info.h"
-#include "../resource/mesh_loader.h"
+#include "../resource/model_loader.h"
 #include "../resource/texture_loader.h"
 #include "../resource/shader_loader.h"
 #include "../render/render_scene.h"
@@ -14,7 +14,7 @@
 class modelviewer_window : public window {
     
 private:
-    modelViewer::res::mesh_loader m_MeshLoader;
+    modelViewer::res::model_loader m_MeshLoader;
     modelViewer::res::texture_loader m_TextureLoader;
     modelViewer::res::shader_loader m_ShaderLoader;
     modelViewer::render::render_scene m_Scene;
@@ -39,7 +39,7 @@ private:
     
     std::shared_ptr<modelViewer::render::shader_program> getProgram(modelViewer::res::model_info& info);
     std::shared_ptr<modelViewer::render::mesh> getMesh(modelViewer::res::model_info& info);
-    std::shared_ptr<modelViewer::render::texture> getTexture(modelViewer::res::model_info& info);
+    std::vector<std::shared_ptr<modelViewer::render::texture>> getTextures(modelViewer::res::model_info& info);
     
     void addNewModels();
     void openDemoModel(std::string name);

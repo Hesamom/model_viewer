@@ -2,6 +2,7 @@
 #define MODEL_VIEWER_TEXTURE_SETUP_H
 
 #include "../resource/texture_asset.h"
+#include "../resource/model_info.h"
 
 namespace modelViewer::render {
 
@@ -24,13 +25,15 @@ namespace modelViewer::render {
     };
 
     struct texture_setup {
-        std::shared_ptr<modelViewer::res::texture_asset> m_Asset;
-        unsigned int m_Mip_Map_Min_Level;
-        unsigned int m_Mip_Map_Max_Level;
-        bool m_Is_Mip_Map_Active;
-        texture_filtering_mode m_Texture_Filtering_Min = texture_filtering_mode::linear_linear;
-        texture_filtering_mode m_Texture_Filtering_Mag = texture_filtering_mode::linear;
-        texture_wrapping_mode m_Texture_Wrapping = texture_wrapping_mode::clamp_to_edge;
+        std::shared_ptr<modelViewer::res::texture_asset> asset;
+        unsigned int mipMapMinLevel = 0;
+        unsigned int mipMapMaxLevel = 1000;
+        bool isMipMapActive = true;
+        texture_filtering_mode filteringMin = texture_filtering_mode::linear_linear;
+        texture_filtering_mode filteringMag = texture_filtering_mode::linear;
+        texture_wrapping_mode wrapping = texture_wrapping_mode::clamp_to_edge;
+        res::texture_asset_type type =  res::texture_asset_type::diffuse;
+        bool compress = true;
     };
 }
 

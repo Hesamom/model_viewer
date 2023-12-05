@@ -7,6 +7,7 @@
 #include "vertex_buffer.h"
 #include "index_buffer.h"
 #include "vertex_array.h"
+#include "material.h"
 
 namespace modelViewer::render {
     class mesh {
@@ -20,7 +21,7 @@ namespace modelViewer::render {
         
         std::shared_ptr<modelViewer::res::mesh_asset> m_Asset;
     public:
-        void bindAttributes(shader_program& program);
+        void bindAttributes(modelViewer::render::material &material);
         void bind();
         void draw();
         void drawLines();
