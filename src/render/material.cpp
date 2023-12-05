@@ -127,3 +127,19 @@ int material::getUniformLocation(std::string name) {
 int material::getAttributeLocation(std::string name) {
     return m_Program->getAttributeLocation(name);
 }
+
+void material::setLight(const light_directional &light) {
+    
+    m_Program->bind();
+    int lightPos = m_Program->getUniformLocation(m_LightPos);
+    if (lightPos > -1)
+    {
+        m_Program->setUniformVector3(lightPos, light.getPosition());
+    }
+
+    int lightColor = m_Program->getUniformLocation(m_LightColor);
+    if (lightColor > -1)
+    {
+        m_Program->setUniformVector3(lightColor, light.getColor());
+    }
+}

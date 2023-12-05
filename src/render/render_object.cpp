@@ -49,5 +49,9 @@ render_object::render_object(std::shared_ptr<material>& material, std::shared_pt
     m_Mesh->bindAttributes(*m_Material);
 }
 
+void render_object::setLight(const light_directional &light) {
+    m_Material->setLight(light);
+}
+
 
 

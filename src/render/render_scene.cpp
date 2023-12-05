@@ -21,3 +21,7 @@ void render_scene::addObject(std::shared_ptr<render_object> &object) {
     m_RenderObjects.push_back(object);
 }
 
+light_directional &render_scene::getLight() {
+    return m_Light;
+}
+

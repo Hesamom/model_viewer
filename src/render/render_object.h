@@ -31,6 +31,7 @@ namespace modelViewer::render
         void setTransform(common::transform& t);
         std::shared_ptr<material>& getMaterial();
         
+        void setLight(const light_directional& light);
         void render(glm::mat4 view, glm::mat4 projection, render_mode mode);
     };
 }

@@ -32,6 +32,7 @@ void modelviewer_window::onRender(float elapsed) {
     m_Platform.draw(viewMatrix, projection);
     for (auto& object : m_Scene.getObjects()) {
 
+        object->setLight(m_Scene.getLight());
         object->render(viewMatrix, projection, render_mode::triangles);
     }
 }
@@ -74,9 +75,15 @@ std::shared_ptr<modelViewer::render::shader_program> modelviewer_window::getProg
     auto program = std::make_shared<shader_program>(shaders);
     if(!program->isLinked())
     {
-        std::cerr<< program->getLinkLog() << std::endl;
+        throw std::runtime_error(program->getLinkLog());
     }
-
+    
+    auto log = program->getLinkLog();
+    if(!log.empty())
+    {
+        std::cout << log << std::endl;
+    }
+    
     return program;
 }
 

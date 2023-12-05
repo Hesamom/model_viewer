@@ -1,6 +1,7 @@
 ﻿#ifndef MODEL_VIEWER_MATERIAL_H
 #define MODEL_VIEWER_MATERIAL_H
 #include "../resource/model_info.h"
+#include "light_directional.h"
 
 
 namespace modelViewer::render
@@ -31,6 +32,9 @@ namespace modelViewer::render
         const std::string  m_SpecularAlbedo = "u_specularAlbedo";
         const std::string  m_Shininess = "u_shininess";
         
+        const std::string  m_LightPos = "u_light_pos";
+        const std::string  m_LightColor = "u_light_color";
+        
         void applyMaterialProperties();
         void bindTextures(std::vector<std::shared_ptr<texture>>& textures);
         std::string  getSamplerName(modelViewer::res::texture_asset_type type);
@@ -42,6 +46,7 @@ namespace modelViewer::render
         void bind();
         int getUniformLocation(std::string name);
         int getAttributeLocation(std::string name);
+        void setLight(const light_directional& light);
     };
 }
 
