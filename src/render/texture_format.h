@@ -14,6 +14,8 @@ namespace modelViewer::render {
     };
 
     class texture_format {
+    private:
+       static texture_format_type types[4];
     public:
         static GLint
         getOptimalFormat(modelViewer::res::texture_channel_type channelType, bool compress);
