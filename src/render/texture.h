@@ -27,6 +27,7 @@ namespace modelViewer::render {
         void setMipMapLevels(unsigned int min, unsigned int max);
         void setFilteringMode(texture_filtering_mode textureFilteringMin, texture_filtering_mode textureFilteringMag);
         void setWrappingMode(texture_wrapping_mode textureWrapping);
+        modelViewer::res::texture_asset_type getType() const;
     };
 }
 

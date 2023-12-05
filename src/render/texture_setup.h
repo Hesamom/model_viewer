@@ -2,6 +2,7 @@
 #define MODEL_VIEWER_TEXTURE_SETUP_H
 
 #include "../resource/texture_asset.h"
+#include "../resource/model_info.h"
 
 namespace modelViewer::render {
 
@@ -31,6 +32,7 @@ namespace modelViewer::render {
         texture_filtering_mode m_Texture_Filtering_Min = texture_filtering_mode::linear_linear;
         texture_filtering_mode m_Texture_Filtering_Mag = texture_filtering_mode::linear;
         texture_wrapping_mode m_Texture_Wrapping = texture_wrapping_mode::clamp_to_edge;
+        res::texture_asset_type type =  res::texture_asset_type::diffuse;
     };
 }
 

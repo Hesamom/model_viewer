@@ -25,10 +25,10 @@ texture::texture(texture_setup& texture_setup)
     glGenTextures(1, &m_TextureId);
     setBind(true);
     
-    glTexImage2D(GL_TEXTURE_2D, 0, optimalFormat, m_Setup.m_Asset->getWidth(), m_Setup.m_Asset->getHeight(), 0, getFormat(m_Setup.m_Asset->getChannelCount()), GL_UNSIGNED_BYTE,
+    glTexImage2D(GL_TEXTURE_2D, 0, optimalFormat, m_Setup.m_Asset->getWidth(), m_Setup.m_Asset->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
                  m_Setup.m_Asset->getContent());
 
-    //glObjectLabel(GL_TEXTURE, m_TextureId, -1, m_Asset->getName().data());
+    glObjectLabel(GL_TEXTURE, m_TextureId, -1, m_Setup.m_Asset->getName().data());
 
     if (m_Setup.m_Is_Mip_Map_Active)
     {
@@ -207,7 +207,7 @@ void texture::setMipMapLevels(unsigned int min, unsigned int max) {
 
 void texture::setBind(bool bind) {
 
-    static unsigned int m_BoundTexture;
+    static unsigned int m_BoundTexture = -1;
     if(bind && m_BoundTexture == m_TextureId)
     {
         return;
@@ -223,4 +223,8 @@ void texture::setBind(bool bind) {
     }
 
     glBindTexture(GL_TEXTURE_2D, m_BoundTexture);
+}
+
+modelViewer::res::texture_asset_type texture::getType() const {
+    return m_Setup.type;
 }

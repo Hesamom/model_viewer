@@ -5,6 +5,21 @@
 using namespace modelViewer::render;
 
 
+//TODO find a way to remove ctors duplications 
+shader_program::shader_program(std::vector<shader> &shaders) {
+    
+    m_ProgramId = glCreateProgram();
+
+    for(auto& shader : shaders)
+    {
+        glAttachShader(m_ProgramId, shader.getId());
+        shader.destroy();
+    }
+
+    glLinkProgram(m_ProgramId);
+    glValidateProgram(m_ProgramId);
+}
+
 shader_program::shader_program(std::initializer_list<shader> shaders) {
     
     m_ProgramId = glCreateProgram();
@@ -12,6 +27,7 @@ shader_program::shader_program(std::initializer_list<shader> shaders) {
     for(auto& shader : shaders)
     {
         glAttachShader(m_ProgramId, shader.getId());
+        shader.destroy();
     }
     
     glLinkProgram(m_ProgramId);
@@ -72,6 +88,8 @@ void shader_program::setUniformInt(int location, int value) {
     glUniform1i(location, value);
 }
 
-void shader_program::setUniformMatrix4(int index, glm::mat4 mat) {
+void shader_program::setUniformMatrix4(int index, glm::mat4& mat) {
     glUniformMatrix4fv(index, 1, false, glm::value_ptr(mat));
 }
+
+

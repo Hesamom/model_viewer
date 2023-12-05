@@ -10,7 +10,7 @@ namespace modelViewer::common {
     private:
         glm::vec3 m_Scale{1};
         glm::vec3 m_Position{0};
-        quaternion m_Rotation;
+        quaternion m_Rotation = quaternion::fromEuler(0,0,0);
 
     public:
         glm::mat4 getMatrix() const;

@@ -90,8 +90,10 @@ void model_platform_buffer::init(shader_loader &shaderLoader,
     {
         std::cerr<< program->getLinkLog() << "\n";
     }
+
+    material_info materialInfo;
+    std::vector<std::shared_ptr<texture>> textures;
+    auto mat = std::make_shared<material>(materialInfo, textures, program);
     
-    
-    
-    m_Object = std::make_unique<render_object>(program, mesh, "platform");
+    m_Object = std::make_unique<render_object>(mat, mesh, "platform");
 }

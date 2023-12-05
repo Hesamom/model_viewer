@@ -6,6 +6,7 @@
 #include "modelviewer_window.h"
 #include "glfw/glfw3.h"
 #include "regex"
+#include "../render/material.h"
 
 using namespace modelViewer::res;
 using namespace modelViewer::render;
@@ -59,17 +60,18 @@ void verifyShader(shader& shader)
 
 std::shared_ptr<modelViewer::render::shader_program> modelviewer_window::getProgram(model_info &info) {
 
-    auto vertShaderAsset = m_ShaderLoader.load(info.vertexShaderPath, shaderType::vertex );
-    auto fragShaderAsset = m_ShaderLoader.load(info.fragmentShaderPath, shaderType::fragment);
+    std::vector<shader> shaders;
+    for (auto& shaderInfo : info.material.shaders) {
+        
+        auto shaderAsset = m_ShaderLoader.load(shaderInfo.path, shaderInfo.type);
+        shader shader(shaderAsset);
+        shader.compile();
+        verifyShader(shader);
+
+        shaders.push_back(shader);
+    }
     
-    shader vertShader(vertShaderAsset);
-    vertShader.compile();
-    verifyShader(vertShader);
-    
-    shader fragShader (fragShaderAsset);
-    verifyShader(fragShader);
-    
-    auto program = std::make_shared<shader_program>(std::initializer_list<shader>{vertShader, fragShader});
+    auto program = std::make_shared<shader_program>(shaders);
     if(!program->isLinked())
     {
         std::cerr<< program->getLinkLog() << std::endl;
@@ -79,29 +81,45 @@ std::shared_ptr<modelViewer::render::shader_program> modelviewer_window::getProg
 }
 
 std::shared_ptr<modelViewer::render::mesh> modelviewer_window::getMesh(model_info &info) {
+
+    if (info.mesh)
+    {
+        return std::make_shared<mesh>(info.mesh);
+    }
     
-    auto meshAsset = m_MeshLoader.load(info.meshPath);
-    auto meshPtr  = std::make_shared<mesh>(meshAsset);
+    info.mesh = m_MeshLoader.loadMesh(info.path);
+    auto meshPtr  = std::make_shared<mesh>(info.mesh);
     
     return meshPtr;
 }
 
-std::shared_ptr<modelViewer::render::texture> modelviewer_window::getTexture(model_info &info) {
+std::vector<std::shared_ptr<modelViewer::render::texture>> modelviewer_window::getTextures(model_info &info) {
 
-    if (info.texturePath.empty())
-        return nullptr;
-    
-    auto textureAsset = m_TextureLoader.load(info.texturePath, 4);
+    std::vector<std::shared_ptr<modelViewer::render::texture>> textures;
+    for (auto& textureInfo : info.material.textures ) {
+        if (textureInfo.path.empty())
+        {
+            continue;
+        }
+        if (textureInfo.isNormal)
+        {
+            continue;
+        }
 
-    texture_setup setup;
-    setup.m_Asset = textureAsset;
-    setup.m_Is_Mip_Map_Active = true;
-    setup.m_Mip_Map_Max_Level = 1000;
-    setup.m_Mip_Map_Min_Level = 0;
-   
-    auto texturePtr = std::make_shared<texture>(setup);
+        auto textureAsset = m_TextureLoader.load(textureInfo.path, 4);
+
+        texture_setup setup;
+        setup.m_Asset = textureAsset;
+        setup.m_Is_Mip_Map_Active = true;
+        setup.m_Mip_Map_Max_Level = 1000;
+        setup.m_Mip_Map_Min_Level = 0;
+        //TODO set wrapping mode here
+
+        auto texturePtr = std::make_shared<texture>(setup);
+        textures.push_back(texturePtr);
+    }
     
-    return texturePtr;
+    return textures;
 }
 
 modelviewer_window::modelviewer_window(int width, int height, std::string title, bool fullscreen) : window(width,
@@ -245,13 +263,10 @@ void modelviewer_window::openModelFile() {
     path.reserve(256);
     if(m_FilePicker.tryOpenPicker(path))
     {
-        modelViewer::res::model_info info;
-        info.fragmentShaderPath = "res/shaders/sample/phong_phong_frag.glsl";
-        info.vertexShaderPath = "res/shaders/sample/phong_phong_vert.glsl";
-        info.texturePath = "res/textures/Transparent.png";
-        info.meshPath = path.c_str();
-        info.name = "loaded model";
-        
+        model_info info;
+        info.path = path.c_str();
+        info.name = path.c_str();
+        m_MeshLoader.load(info.path, info);
         addModel(info);
     }
 }
@@ -264,13 +279,10 @@ void modelviewer_window::addNewModels()
     {
         auto program = getProgram(info);
         auto mesh = getMesh(info);
-        auto texture = getTexture(info);
-        auto object = std::make_shared<render_object>(program, mesh, info.name);
-        if(texture)
-        {
-            object->addTexture(texture, "m_sampler");
-        }
-
+        auto textures = getTextures(info);
+        auto mat = std::make_shared<material>(info.material,textures, program);
+        auto object = std::make_shared<render_object>(mat, mesh, info.name);
+        
         object->setTransform(info.transform);
         m_Scene.addObject(object);
     }
@@ -286,11 +298,17 @@ void modelviewer_window::addNewModels()
 }
 void modelviewer_window::openDemoModel(std::string name)
 {
-    modelViewer::res::model_info info;
-    info.fragmentShaderPath = "res/shaders/sample/phong_phong_frag.glsl";
-    info.vertexShaderPath = "res/shaders/sample/phong_phong_vert.glsl";
-    info.texturePath = "res/textures/Transparent.png";
-    info.meshPath = "res/models/primitives/" + name + ".fbx";
+    model_info info;
+    shader_asset_info fragShader { "res/shaders/sample/phong_phong_frag.glsl", shaderType::fragment};
+    shader_asset_info vertShader { "res/shaders/sample/phong_phong_vert.glsl", shaderType::vertex};
+    info.material.shaders.push_back(fragShader);
+    info.material.shaders.push_back(vertShader);
+
+    texture_asset_info textureAssetInfo;
+    textureAssetInfo.path = "res/textures/Transparent.png";
+    info.material.textures.push_back(textureAssetInfo);
+
+    info.path = "res/models/primitives/" + name + ".fbx";
     info.name = name;
   
     addModel(info);

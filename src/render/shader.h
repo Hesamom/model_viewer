@@ -12,9 +12,9 @@ namespace modelViewer::render {
         std::shared_ptr<modelViewer::res::shader_asset> m_Asset;
     public:
         explicit shader(std::shared_ptr<modelViewer::res::shader_asset>& asset);
-        ~shader();
         
         void compile();
+        void destroy() const;
         std::string  getCompilationLog();
         bool isCompiled();
         res::shaderType getType();
