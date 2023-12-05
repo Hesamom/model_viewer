@@ -109,10 +109,10 @@ std::vector<std::shared_ptr<modelViewer::render::texture>> modelviewer_window::g
         auto textureAsset = m_TextureLoader.load(textureInfo.path, 4);
 
         texture_setup setup;
-        setup.m_Asset = textureAsset;
-        setup.m_Is_Mip_Map_Active = true;
-        setup.m_Mip_Map_Max_Level = 1000;
-        setup.m_Mip_Map_Min_Level = 0;
+        setup.asset = textureAsset;
+        setup.isMipMapActive = true;
+        setup.mipMapMaxLevel = 1000;
+        setup.mipMapMinLevel = 0;
         //TODO set wrapping mode here
 
         auto texturePtr = std::make_shared<texture>(setup);

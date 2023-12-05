@@ -20,26 +20,26 @@ GLint getFormat(int channelsCount)
 texture::texture(texture_setup& texture_setup)
 {
     m_Setup = texture_setup;
-    auto optimalFormat = texture_format::getOptimalFormat(m_Setup.m_Asset->getChannelType());
+    auto optimalFormat = texture_format::getOptimalFormat(m_Setup.asset->getChannelType(), m_Setup.compress);
 
     glGenTextures(1, &m_TextureId);
     setBind(true);
     
-    glTexImage2D(GL_TEXTURE_2D, 0, optimalFormat, m_Setup.m_Asset->getWidth(), m_Setup.m_Asset->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                 m_Setup.m_Asset->getContent());
+    glTexImage2D(GL_TEXTURE_2D, 0, optimalFormat, m_Setup.asset->getWidth(), m_Setup.asset->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                 m_Setup.asset->getContent());
 
-    glObjectLabel(GL_TEXTURE, m_TextureId, -1, m_Setup.m_Asset->getName().data());
+    glObjectLabel(GL_TEXTURE, m_TextureId, -1, m_Setup.asset->getName().data());
 
-    if (m_Setup.m_Is_Mip_Map_Active)
+    if (m_Setup.isMipMapActive)
     {
         //TODO have to check if specifying the level before generation affects generation or not 
         glGenerateMipmap(GL_TEXTURE_2D);
-        setMipMapLevels(m_Setup.m_Mip_Map_Min_Level, m_Setup.m_Mip_Map_Max_Level);
+        setMipMapLevels(m_Setup.mipMapMinLevel, m_Setup.mipMapMaxLevel);
     }
 
-    setFilteringModeMag(m_Setup.m_Texture_Filtering_Mag);
-    setFilteringModeMin(m_Setup.m_Texture_Filtering_Min);
-    setWrappingMode(m_Setup.m_Texture_Wrapping);
+    setFilteringModeMag(m_Setup.filteringMag);
+    setFilteringModeMin(m_Setup.filteringMin);
+    setWrappingMode(m_Setup.wrapping);
 
     setBind(false);
 }
@@ -57,17 +57,17 @@ void texture::active(int index) {
 
 texture_filtering_mode
 texture::getFilteringModeMin() const {
-    return m_Setup.m_Texture_Filtering_Min;
+    return m_Setup.filteringMin;
 }
 
 texture_filtering_mode
 texture::getFilteringModeMag() const {
-    return m_Setup.m_Texture_Filtering_Mag;
+    return m_Setup.filteringMag;
 }
 
 texture_wrapping_mode
 texture::getWrappingMode() const {
-    return m_Setup.m_Texture_Wrapping;
+    return m_Setup.wrapping;
 }
 
 void
@@ -111,7 +111,7 @@ texture::setFilteringModeMin(
         throw std::runtime_error("texture is not resident");
     }
 
-    m_Setup.m_Texture_Filtering_Min = textureFiltering;
+    m_Setup.filteringMin = textureFiltering;
     setBind(true);
     setFilteringModeInternal(textureFiltering, GL_TEXTURE_MIN_FILTER);
 }
@@ -124,7 +124,7 @@ texture::setFilteringModeMag(
         throw std::runtime_error("texture is not resident");
     }
 
-    m_Setup.m_Texture_Filtering_Mag = textureFiltering;
+    m_Setup.filteringMag = textureFiltering;
     setBind(true);
     setFilteringModeInternal(textureFiltering, GL_TEXTURE_MAG_FILTER);
 }
@@ -132,7 +132,7 @@ texture::setFilteringModeMag(
 void
 texture::setWrappingMode(
         texture_wrapping_mode textureWrapping){
-    m_Setup.m_Texture_Wrapping = textureWrapping;
+    m_Setup.wrapping = textureWrapping;
     setBind(true);
     switch (textureWrapping) {
 
@@ -165,12 +165,12 @@ texture::setWrappingMode(
 
 unsigned int
 texture::getMipMapMinLevel() {
-    return m_Setup.m_Mip_Map_Min_Level;
+    return m_Setup.mipMapMinLevel;
 }
 
 unsigned int
 texture::getMipMapMaxLevel() {
-    return  m_Setup.m_Mip_Map_Max_Level;
+    return  m_Setup.mipMapMaxLevel;
 }
 
 
@@ -186,21 +186,21 @@ void texture::setMipMapLevels(unsigned int min, unsigned int max) {
     {
         throw std::invalid_argument( "mipmap min level is bigger than mipmap max level");
     }
-    if (!m_Setup.m_Is_Mip_Map_Active)
+    if (!m_Setup.isMipMapActive)
     {
         throw std::runtime_error( "mipmap levels can not be set when mip map is not active!");
     }
 
-    if(m_Setup.m_Mip_Map_Min_Level != min)
+    if(m_Setup.mipMapMinLevel != min)
     {
         setBind(true);
-        m_Setup.m_Mip_Map_Min_Level = min;
+        m_Setup.mipMapMinLevel = min;
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, min);
     }
-    if ( m_Setup.m_Mip_Map_Max_Level != max)
+    if (m_Setup.mipMapMaxLevel != max)
     {
         setBind(true);
-        m_Setup.m_Mip_Map_Max_Level = max;
+        m_Setup.mipMapMaxLevel = max;
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, max);
     }
 }
