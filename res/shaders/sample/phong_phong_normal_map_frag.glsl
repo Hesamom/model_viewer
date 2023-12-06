@@ -22,7 +22,13 @@ out vec4 FragColor;
 
 void main()
 {
-    vec3 normal = normalize(fs_in.normal);
+    // obtain normal from normal map in range [0,1]
+    vec3 normal = texture(u_diffuseSampler, fs_in.texCoord).rgb;
+    // transform normal vector to range [-1,1]
+    normal = normal * 2.0 - 1.0;
+
+    normal = normalize(fs_in.TBN * normal);
+
     vec3 lightDir = fs_in.TBN * normalize(fs_in.lightDir);
     vec3 viewDir = fs_in.TBN * normalize(fs_in.viewDir);
 
