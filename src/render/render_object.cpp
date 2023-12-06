@@ -18,8 +18,9 @@ void render_object::render(glm::mat4 view, glm::mat4 projection, render_mode mod
     
     
     m_Material->bind();
-    
-    auto modelView = view * m_Transform.getMatrix();
+    auto model =  m_Transform.getMatrix();
+    auto modelView = view * model;
+    m_Material->setModel(model);
     m_Material->setModelView(modelView);
     m_Material->setProjection(projection);
     

@@ -17,10 +17,12 @@ namespace modelViewer::res {
         std::shared_ptr<std::vector<unsigned int>> indices;
 
         std::shared_ptr<std::vector<glm::vec3>> normals;
+        std::shared_ptr<std::vector<glm::vec3>> tangents;
+        std::shared_ptr<std::vector<glm::vec3>> bitangents;
         std::shared_ptr<std::vector<glm::vec2>> UV0;
         
         std::string name;
     };
 }
 
-#endif //MODEL_VIEWER_MESHASSET_H
+#endif

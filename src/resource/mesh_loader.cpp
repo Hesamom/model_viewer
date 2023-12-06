@@ -185,6 +185,24 @@ std::shared_ptr<mesh_asset> getMesh(const aiScene* scene, std::string& filePath)
         }
     }
 
+    std::shared_ptr<std::vector<glm::vec3>> tangents;
+    std::shared_ptr<std::vector<glm::vec3>> bitangents;
+
+    if (scene->mMeshes[0]->HasTangentsAndBitangents())
+    {
+        tangents = std::make_shared<std::vector<glm::vec3>>();
+        bitangents = std::make_shared<std::vector<glm::vec3>>();
+
+        for (int i = 0; i < vertexCount; ++i)
+        {
+            auto tangent = scene->mMeshes[0]->mTangents[i];
+            tangents->push_back(to_vec3(tangent));
+
+            auto bitangent = scene->mMeshes[0]->mBitangents[i];
+            bitangents->push_back(to_vec3(bitangent));
+        }
+    }
+
     std::shared_ptr<std::vector<glm::vec2>> uv0;
     if (scene->mMeshes[0]->HasTextureCoords(0))
     {
@@ -199,6 +217,8 @@ std::shared_ptr<mesh_asset> getMesh(const aiScene* scene, std::string& filePath)
     auto mesh = std::make_shared<mesh_asset>();
     mesh->positions = positions;
     mesh->normals = normals;
+    mesh->tangents = tangents;
+    mesh->bitangents = bitangents;
     mesh->indices = indices;
     mesh->UV0 = uv0;
     mesh->name = filePath;

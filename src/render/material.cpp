@@ -12,6 +12,7 @@ material::material(material_info &info, std::vector<std::shared_ptr<texture>>& t
     m_Program = program;
 
     m_Program->bind();
+    m_ModelLocation = m_Program->getUniformLocation(m_ModelViewUniform);;
     m_ModelViewLocation = m_Program->getUniformLocation(m_ModelViewUniform);
     m_MVPLocation = m_Program->getUniformLocation(m_MVPUniform);
     m_ProjectionLocation = m_Program->getUniformLocation(m_ProjectionUniform);
@@ -52,6 +53,16 @@ void material::setModelView(glm::mat4 &matrix) {
     }
 
     m_Program->setUniformMatrix4(m_ModelViewLocation, matrix);
+}
+
+void
+material::setModel(glm::mat4 &model) {
+    if (m_ModelLocation < 0)
+    {
+        return;
+    }
+
+    m_Program->setUniformMatrix4(m_ModelLocation, model);
 }
 
 void material::setProjection(glm::mat4 &projection) {

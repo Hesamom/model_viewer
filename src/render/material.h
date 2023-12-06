@@ -21,10 +21,12 @@ namespace modelViewer::render
         //TODO consider using a uniform block
         const std::string  m_MVPUniform = "m_MVP";
         const std::string  m_ModelViewUniform = "m_MV";
+        const std::string  m_ModelUniform = "m_Model";
         const std::string  m_ProjectionUniform = "m_Projection";
         
         int m_MVPLocation = -1;
         int m_ModelViewLocation = -1;
+        int m_ModelLocation = -1;
         int m_ProjectionLocation = -1;
         
         const std::string  m_AmbientAlbedo = "u_ambient";
@@ -43,6 +45,7 @@ namespace modelViewer::render
         void setMVP(glm::mat4& matrix);
         void setModelView(glm::mat4& matrix);
         void setProjection(glm::mat4& projection);
+        void setModel(glm::mat4& model);
         void bind();
         int getUniformLocation(std::string name);
         int getAttributeLocation(std::string name);
