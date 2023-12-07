@@ -152,26 +152,22 @@ void fetchTextures(aiMaterial* material, model_info& info, aiTextureType type)
 }
 
 
-void setTangents(const aiMesh& mesh, const aiMatrix4x4 &transform, unsigned int vertexCount,
-                 std::shared_ptr<std::vector<glm::vec3>> &tangents,
-	std::shared_ptr<std::vector<glm::vec3>> &bitangents)
+std::shared_ptr<std::vector<glm::vec3>> getTangents(const aiMesh& mesh, const aiMatrix4x4 &transform, unsigned int vertexCount)
 	{
 		if (!mesh.HasTangentsAndBitangents())
 		{
-			return;
+			return nullptr;
 		}
 		
-		tangents = std::make_shared<std::vector<glm::vec3>>();
-		bitangents = std::make_shared<std::vector<glm::vec3>>();
+		auto tangents = std::make_shared<std::vector<glm::vec3>>();
 
 		for (int i = 0; i < vertexCount; ++i)
 		{
 			auto tangent = transform * mesh.mTangents[i];
 			tangents->push_back(to_vec3(tangent));
-
-			auto bitangent = transform * mesh.mBitangents[i];
-			bitangents->push_back(to_vec3(bitangent));
 		}
+
+        return tangents;
 	}
 
 std::shared_ptr<std::vector<glm::vec3>> getPositions(const aiMesh& mesh,
@@ -252,16 +248,13 @@ std::shared_ptr<mesh_asset> getMesh(const aiScene* scene, std::string& filePath)
 	std::shared_ptr<std::vector<glm::vec3>> normals = getNormals(*firstMesh, transform, vertexCount);
 	std::shared_ptr<std::vector<glm::vec2>> uv0 = getUV0(*firstMesh, transform, vertexCount);
 	
-	std::shared_ptr<std::vector<glm::vec3>> tangents;
-    std::shared_ptr<std::vector<glm::vec3>> bitangents;
-    setTangents(*firstMesh, transform, vertexCount, tangents, bitangents);
+	std::shared_ptr<std::vector<glm::vec3>> tangents =  getTangents(*firstMesh,transform,vertexCount);
 	
 
 	auto mesh = std::make_shared<mesh_asset>();
 	mesh->positions = positions;
 	mesh->normals = normals;
 	mesh->tangents = tangents;
-	mesh->bitangents = bitangents;
 	mesh->indices = indices;
 	mesh->UV0 = uv0;
 	mesh->name = filePath;

@@ -26,13 +26,7 @@ modelViewer::render::mesh::mesh(std::shared_ptr<modelViewer::res::mesh_asset>& a
               m_TangentsBuffer = std::make_unique<vertex_buffer<float,3>>(*m_Asset->tangents);
               m_TangentsBuffer->setName(m_Asset->name + "_tangents");
           }
-
-          if (m_Asset->bitangents)
-          {
-              m_BitangentsBuffer = std::make_unique<vertex_buffer<float,3>>(*m_Asset->bitangents);
-              m_BitangentsBuffer->setName(m_Asset->name + "_bitangents");
-          }
-
+          
           if (m_Asset->colors)
           {
               m_ColorBuffer = std::make_unique<vertex_buffer<float,4>>(*m_Asset->colors);
@@ -83,13 +77,6 @@ void modelViewer::render::mesh::bindAttributes(modelViewer::render::material &ma
     {
         m_TangentsBuffer->bindBuffer(tangentIndex);
     }
-
-    int bitangentIndex = material.getAttributeLocation("v_bitangent");
-    if(m_BitangentsBuffer && bitangentIndex >= 0)
-    {
-        m_BitangentsBuffer->bindBuffer(bitangentIndex);
-    }
-
 }
 
 void modelViewer::render::mesh::draw()

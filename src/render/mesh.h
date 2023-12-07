@@ -16,7 +16,6 @@ namespace modelViewer::render {
         std::unique_ptr<vertex_buffer<float,4>> m_ColorBuffer;
         std::unique_ptr< vertex_buffer<float,3>> m_NormalBuffer;
         std::unique_ptr< vertex_buffer<float,3>> m_TangentsBuffer;
-        std::unique_ptr< vertex_buffer<float,3>> m_BitangentsBuffer;
         std::unique_ptr<vertex_buffer<float,2>> m_UV0;
         std::unique_ptr<index_buffer>  m_IndexBuffer;
         vertex_array m_VertexArray;
@@ -36,4 +35,4 @@ namespace modelViewer::render {
 }
 
 
-#endif //MODEL_VIEWER_MESH_H
+#endif

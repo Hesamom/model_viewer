@@ -30,8 +30,8 @@ void main()
 
     normal = normalize(fs_in.TBN * normal);
 
-    vec3 lightDir = fs_in.TBN * normalize(fs_in.lightDir);
-    vec3 viewDir = fs_in.TBN * normalize(fs_in.viewDir);
+    vec3 lightDir = normalize(fs_in.lightDir);
+    vec3 viewDir = normalize(fs_in.viewDir);
 
     vec3 lightReflection = reflect(-lightDir, normal);
 
