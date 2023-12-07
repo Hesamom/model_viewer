@@ -105,6 +105,7 @@ void model_loader::setShaders(aiMaterial& material, std::vector<shader_asset_inf
 {
     aiShadingMode model;
     material.Get(AI_MATKEY_SHADING_MODEL, model);
+	bool hasNormalMap = material.GetTextureCount(aiTextureType_NORMALS) > 0;
     
     switch (model) {
         
@@ -113,8 +114,17 @@ void model_loader::setShaders(aiMaterial& material, std::vector<shader_asset_inf
             shaders.emplace_back(m_GouraudFragPath, shaderType::fragment);
             return;
         default:
-            shaders.emplace_back(m_PhongVertPath, shaderType::vertex);
-            shaders.emplace_back(m_PhongFragPath, shaderType::fragment);
+			if (hasNormalMap)
+			{
+				shaders.emplace_back(m_PhongNormalVertPath, shaderType::vertex);
+				shaders.emplace_back(m_PhongNormalFragPath, shaderType::fragment);
+			}
+			else
+			{
+				shaders.emplace_back(m_PhongVertPath, shaderType::vertex);
+				shaders.emplace_back(m_PhongFragPath, shaderType::fragment);
+			}
+      
             return;
     }
 }
