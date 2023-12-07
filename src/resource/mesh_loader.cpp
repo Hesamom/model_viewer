@@ -195,10 +195,10 @@ std::shared_ptr<mesh_asset> getMesh(const aiScene* scene, std::string& filePath)
 
         for (int i = 0; i < vertexCount; ++i)
         {
-            auto tangent = scene->mMeshes[0]->mTangents[i];
+            auto tangent = transform * scene->mMeshes[0]->mTangents[i];
             tangents->push_back(to_vec3(tangent));
 
-            auto bitangent = scene->mMeshes[0]->mBitangents[i];
+            auto bitangent = transform * scene->mMeshes[0]->mBitangents[i];
             bitangents->push_back(to_vec3(bitangent));
         }
     }
