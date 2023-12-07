@@ -143,6 +143,85 @@ void fetchTextures(aiMaterial* material, model_info& info, aiTextureType type)
 }
 
 
+void setTangents(const aiMesh& mesh, const aiMatrix4x4 &transform, unsigned int vertexCount,
+                 std::shared_ptr<std::vector<glm::vec3>> &tangents,
+	std::shared_ptr<std::vector<glm::vec3>> &bitangents)
+	{
+		if (!mesh.HasTangentsAndBitangents())
+		{
+			return;
+		}
+		
+		tangents = std::make_shared<std::vector<glm::vec3>>();
+		bitangents = std::make_shared<std::vector<glm::vec3>>();
+
+		for (int i = 0; i < vertexCount; ++i)
+		{
+			auto tangent = transform * mesh.mTangents[i];
+			tangents->push_back(to_vec3(tangent));
+
+			auto bitangent = transform * mesh.mBitangents[i];
+			bitangents->push_back(to_vec3(bitangent));
+		}
+	}
+
+std::shared_ptr<std::vector<glm::vec3>> getPositions(const aiMesh& mesh,
+	const aiMatrix4x4& transform,
+	unsigned int vertexCount)
+{
+	auto positions = std::make_shared<std::vector<glm::vec3>>();
+	for (int i = 0; i < vertexCount; ++i)
+	{
+		auto vertex = transform * mesh.mVertices[i];
+		positions->push_back(to_vec3(vertex));
+	}
+	return positions;
+}
+std::shared_ptr<std::vector<unsigned int>> getIndices(const aiMesh& mesh)
+{
+	auto indices = std::make_shared<std::vector<unsigned int>>();
+	auto facesCount = mesh.mNumFaces;
+	for (int i = 0; i < facesCount; ++i)
+	{
+		auto face = mesh.mFaces[i];
+		for (int j = 0; j < face.mNumIndices; ++j) {
+			indices->push_back(face.mIndices[j]);
+		}
+	}
+	return indices;
+}
+std::shared_ptr<std::vector<glm::vec3>> getNormals(const aiMesh& mesh,
+	const aiMatrix4x4& transform,
+	unsigned int vertexCount)
+{
+	std::shared_ptr<std::vector<glm::vec3>> normals;
+	if (!mesh.HasNormals())
+	{
+		return normals;
+	}
+	normals = std::make_shared<std::vector<glm::vec3>>();
+	for (int i = 0; i < vertexCount; ++i)
+	{
+		auto normal = transform * mesh.mNormals[i];
+		normals->push_back(to_vec3(normal));
+	}
+	return normals;
+}
+std::shared_ptr<std::vector<glm::vec2>> getUV0(const aiMesh& mesh, const aiMatrix4x4& transform, unsigned int vertexCount)
+{
+	std::shared_ptr<std::vector<glm::vec2>> uv0;
+	if (!mesh.HasTextureCoords(0))
+	{
+		return uv0;
+	}
+	uv0 = std::make_shared<std::vector<glm::vec2>>();
+	for (int i = 0; i < vertexCount; ++i)
+	{
+		auto uv = transform * mesh.mTextureCoords[0][i];
+		uv0->push_back(to_vec2(uv));
+	}
+	return uv0;
+}
 std::shared_ptr<mesh_asset> getMesh(const aiScene* scene, std::string& filePath)
 {
     if (!scene->HasMeshes())
@@ -155,73 +234,28 @@ std::shared_ptr<mesh_asset> getMesh(const aiScene* scene, std::string& filePath)
         throw std::runtime_error("first mesh in path:" + filePath + " has no positions defined in it!");
     }
 
+	auto firstMesh = scene->mMeshes[0];
     auto transform =  scene->mRootNode->mTransformation;
     auto vertexCount = scene->mMeshes[0]->mNumVertices;
-    auto positions = std::make_shared<std::vector<glm::vec3>>();
-    for (int i = 0; i < vertexCount; ++i)
-    {
-        auto vertex = transform * scene->mMeshes[0]->mVertices[i];
-        positions->push_back(to_vec3(vertex));
-    }
-
-    auto facesCount = scene->mMeshes[0]->mNumFaces;
-    auto indices = std::make_shared<std::vector<unsigned int>>();
-    for (int i = 0; i < facesCount; ++i)
-    {
-        auto face = scene->mMeshes[0]->mFaces[i];
-        for (int j = 0; j < face.mNumIndices; ++j) {
-            indices->push_back(face.mIndices[j]);
-        }
-    }
-
-    std::shared_ptr<std::vector<glm::vec3>> normals;
-    if (scene->mMeshes[0]->HasNormals())
-    {
-        normals = std::make_shared<std::vector<glm::vec3>>();
-        for (int i = 0; i < vertexCount; ++i)
-        {
-            auto normal = transform * scene->mMeshes[0]->mNormals[i];
-            normals->push_back(to_vec3(normal));
-        }
-    }
-
-    std::shared_ptr<std::vector<glm::vec3>> tangents;
+	
+	std::shared_ptr<std::vector<glm::vec3>> positions = getPositions(*firstMesh, transform, vertexCount);
+	std::shared_ptr<std::vector<unsigned int>> indices = getIndices(*firstMesh);
+	std::shared_ptr<std::vector<glm::vec3>> normals = getNormals(*firstMesh, transform, vertexCount);
+	std::shared_ptr<std::vector<glm::vec2>> uv0 = getUV0(*firstMesh, transform, vertexCount);
+	
+	std::shared_ptr<std::vector<glm::vec3>> tangents;
     std::shared_ptr<std::vector<glm::vec3>> bitangents;
+    setTangents(*firstMesh, transform, vertexCount, tangents, bitangents);
+	
 
-    if (scene->mMeshes[0]->HasTangentsAndBitangents())
-    {
-        tangents = std::make_shared<std::vector<glm::vec3>>();
-        bitangents = std::make_shared<std::vector<glm::vec3>>();
-
-        for (int i = 0; i < vertexCount; ++i)
-        {
-            auto tangent = transform * scene->mMeshes[0]->mTangents[i];
-            tangents->push_back(to_vec3(tangent));
-
-            auto bitangent = transform * scene->mMeshes[0]->mBitangents[i];
-            bitangents->push_back(to_vec3(bitangent));
-        }
-    }
-
-    std::shared_ptr<std::vector<glm::vec2>> uv0;
-    if (scene->mMeshes[0]->HasTextureCoords(0))
-    {
-        uv0 = std::make_shared<std::vector<glm::vec2>>();
-        for (int i = 0; i < vertexCount; ++i)
-        {
-            auto uv = transform * scene->mMeshes[0]->mTextureCoords[0][i];
-            uv0->push_back(to_vec2(uv));
-        }
-    }
-
-    auto mesh = std::make_shared<mesh_asset>();
-    mesh->positions = positions;
-    mesh->normals = normals;
-    mesh->tangents = tangents;
-    mesh->bitangents = bitangents;
-    mesh->indices = indices;
-    mesh->UV0 = uv0;
-    mesh->name = filePath;
+	auto mesh = std::make_shared<mesh_asset>();
+	mesh->positions = positions;
+	mesh->normals = normals;
+	mesh->tangents = tangents;
+	mesh->bitangents = bitangents;
+	mesh->indices = indices;
+	mesh->UV0 = uv0;
+	mesh->name = filePath;
     return mesh;
 }
 
