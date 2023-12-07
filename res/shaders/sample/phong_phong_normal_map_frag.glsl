@@ -1,7 +1,8 @@
    #version 330 core
 
 uniform sampler2D u_diffuseSampler;
-
+uniform sampler2D u_normalSampler;
+   
 uniform vec3 u_light_color;
 
 uniform vec3 u_ambient;
@@ -23,7 +24,7 @@ out vec4 FragColor;
 void main()
 {
     // obtain normal from normal map in range [0,1]
-    vec3 normal = texture(u_diffuseSampler, fs_in.texCoord).rgb;
+    vec3 normal = texture(u_normalSampler, fs_in.texCoord).rgb;
     // transform normal vector to range [-1,1]
     normal = normal * 2.0 - 1.0;
 

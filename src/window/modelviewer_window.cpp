@@ -108,10 +108,6 @@ std::vector<std::shared_ptr<modelViewer::render::texture>> modelviewer_window::g
         {
             continue;
         }
-        if (textureInfo.isNormal)
-        {
-            continue;
-        }
 
         auto textureAsset = m_TextureLoader.load(textureInfo.path, 4);
 
@@ -120,8 +116,8 @@ std::vector<std::shared_ptr<modelViewer::render::texture>> modelviewer_window::g
         setup.isMipMapActive = true;
         setup.mipMapMaxLevel = 1000;
         setup.mipMapMinLevel = 0;
-        //TODO set wrapping mode here
-
+		setup.type = textureInfo.type;
+		//TODO set wrap mode
         auto texturePtr = std::make_shared<texture>(setup);
         textures.push_back(texturePtr);
     }

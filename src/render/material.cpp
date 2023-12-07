@@ -12,7 +12,7 @@ material::material(material_info &info, std::vector<std::shared_ptr<texture>>& t
     m_Program = program;
 
     m_Program->bind();
-    m_ModelLocation = m_Program->getUniformLocation(m_ModelViewUniform);;
+    m_ModelLocation = m_Program->getUniformLocation(m_ModelUniform);;
     m_ModelViewLocation = m_Program->getUniformLocation(m_ModelViewUniform);
     m_MVPLocation = m_Program->getUniformLocation(m_MVPUniform);
     m_ProjectionLocation = m_Program->getUniformLocation(m_ProjectionUniform);
@@ -104,6 +104,7 @@ void material::applyMaterialProperties() {
 void material::bindTextures(std::vector<std::shared_ptr<texture>>& textures) 
 {
     int index = 0;
+	std::set<int> assignedLocs;
     for (const auto &item: textures)
     {
         auto loc = m_Program->getUniformLocation(getSamplerName(item->getType()));
@@ -111,6 +112,12 @@ void material::bindTextures(std::vector<std::shared_ptr<texture>>& textures)
         {
             continue;
         }
+		if (assignedLocs.contains(loc))
+		{
+			throw std::runtime_error("the texture would override the previous ones since they share the same sampler");
+		}
+
+		assignedLocs.insert(loc);
         
         item->active(index);
         m_Program->bind();

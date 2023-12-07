@@ -38,7 +38,6 @@ namespace modelViewer::res
         texture_asset_mapping_mode mappingMode = texture_asset_mapping_mode::uv;
         texture_asset_wrapping_mode wrappingMode = texture_asset_wrapping_mode::wrap;
         texture_asset_type type = texture_asset_type::diffuse;
-        bool isNormal = false;
     };
     
     struct shader_asset_info

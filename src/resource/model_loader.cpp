@@ -143,7 +143,6 @@ void fetchTextures(aiMaterial* material, model_info& info, aiTextureType type)
         
         texture_asset_info textureAssetInfo;
         textureAssetInfo.uvIndex = uvIndex;
-        textureAssetInfo.isNormal = type == aiTextureType_NORMALS;
         textureAssetInfo.path = path.C_Str();
         textureAssetInfo.wrappingMode = getWrappingMode(wrapMode);
         textureAssetInfo.mappingMode = getMappingMode(mapping);

@@ -17,12 +17,17 @@ int main()
     info.material.shaders.push_back(fragShader);
     info.material.shaders.push_back(vertShader);
     
-    texture_asset_info textureAssetInfo;
-    textureAssetInfo.type = texture_asset_type::diffuse;
-    textureAssetInfo.path = "res/textures/sample.png";
-    info.material.textures.push_back(textureAssetInfo);
+    texture_asset_info diffuseTexture;
+	diffuseTexture.type = texture_asset_type::diffuse;
+	diffuseTexture.path = "res/textures/white_pixel.png";
+    info.material.textures.push_back(diffuseTexture);
+
+	texture_asset_info normalTexture;
+	normalTexture.type = texture_asset_type::normal;
+	normalTexture.path = "res/textures/normal_map_wall.png";
+	info.material.textures.push_back(normalTexture);
     
-    info.path = "res/models/complex/monkey.fbx";
+    info.path = "res/models/primitives/plane.fbx";
     info.name = "default model";
     window.addModel(info);
     

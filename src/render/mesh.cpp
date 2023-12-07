@@ -79,13 +79,13 @@ void modelViewer::render::mesh::bindAttributes(modelViewer::render::material &ma
     }
 
     int tangentIndex = material.getAttributeLocation("v_tangent");
-    if(m_NormalBuffer && normalIndex >= 0)
+    if(m_TangentsBuffer && tangentIndex >= 0)
     {
         m_TangentsBuffer->bindBuffer(tangentIndex);
     }
 
     int bitangentIndex = material.getAttributeLocation("v_bitangent");
-    if(m_NormalBuffer && normalIndex >= 0)
+    if(m_BitangentsBuffer && bitangentIndex >= 0)
     {
         m_BitangentsBuffer->bindBuffer(bitangentIndex);
     }
