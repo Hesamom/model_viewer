@@ -12,14 +12,14 @@ int main()
     window.setClearFlag(glm::vec4(0.15f,0.15f,0.15f,0));
     
     model_info info;
-    shader_asset_info fragShader { "res/shaders/sample/phong_phong_normal_map_frag.glsl", shaderType::fragment};
-    shader_asset_info vertShader { "res/shaders/sample/phong_phong_normal_map_vert.glsl", shaderType::vertex};
+    shader_asset_info fragShader { "res/shaders/sample/phong_phong_normal_map_frag_2.glsl", shaderType::fragment};
+    shader_asset_info vertShader { "res/shaders/sample/phong_phong_normal_map_vert_2.glsl", shaderType::vertex};
     info.material.shaders.push_back(fragShader);
     info.material.shaders.push_back(vertShader);
     
     texture_asset_info diffuseTexture;
 	diffuseTexture.type = texture_asset_type::diffuse;
-	diffuseTexture.path = "res/textures/white_pixel.png";
+	diffuseTexture.path = "res/textures/wall.jpg";
     info.material.textures.push_back(diffuseTexture);
 
 	texture_asset_info normalTexture;
@@ -29,6 +29,9 @@ int main()
     
     info.path = "res/models/primitives/plane.fbx";
     info.name = "default model";
+	info.material.propertySet.diffuseAlbedo = glm::vec3 (1.0f);
+	info.material.propertySet.specularAlbedo = glm::vec3 (0.2f);
+	info.material.propertySet.shininess = 10;
     window.addModel(info);
     
     window.draw();

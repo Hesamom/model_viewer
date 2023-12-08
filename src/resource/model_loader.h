@@ -13,8 +13,8 @@ namespace modelViewer::res {
         const std::string  m_PhongVertPath = "res/shaders/sample/phong_phong_vert.glsl";
         const std::string  m_PhongFragPath = "res/shaders/sample/phong_phong_frag.glsl";
 
-		const std::string  m_PhongNormalVertPath = "res/shaders/sample/phong_phong_normal_map_vert.glsl";
-		const std::string  m_PhongNormalFragPath = "res/shaders/sample/phong_phong_normal_map_frag.glsl";
+		const std::string  m_PhongNormalVertPath = "res/shaders/sample/phong_phong_normal_map_vert_2.glsl";
+		const std::string  m_PhongNormalFragPath = "res/shaders/sample/phong_phong_normal_map_frag_2.glsl";
 		
         const std::string  m_GouraudVertPath = "res/shaders/sample/phong_gouraud_vert.glsl";
         const std::string  m_GouraudFragPath = "res/shaders/sample/phong_gouraud_frag.glsl";
