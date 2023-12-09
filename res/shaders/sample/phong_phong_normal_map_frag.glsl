@@ -13,10 +13,8 @@ uniform float u_shininess;
 in VS_OUT
 {
     vec2 texCoord;
-    vec3 normal;
     vec3 lightDir;
     vec3 viewDir;
-    mat3 TBN;
 } fs_in;
 
 out vec4 FragColor;
@@ -27,9 +25,7 @@ void main()
     vec3 normal = texture(u_normalSampler, fs_in.texCoord).rgb;
     // transform normal vector to range [-1,1]
     normal = normal * 2.0 - 1.0;
-
-    normal = normalize(fs_in.TBN * normal);
-
+    
     vec3 lightDir = normalize(fs_in.lightDir);
     vec3 viewDir = normalize(fs_in.viewDir);
 
