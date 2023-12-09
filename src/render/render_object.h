@@ -33,6 +33,7 @@ namespace modelViewer::render
         
         void setLight(const light_directional& light);
         void render(glm::mat4 view, glm::mat4 projection, render_mode mode);
+		void renderShadow();
     };
 }
 #endif

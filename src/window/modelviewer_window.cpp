@@ -1,8 +1,5 @@
-﻿
-#include <GL/glew.h>
-#include <imgui/imgui.h>
+﻿#include <imgui/imgui.h>
 #include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
 #include "modelviewer_window.h"
 #include "glfw/glfw3.h"
 #include "regex"
@@ -14,26 +11,7 @@ using namespace modelViewer::common;
 void modelviewer_window::onRender(float elapsed) {
 
     addNewModels();
-  
-    glClearBufferfv(GL_COLOR, 0, &m_ClearFlag.x);
-    glClear(GL_DEPTH_BUFFER_BIT);
-    
-    auto viewMatrix = glm::lookAt(
-            m_CameraPosition, // Camera is at (4,3,3), in World Space
-            glm::vec3(0,0,0), // and looks at the origin
-            glm::vec3(0,1,0));  // Head is up (set to 0,-1,0 to look upside-down
-            
-    auto aspectRatio = (float)getWidth()/getHeight();
-    auto projection = glm::perspective<float>(glm::radians(45.0),aspectRatio,0.1,100.0);
-    
-    //auto viewProjection = projection * viewMatrix;
-
-    m_Platform.draw(viewMatrix, projection);
-    for (auto& object : m_Scene.getObjects()) {
-
-        object->setLight(m_Scene.getLight());
-        object->render(viewMatrix, projection, render_mode::triangles);
-    }
+	m_Renderer.render(m_Scene, m_Camera, true);
 }
 
 
@@ -52,12 +30,15 @@ modelviewer_window::modelviewer_window(int width, int height, std::string title,
     setVsync(false);
     setTargetFrameRate(360);
     updateCameraPosition();
+	//TODO set viewport when the window size changes too
+	m_Camera.setViewPort(getWidth(), getHeight());
+	m_Renderer.init(m_ObjectFactory.getShaderLoader());
     
     model_platform_info info;
     info.sizeY = 12;
     info.sizeX = 12;
     info.lineSpace = 1;
-    m_Platform.init(m_ObjectFactory.getShaderLoader(), info);
+    //m_Platform.init(m_ObjectFactory.getShaderLoader(), info);
 }
 
 modelviewer_window::~modelviewer_window() {
@@ -65,7 +46,8 @@ modelviewer_window::~modelviewer_window() {
 }
 
 void modelviewer_window::setClearFlag(glm::vec4 color) {
-    m_ClearFlag = color;
+    
+	m_Renderer.setClearFlag(color);
 }
 
 
@@ -117,9 +99,7 @@ void modelviewer_window::onMousePositionChanged(double xpos, double ypos) {
 
 void modelviewer_window::updateCameraPosition() {
     auto pos = getPosition(m_PitchAngle, m_YawAngle, m_ZoomLevel);
-    m_CameraPosition.x = pos.x;
-    m_CameraPosition.y = pos.y;
-    m_CameraPosition.z = pos.z;
+	m_Camera.setPosition(pos);
 }
 
 

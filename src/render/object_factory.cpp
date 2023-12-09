@@ -6,21 +6,6 @@ using namespace modelViewer::render;
 using namespace modelViewer::common;
 
 
-void verifyShader(shader& shader)
-{
-	shader.compile();
-	if(!shader.isCompiled())
-	{
-		throw std::runtime_error("shader compilation failed: \n" + shader.getCompilationLog());
-	}
-
-	auto log = shader.getCompilationLog();
-	if(!log.empty())
-	{
-		std::cout<< shader.getCompilationLog();
-	}
-}
-
 std::vector<std::shared_ptr<modelViewer::render::texture>> object_factory::getTextures(const model_info &info) {
 
 	std::vector<std::shared_ptr<modelViewer::render::texture>> textures;
@@ -69,23 +54,13 @@ std::shared_ptr<modelViewer::render::shader_program> object_factory::getProgram(
 		auto shaderAsset = m_ShaderLoader.load(shaderInfo.path, shaderInfo.type);
 		shader shader(shaderAsset);
 		shader.compile();
-		verifyShader(shader);
+		shader.verify();
 
 		shaders.push_back(shader);
 	}
 
 	auto program = std::make_shared<shader_program>(shaders);
-	if(!program->isLinked())
-	{
-		throw std::runtime_error(program->getLinkLog());
-	}
-
-	auto log = program->getLinkLog();
-	if(!log.empty())
-	{
-		std::cout << log << std::endl;
-	}
-
+	program->validate();
 	return program;
 }
 

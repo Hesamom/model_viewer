@@ -17,7 +17,6 @@ shader_program::shader_program(std::vector<shader> &shaders) {
     }
 
     glLinkProgram(m_ProgramId);
-    glValidateProgram(m_ProgramId);
 }
 
 shader_program::shader_program(std::initializer_list<shader> shaders) {
@@ -31,7 +30,6 @@ shader_program::shader_program(std::initializer_list<shader> shaders) {
     }
     
     glLinkProgram(m_ProgramId);
-    glValidateProgram(m_ProgramId);
 }
 
 
@@ -55,6 +53,8 @@ bool shader_program::isLinked() {
 }
 
 void shader_program::bind() {
+	
+	//TODO add guards 
     glUseProgram(m_ProgramId);
 }
 
@@ -90,6 +90,23 @@ void shader_program::setUniformInt(int location, int value) {
 
 void shader_program::setUniformMatrix4(int index, glm::mat4& mat) {
     glUniformMatrix4fv(index, 1, false, glm::value_ptr(mat));
+}
+
+void shader_program::validate()
+{
+	glValidateProgram(m_ProgramId);
+	int valid = 0;
+	glGetProgramiv(m_ProgramId, GL_VALIDATE_STATUS, &valid);
+	if (valid == GL_FALSE)
+	{
+		throw std::runtime_error("validation failed");
+	}
+	
+	auto log = getLinkLog();
+	if(!log.empty())
+	{
+		std::cout << log << std::endl;
+	}
 }
 
 

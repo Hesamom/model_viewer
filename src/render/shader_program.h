@@ -14,6 +14,7 @@ private:
         shader_program(std::initializer_list<shader> shaders);
         shader_program(std::vector<shader>& shaders);
         ~shader_program();
+		void validate();
         std::string getLinkLog();
         bool isLinked();
         void bind();

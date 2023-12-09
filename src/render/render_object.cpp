@@ -23,7 +23,9 @@ void render_object::render(glm::mat4 view, glm::mat4 projection, render_mode mod
     m_Material->setModel(model);
     m_Material->setModelView(modelView);
     m_Material->setProjection(projection);
-    
+
+	//TODO set material to use shadow map
+	
     m_Mesh->bind();
 
     switch (mode)
@@ -52,6 +54,12 @@ render_object::render_object(std::shared_ptr<material>& material, std::shared_pt
 
 void render_object::setLight(const light_directional &light) {
     m_Material->setLight(light);
+}
+
+void render_object::renderShadow()
+{
+	m_Mesh->bind();
+	m_Mesh->draw();
 }
 
 

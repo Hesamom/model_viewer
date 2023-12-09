@@ -16,6 +16,9 @@ material::material(const material_info &info, std::vector<std::shared_ptr<textur
     m_ModelViewLocation = m_Program->getUniformLocation(m_ModelViewUniform);
     m_MVPLocation = m_Program->getUniformLocation(m_MVPUniform);
     m_ProjectionLocation = m_Program->getUniformLocation(m_ProjectionUniform);
+	m_LightViewProjectionLocation = m_Program->getUniformLocation(m_LightViewProjectionUniform);
+
+	m_ShadowMapSamplerLocation = m_Program->getUniformLocation(m_ShadowSampler);
     
     applyMaterialProperties();
     bindTextures(textures);
@@ -160,4 +163,26 @@ void material::setLight(const light_directional &light) {
     {
         m_Program->setUniformVector3(lightColor, light.getColor());
     }
+}
+
+
+void material::setShadowMapSlot(int slot)
+{
+	if (m_ShadowMapSamplerLocation < 0)
+	{
+		return;
+	}
+
+	m_Program->bind();
+	m_Program->setUniformInt(m_ShadowMapSamplerLocation, slot);
+}
+
+void material::setLightViewProjection(glm::mat4& matrix)
+{
+	if (m_LightViewProjectionLocation < 0)
+	{
+		return;
+	}
+
+	m_Program->setUniformMatrix4(m_LightViewProjectionLocation, matrix);
 }
