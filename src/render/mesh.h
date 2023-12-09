@@ -22,7 +22,7 @@ namespace modelViewer::render {
         
         std::shared_ptr<modelViewer::res::mesh_asset> m_Asset;
     public:
-        void bindAttributes(modelViewer::render::material &material);
+        void bindAttributes(const modelViewer::render::material &material);
         void bind();
         void draw();
         void drawLines();

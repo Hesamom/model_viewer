@@ -3,20 +3,17 @@
 #define MODEL_VIEWER_MODELVIEWER_WINDOW_H
 #include "window.h"
 #include "../resource/model_info.h"
-#include "../resource/model_loader.h"
-#include "../resource/texture_loader.h"
-#include "../resource/shader_loader.h"
 #include "../render/render_scene.h"
 #include "glm/glm.hpp"
 #include "../render/model_platform_buffer.h"
 #include "file_picker_windows.h"
+#include "../render/object_factory.h"
 
 class modelviewer_window : public window {
     
 private:
-    modelViewer::res::model_loader m_MeshLoader;
-    modelViewer::res::texture_loader m_TextureLoader;
-    modelViewer::res::shader_loader m_ShaderLoader;
+    
+	modelViewer::render::object_factory m_ObjectFactory;
     modelViewer::render::render_scene m_Scene;
     modelViewer::render::model_platform_buffer m_Platform;
     file_picker_windows m_FilePicker {"select the model file"};
@@ -36,11 +33,7 @@ private:
     
             
     glm::vec<2,double,glm::defaultp> m_LastMousePosition;
-    
-    std::shared_ptr<modelViewer::render::shader_program> getProgram(modelViewer::res::model_info& info);
-    std::shared_ptr<modelViewer::render::mesh> getMesh(modelViewer::res::model_info& info);
-    std::vector<std::shared_ptr<modelViewer::render::texture>> getTextures(modelViewer::res::model_info& info);
-    
+	
     void addNewModels();
     void openDemoModel(std::string name);
     void updateCameraPosition();
@@ -58,8 +51,6 @@ public:
      ~modelviewer_window() override;
      void addModel(modelViewer::res::model_info& info);
      void setClearFlag(glm::vec4 color);
-
-    void file();
 };
 
 

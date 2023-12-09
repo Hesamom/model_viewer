@@ -6,7 +6,7 @@ using namespace modelViewer::render;
 using namespace modelViewer::res;
 
 
-material::material(material_info &info, std::vector<std::shared_ptr<texture>>& textures, std::shared_ptr<shader_program>& program) {
+material::material(const material_info &info, std::vector<std::shared_ptr<texture>>& textures, std::shared_ptr<shader_program>& program) {
 
     m_Info = info;
     m_Program = program;
@@ -138,11 +138,11 @@ void material::bind() {
     }
 }
 
-int material::getUniformLocation(std::string name) {
+int material::getUniformLocation(std::string name) const {
     return m_Program->getUniformLocation(name);
 }
 
-int material::getAttributeLocation(std::string name) {
+int material::getAttributeLocation(std::string name) const {
     return m_Program->getAttributeLocation(name);
 }
 

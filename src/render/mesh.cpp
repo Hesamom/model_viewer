@@ -44,7 +44,7 @@ modelViewer::render::mesh::mesh(std::shared_ptr<modelViewer::res::mesh_asset>& a
 
 modelViewer::render::mesh::~mesh() = default;
 
-void modelViewer::render::mesh::bindAttributes(modelViewer::render::material &material) {
+void modelViewer::render::mesh::bindAttributes(const modelViewer::render::material &material) {
     
     m_VertexArray.bind();
     

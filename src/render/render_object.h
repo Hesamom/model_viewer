@@ -28,7 +28,7 @@ namespace modelViewer::render
     public:
         render_object(std::shared_ptr<material>& material , std::shared_ptr<mesh>& mesh, const std::string& name);
         common::transform& getTransform();
-        void setTransform(common::transform& t);
+        void setTransform(const common::transform& t);
         std::shared_ptr<material>& getMaterial();
         
         void setLight(const light_directional& light);

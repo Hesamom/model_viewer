@@ -7,7 +7,7 @@ transform& render_object::getTransform() {
     return m_Transform;
 }
 
-void render_object::setTransform(transform &t) {
+void render_object::setTransform(const transform &t) {
     m_Transform = t;
 }
 

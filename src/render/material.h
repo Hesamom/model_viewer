@@ -41,14 +41,14 @@ namespace modelViewer::render
         void bindTextures(std::vector<std::shared_ptr<texture>>& textures);
         std::string  getSamplerName(modelViewer::res::texture_asset_type type);
     public:
-        explicit material(modelViewer::res::material_info& info, std::vector<std::shared_ptr<texture>>& textures, std::shared_ptr<shader_program>& program);
+        explicit material(const modelViewer::res::material_info& info, std::vector<std::shared_ptr<texture>>& textures, std::shared_ptr<shader_program>& program);
         void setMVP(glm::mat4& matrix);
         void setModelView(glm::mat4& matrix);
         void setProjection(glm::mat4& projection);
         void setModel(glm::mat4& model);
         void bind();
-        int getUniformLocation(std::string name);
-        int getAttributeLocation(std::string name);
+        int getUniformLocation(std::string name) const;
+        int getAttributeLocation(std::string name) const;
         void setLight(const light_directional& light);
     };
 }
