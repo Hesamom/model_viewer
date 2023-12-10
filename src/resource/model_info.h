@@ -31,7 +31,7 @@ namespace modelViewer::res
         clamp,
         mirror
     };
-    
+
     struct texture_asset_info
     {
         std::vector<std::string> paths;

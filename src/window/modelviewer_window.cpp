@@ -112,7 +112,7 @@ std::vector<std::shared_ptr<modelViewer::render::texture>> modelviewer_window::g
 
         texture_setup setup;
 
-        for (auto &path: textureInfo.paths){
+        for (auto& path: textureInfo.paths){
             setup.assets.push_back(m_TextureLoader.load(path, 4));
         }
 
@@ -122,7 +122,7 @@ std::vector<std::shared_ptr<modelViewer::render::texture>> modelviewer_window::g
 		setup.type = textureInfo.type;
 
 
-        if (setup.assets.size() > 1)
+        if (textureInfo.type == modelViewer::res::texture_asset_type::cube)
         {
             auto texturePtr = std::make_shared<texture_cube>(setup);
             textures.push_back(texturePtr);

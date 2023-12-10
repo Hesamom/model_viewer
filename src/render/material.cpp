@@ -30,6 +30,8 @@ std::string material::getSamplerName(modelViewer::res::texture_asset_type type) 
             return m_DiffuseSampler;
         case texture_asset_type::normal:
             return m_NormalSampler;
+        case texture_asset_type::cube:
+            return m_SkyboxSampler;
         default:
             throw std::runtime_error("not supported!");
     }

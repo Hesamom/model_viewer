@@ -34,6 +34,7 @@ window::window(int width, int height, const std::string& title, bool fullscreen,
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_DEPTH_TEST);
 
+
     if (fullscreen)
     {
         m_Monitor = glfwGetPrimaryMonitor();

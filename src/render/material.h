@@ -18,6 +18,7 @@ namespace modelViewer::render
         
         const std::string  m_DiffuseSampler = "u_diffuseSampler";
         const std::string  m_NormalSampler = "u_normalSampler";
+        const std::string  m_SkyboxSampler = "u_skybox";
         
         //TODO consider using a uniform block
         const std::string  m_MVPUniform = "m_MVP";
