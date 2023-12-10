@@ -25,10 +25,10 @@ namespace modelViewer::render {
     };
 
     struct texture_setup {
-        std::shared_ptr<modelViewer::res::texture_asset> asset;
+        std::vector<std::shared_ptr<modelViewer::res::texture_asset>> assets;
         unsigned int mipMapMinLevel = 0;
         unsigned int mipMapMaxLevel = 1000;
-        bool isMipMapActive = true;
+        bool isMipMapActive = false;
         texture_filtering_mode filteringMin = texture_filtering_mode::linear_linear;
         texture_filtering_mode filteringMag = texture_filtering_mode::linear;
         texture_wrapping_mode wrapping = texture_wrapping_mode::clamp_to_edge;

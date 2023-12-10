@@ -19,12 +19,12 @@ int main()
     
     texture_asset_info diffuseTexture;
 	diffuseTexture.type = texture_asset_type::diffuse;
-	diffuseTexture.path = "res/textures/wall.jpg";
+	diffuseTexture.paths.emplace_back("res/textures/wall.jpg");
     info.material.textures.push_back(diffuseTexture);
 
 	texture_asset_info normalTexture;
 	normalTexture.type = texture_asset_type::normal;
-	normalTexture.path = "res/textures/normal_map_wall.png";
+	normalTexture.paths.emplace_back("res/textures/normal_map_wall.png");
 	info.material.textures.push_back(normalTexture);
     
     info.path = "res/models/primitives/plane.fbx";

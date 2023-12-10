@@ -1,6 +1,7 @@
 ﻿#ifndef MODEL_VIEWER_TEXTURE_H
 #define MODEL_VIEWER_TEXTURE_H
 
+#include "../resource/model_info.h"
 #include "GL/glew.h"
 
 namespace modelViewer::render {
@@ -29,7 +30,7 @@ namespace modelViewer::render {
         }
 
         virtual unsigned int GetTextureType() = 0;
-        virtual modelViewer::res::texture_asset_type GetTextureAssetType() const = 0;
+        virtual res::texture_asset_type GetTextureAssetType() const = 0;
     private:
     public:
         virtual void active(int index) {

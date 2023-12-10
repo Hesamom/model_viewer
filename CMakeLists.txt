@@ -18,11 +18,13 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_COMPILE_WARNING_AS_ERROR OFF)
 file(GLOB_RECURSE SRC_FILES src/*)
 add_executable(model_viewer main.cpp ${SRC_FILES}
-        src/render/texture_setup.cpp
         src/render/texture_setup.h
         src/render/texture_format.cpp
         src/render/texture_format.h
-        src/render/texture.h)
+        src/render/texture.h
+        src/render/texture_cube.cpp
+        src/render/texture_cube.h
+)
 
 
 if (USE_PRE_COMPILED_HEADERS)

@@ -7,6 +7,7 @@
 #include "glfw/glfw3.h"
 #include "regex"
 #include "../render/material.h"
+#include "../render/texture_cube.h"
 
 using namespace modelViewer::res;
 using namespace modelViewer::render;
@@ -103,23 +104,34 @@ std::shared_ptr<modelViewer::render::mesh> modelviewer_window::getMesh(model_inf
 std::vector<std::shared_ptr<modelViewer::render::texture>> modelviewer_window::getTextures(model_info &info) {
 
     std::vector<std::shared_ptr<modelViewer::render::texture>> textures;
-    for (auto& textureInfo : info.material.textures ) {
-        if (textureInfo.path.empty())
+    for (auto& textureInfo : info.material.textures){
+        if (textureInfo.paths.size() == 0 || textureInfo.paths[0].empty())
         {
             continue;
         }
 
-        auto textureAsset = m_TextureLoader.load(textureInfo.path, 4);
-
         texture_setup setup;
-        setup.asset = textureAsset;
+
+        for (auto &path: textureInfo.paths){
+            setup.assets.push_back(m_TextureLoader.load(path, 4));
+        }
+
         setup.isMipMapActive = true;
         setup.mipMapMaxLevel = 1000;
         setup.mipMapMinLevel = 0;
 		setup.type = textureInfo.type;
-		//TODO set wrap mode
-        auto texturePtr = std::make_shared<texture_2D>(setup);
-        textures.push_back(texturePtr);
+
+
+        if (setup.assets.size() > 1)
+        {
+            auto texturePtr = std::make_shared<texture_cube>(setup);
+            textures.push_back(texturePtr);
+        }
+        else
+        {
+            auto texturePtr = std::make_shared<texture_2D>(setup);
+            textures.push_back(texturePtr);
+        }
     }
     
     return textures;
@@ -308,7 +320,7 @@ void modelviewer_window::openDemoModel(std::string name)
     info.material.shaders.push_back(vertShader);
 
     texture_asset_info textureAssetInfo;
-    textureAssetInfo.path = "res/textures/Transparent.png";
+    textureAssetInfo.paths.emplace_back("res/textures/Transparent.png");
     info.material.textures.push_back(textureAssetInfo);
 
     info.path = "res/models/primitives/" + name + ".fbx";

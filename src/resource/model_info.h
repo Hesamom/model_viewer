@@ -14,7 +14,8 @@ namespace modelViewer::res
     {
         none,
         diffuse,
-        normal
+        normal,
+        cube
     };
     
     enum class texture_asset_mapping_mode
@@ -33,7 +34,7 @@ namespace modelViewer::res
     
     struct texture_asset_info
     {
-        std::string path;
+        std::vector<std::string> paths;
         unsigned int uvIndex = 0;
         texture_asset_mapping_mode mappingMode = texture_asset_mapping_mode::uv;
         texture_asset_wrapping_mode wrappingMode = texture_asset_wrapping_mode::wrap;
