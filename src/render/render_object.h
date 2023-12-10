@@ -5,7 +5,7 @@
 #include "../common/transform.h"
 #include "shader_program.h"
 #include "mesh.h"
-#include "texture.h"
+#include "texture_2D.h"
 #include "material.h"
 
 namespace modelViewer::render

@@ -1,5 +1,5 @@
 ﻿#include "material.h"
-#include "texture.h"
+#include "texture_2D.h"
 #include "shader_program.h"
 
 using namespace modelViewer::render;
@@ -101,7 +101,7 @@ void material::applyMaterialProperties() {
     }
 }
 
-void material::bindTextures(std::vector<std::shared_ptr<texture>>& textures) 
+void material::bindTextures(std::vector<std::shared_ptr<texture>>& textures)
 {
     int index = 0;
 	std::set<int> assignedLocs;

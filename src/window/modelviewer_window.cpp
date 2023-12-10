@@ -118,7 +118,7 @@ std::vector<std::shared_ptr<modelViewer::render::texture>> modelviewer_window::g
         setup.mipMapMinLevel = 0;
 		setup.type = textureInfo.type;
 		//TODO set wrap mode
-        auto texturePtr = std::make_shared<texture>(setup);
+        auto texturePtr = std::make_shared<texture_2D>(setup);
         textures.push_back(texturePtr);
     }
     

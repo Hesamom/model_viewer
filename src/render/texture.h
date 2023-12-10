@@ -1,34 +1,49 @@
 ﻿#ifndef MODEL_VIEWER_TEXTURE_H
 #define MODEL_VIEWER_TEXTURE_H
 
-
-#include "../resource/texture_asset.h"
-#include "texture_setup.h"
+#include "GL/glew.h"
 
 namespace modelViewer::render {
-    class texture{
-    private:
+    class texture {
+    protected:
         unsigned int m_TextureId;
-        texture_setup m_Setup;
-        
-        bool isTextureResident();
-        void setFilteringModeMin(texture_filtering_mode textureFiltering);
-        void setFilteringModeMag(texture_filtering_mode textureFiltering);
-        void setBind(bool bind);
+
+        void setBind(bool bind) {
+
+            static unsigned int m_BoundTexture = -1;
+            if(bind && m_BoundTexture == m_TextureId)
+            {
+                return;
+            }
+
+            if (bind)
+            {
+                m_BoundTexture = m_TextureId;
+            }
+            else
+            {
+                m_BoundTexture = 0;
+            }
+
+            glBindTexture(GetTextureType(), m_BoundTexture);
+        }
+
+        virtual unsigned int GetTextureType() = 0;
+        virtual modelViewer::res::texture_asset_type GetTextureAssetType() const = 0;
+    private:
     public:
-        texture(texture_setup& texture_setup);
-        ~texture();
-        void active(int index);
-        texture_filtering_mode  getFilteringModeMin() const;
-        texture_filtering_mode  getFilteringModeMag() const;
-        texture_wrapping_mode getWrappingMode() const;
-        unsigned int getMipMapMinLevel();
-        unsigned int getMipMapMaxLevel();
-        void setMipMapLevels(unsigned int min, unsigned int max);
-        void setFilteringMode(texture_filtering_mode textureFilteringMin, texture_filtering_mode textureFilteringMag);
-        void setWrappingMode(texture_wrapping_mode textureWrapping);
-        modelViewer::res::texture_asset_type getType() const;
+        virtual void active(int index) {
+            int firstIndex = GL_TEXTURE0;
+            int slotIndex = firstIndex + index;
+            glActiveTexture(slotIndex);
+            setBind(true);
+        }
+
+        modelViewer::res::texture_asset_type getType() const {
+            return GetTextureAssetType();
+        }
     };
 }
+
 
 #endif

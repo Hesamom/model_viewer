@@ -21,7 +21,8 @@ add_executable(model_viewer main.cpp ${SRC_FILES}
         src/render/texture_setup.cpp
         src/render/texture_setup.h
         src/render/texture_format.cpp
-        src/render/texture_format.h)
+        src/render/texture_format.h
+        src/render/texture.h)
 
 
 if (USE_PRE_COMPILED_HEADERS)

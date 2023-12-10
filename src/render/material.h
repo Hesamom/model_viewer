@@ -2,11 +2,12 @@
 #define MODEL_VIEWER_MATERIAL_H
 #include "../resource/model_info.h"
 #include "light_directional.h"
+#include "texture.h"
 
 
 namespace modelViewer::render
 {
-    class texture;
+    class texture_2D;
     class shader_program;
     class material
     {
