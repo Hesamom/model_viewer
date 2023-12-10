@@ -180,8 +180,8 @@ void window::initContext(bool vSync) {
     glewInit();
     glfwSwapInterval(vSync ? 1 : 0);
     
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
+    //glEnable(GL_CULL_FACE);
+    //glCullFace(GL_FRONT);
 
     glEnable(GL_DEPTH_TEST);
     
