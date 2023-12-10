@@ -1,5 +1,6 @@
 ﻿
 #include "object_factory.h"
+#include "texture_cube.h"
 
 using namespace modelViewer::res;
 using namespace modelViewer::render;
@@ -10,22 +11,35 @@ std::vector<std::shared_ptr<modelViewer::render::texture>> object_factory::getTe
 
 	std::vector<std::shared_ptr<modelViewer::render::texture>> textures;
 	for (auto& textureInfo : info.material.textures ) {
-		if (textureInfo.path.empty())
+		if (textureInfo.paths.empty())
 		{
 			continue;
 		}
 
-		auto textureAsset = m_TextureLoader.load(textureInfo.path, 4);
+        texture_setup setup;
 
-		texture_setup setup;
-		setup.asset = textureAsset;
-		setup.isMipMapActive = true;
-		setup.mipMapMaxLevel = 1000;
-		setup.mipMapMinLevel = 0;
-		setup.type = textureInfo.type;
-		//TODO set wrap mode
-		auto texturePtr = std::make_shared<texture>(setup);
-		textures.push_back(texturePtr);
+        //TODO set wrap mode
+        setup.isMipMapActive = true;
+        setup.mipMapMaxLevel = 1000;
+        setup.mipMapMinLevel = 0;
+        setup.type = textureInfo.type;
+
+        for (auto &path: textureInfo.paths)
+        {
+            auto textureAsset = m_TextureLoader.load(path, 4);
+            setup.assets.emplace_back(textureAsset);
+        }
+
+        if (textureInfo.type == res::texture_asset_type::cube)
+        {
+            auto texturePtr = std::make_shared<texture_cube>(setup);
+            textures.push_back(texturePtr);
+        }
+        else
+        {
+            auto texturePtr = std::make_shared<texture_2D>(setup);
+            textures.push_back(texturePtr);
+        }
 	}
 
 	return textures;

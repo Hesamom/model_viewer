@@ -197,7 +197,7 @@ void modelviewer_window::openDemoModel(std::string name)
     info.material.shaders.push_back(vertShader);
 
     texture_asset_info textureAssetInfo;
-    textureAssetInfo.path = "res/textures/Transparent.png";
+    textureAssetInfo.paths.emplace_back("res/textures/Transparent.png");
     info.material.textures.push_back(textureAssetInfo);
 
     info.path = "res/models/primitives/" + name + ".fbx";
