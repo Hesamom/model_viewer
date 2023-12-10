@@ -6,7 +6,7 @@ using namespace modelViewer::render;
 using namespace modelViewer::res;
 
 
-material::material(material_info &info, std::vector<std::shared_ptr<texture>>& textures, std::shared_ptr<shader_program>& program) {
+material::material(const material_info &info, std::vector<std::shared_ptr<texture>>& textures, std::shared_ptr<shader_program>& program) {
 
     m_Info = info;
     m_Program = program;
@@ -16,6 +16,9 @@ material::material(material_info &info, std::vector<std::shared_ptr<texture>>& t
     m_ModelViewLocation = m_Program->getUniformLocation(m_ModelViewUniform);
     m_MVPLocation = m_Program->getUniformLocation(m_MVPUniform);
     m_ProjectionLocation = m_Program->getUniformLocation(m_ProjectionUniform);
+	m_LightViewProjectionLocation = m_Program->getUniformLocation(m_LightViewProjectionUniform);
+
+	m_ShadowMapSamplerLocation = m_Program->getUniformLocation(m_ShadowSampler);
     
     applyMaterialProperties();
     bindTextures(textures);
@@ -140,11 +143,11 @@ void material::bind() {
     }
 }
 
-int material::getUniformLocation(std::string name) {
+int material::getUniformLocation(std::string name) const {
     return m_Program->getUniformLocation(name);
 }
 
-int material::getAttributeLocation(std::string name) {
+int material::getAttributeLocation(std::string name) const {
     return m_Program->getAttributeLocation(name);
 }
 
@@ -162,4 +165,26 @@ void material::setLight(const light_directional &light) {
     {
         m_Program->setUniformVector3(lightColor, light.getColor());
     }
+}
+
+
+void material::setShadowMapSlot(int slot)
+{
+	if (m_ShadowMapSamplerLocation < 0)
+	{
+		return;
+	}
+
+	m_Program->bind();
+	m_Program->setUniformInt(m_ShadowMapSamplerLocation, slot);
+}
+
+void material::setLightViewProjection(glm::mat4& matrix)
+{
+	if (m_LightViewProjectionLocation < 0)
+	{
+		return;
+	}
+
+	m_Program->setUniformMatrix4(m_LightViewProjectionLocation, matrix);
 }

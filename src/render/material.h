@@ -19,18 +19,22 @@ namespace modelViewer::render
         const std::string  m_DiffuseSampler = "u_diffuseSampler";
         const std::string  m_NormalSampler = "u_normalSampler";
         const std::string  m_SkyboxSampler = "u_skybox";
-        
+		const std::string  m_ShadowSampler = "u_shadowSampler";
+
         //TODO consider using a uniform block
         const std::string  m_MVPUniform = "m_MVP";
         const std::string  m_ModelViewUniform = "m_MV";
         const std::string  m_ModelUniform = "m_Model";
         const std::string  m_ProjectionUniform = "m_Projection";
-        
+		const std::string  m_LightViewProjectionUniform = "m_LightViewProjection";
+
         int m_MVPLocation = -1;
         int m_ModelViewLocation = -1;
         int m_ModelLocation = -1;
         int m_ProjectionLocation = -1;
-        
+		int m_LightViewProjectionLocation = -1;
+		int m_ShadowMapSamplerLocation = -1;
+
         const std::string  m_AmbientAlbedo = "u_ambient";
         const std::string  m_DiffuseAlbedo = "u_diffuseAlbedo";
         const std::string  m_SpecularAlbedo = "u_specularAlbedo";
@@ -38,20 +42,26 @@ namespace modelViewer::render
         
         const std::string  m_LightPos = "u_light_pos";
         const std::string  m_LightColor = "u_light_color";
-        
+
+		const std::set<int> m_AssignedTextureLocations;
+
         void applyMaterialProperties();
-        void bindTextures(std::vector<std::shared_ptr<texture>>& textures);
         std::string  getSamplerName(modelViewer::res::texture_asset_type type);
     public:
-        explicit material(modelViewer::res::material_info& info, std::vector<std::shared_ptr<texture>>& textures, std::shared_ptr<shader_program>& program);
+        explicit material(const modelViewer::res::material_info& info, std::vector<std::shared_ptr<texture>>& textures, std::shared_ptr<shader_program>& program);
         void setMVP(glm::mat4& matrix);
         void setModelView(glm::mat4& matrix);
         void setProjection(glm::mat4& projection);
         void setModel(glm::mat4& model);
         void bind();
-        int getUniformLocation(std::string name);
-        int getAttributeLocation(std::string name);
+        int getUniformLocation(std::string name) const;
+        int getAttributeLocation(std::string name) const;
         void setLight(const light_directional& light);
+		void bindTextures(std::vector<std::shared_ptr<texture>>& textures);
+
+
+		void setShadowMapSlot(int slot);
+		void setLightViewProjection(glm::mat4& matrix);
     };
 }
 

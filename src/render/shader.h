@@ -17,6 +17,7 @@ namespace modelViewer::render {
         void destroy() const;
         std::string  getCompilationLog();
         bool isCompiled();
+		void verify();
         res::shaderType getType();
         unsigned int getId() const;
     };

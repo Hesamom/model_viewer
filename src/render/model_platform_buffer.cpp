@@ -5,7 +5,7 @@
 using namespace modelViewer::render;
 using namespace modelViewer::res;
 
-std::shared_ptr<mesh> generateMesh(const model_platform_info& info)
+std::shared_ptr<mesh> generateGridMesh(const model_platform_info& info)
 {
     auto positions = std::make_shared<std::vector<glm::vec3>>();
     auto colors = std::make_shared<std::vector<glm::vec4>>();
@@ -71,29 +71,97 @@ std::shared_ptr<mesh> generateMesh(const model_platform_info& info)
     return meshPtr;
 }
 
-void model_platform_buffer::draw(glm::mat4 view, glm::mat4 projection) {
-    m_Object->render(view, projection, render_mode::lines);
+std::shared_ptr<mesh> generatePlaneMesh(const model_platform_info& info)
+{
+	auto positions = std::make_shared<std::vector<glm::vec3>>();
+	auto normals = std::make_shared<std::vector<glm::vec3>>();
+	
+	float xWidth = info.sizeX * info.lineSpace;
+	float zWidth = info.sizeY * info.lineSpace;
+	
+	float height = -1;
+
+	positions->emplace_back(xWidth/2, height , -zWidth/2);
+	positions->emplace_back(-xWidth/2, height , -zWidth/2);
+	positions->emplace_back(-xWidth/2, height , zWidth/2);
+	positions->emplace_back(xWidth/2, height , zWidth/2);
+
+	for (int i = 0; i < 4; ++i) {
+		normals->emplace_back(0, 1 , 0);
+	}
+	
+	
+	auto indices = std::make_shared<std::vector<unsigned int>>();
+	indices->emplace_back(0);
+	indices->emplace_back(1);
+	indices->emplace_back(2);
+
+	indices->emplace_back(0);
+	indices->emplace_back(2);
+	indices->emplace_back(3);
+	
+	auto meshAsset = std::make_shared<mesh_asset>();
+	meshAsset->positions = positions;
+	meshAsset->indices = indices;
+	meshAsset->normals = normals;
+
+	auto meshPtr = std::make_shared<mesh>(meshAsset);
+	return meshPtr;
 }
 
-void model_platform_buffer::init(shader_loader &shaderLoader,
-                                 const model_platform_info &info) {
-    auto mesh = generateMesh(info);
-    auto fragShaderAsset = shaderLoader.load(m_FragShaderPath, shaderType::fragment);
-    auto vertexShaderAsset = shaderLoader.load(m_VertShaderPath, shaderType::vertex);
-    shader fragShader (fragShaderAsset);
-    fragShader.compile();
-    
-    shader vertexShader (vertexShaderAsset);
-    vertexShader.compile();
-    auto program = std::make_shared<shader_program>(std::initializer_list<shader>{fragShader, vertexShader});
-    if (!program->isLinked())
-    {
-        std::cerr<< program->getLinkLog() << "\n";
-    }
 
-    material_info materialInfo;
-    std::vector<std::shared_ptr<texture>> textures;
-    auto mat = std::make_shared<material>(materialInfo, textures, program);
-    
-    m_Object = std::make_unique<render_object>(mat, mesh, "platform");
+std::shared_ptr<modelViewer::render::render_object> model_platform_buffer::generateGrid(shader_loader &shaderLoader,
+	const model_platform_info &info)
+{
+	auto mesh = generateGridMesh(info);
+	auto fragShaderAsset = shaderLoader.load(m_GridFragShaderPath, shaderType::fragment);
+	auto vertexShaderAsset = shaderLoader.load(m_GridVertShaderPath, shaderType::vertex);
+	shader fragShader (fragShaderAsset);
+	fragShader.compile();
+	fragShader.verify();
+	
+	shader vertexShader (vertexShaderAsset);
+	vertexShader.compile();
+	vertexShader.verify();
+	
+	auto program = std::make_shared<shader_program>(std::initializer_list<shader>{fragShader, vertexShader});
+	program->validate();
+
+	material_info materialInfo;
+	std::vector<std::shared_ptr<texture>> textures;
+	auto mat = std::make_shared<material>(materialInfo, textures, program);
+	
+	auto grid = std::make_shared<render_object>(mat, mesh, "platform_grid");
+	grid->setRenderMode(render_mode::lines);
+	grid->setCastShadows(false);
+	grid->setReceiveShadows(false);
+	
+	return grid;
+}
+
+std::shared_ptr<modelViewer::render::render_object> model_platform_buffer::generatePlane(shader_loader &shaderLoader,
+	const model_platform_info &info)
+{
+	auto mesh = generatePlaneMesh(info);
+	auto fragShaderAsset = shaderLoader.load(m_PlaneFragShaderPath, shaderType::fragment);
+	auto vertexShaderAsset = shaderLoader.load(m_PlaneVertShaderPath, shaderType::vertex);
+	shader fragShader (fragShaderAsset);
+	fragShader.compile();
+	fragShader.verify();
+	
+	shader vertexShader (vertexShaderAsset);
+	vertexShader.compile();
+	vertexShader.verify();
+	
+	auto program = std::make_shared<shader_program>(std::initializer_list<shader>{fragShader, vertexShader});
+	program->validate();
+
+	material_info materialInfo;
+	std::vector<std::shared_ptr<texture>> textures;
+	auto mat = std::make_shared<material>(materialInfo, textures, program);
+
+	auto plane = std::make_shared<render_object>(mat, mesh, "platform_plane");
+	plane->setCastShadows(false);
+	
+	return plane;
 }

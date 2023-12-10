@@ -1,13 +1,8 @@
-﻿
-#include <GL/glew.h>
-#include <imgui/imgui.h>
+﻿#include <imgui/imgui.h>
 #include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
 #include "modelviewer_window.h"
 #include "glfw/glfw3.h"
 #include "regex"
-#include "../render/material.h"
-#include "../render/texture_cube.h"
 
 using namespace modelViewer::res;
 using namespace modelViewer::render;
@@ -16,26 +11,7 @@ using namespace modelViewer::common;
 void modelviewer_window::onRender(float elapsed) {
 
     addNewModels();
-  
-    glClearBufferfv(GL_COLOR, 0, &m_ClearFlag.x);
-    glClear(GL_DEPTH_BUFFER_BIT);
-    
-    auto viewMatrix = glm::lookAt(
-            m_CameraPosition, // Camera is at (4,3,3), in World Space
-            glm::vec3(0,0,0), // and looks at the origin
-            glm::vec3(0,1,0));  // Head is up (set to 0,-1,0 to look upside-down
-            
-    auto aspectRatio = (float)getWidth()/getHeight();
-    auto projection = glm::perspective<float>(glm::radians(45.0),aspectRatio,0.1,100.0);
-    
-    //auto viewProjection = projection * viewMatrix;
-
-    m_Platform.draw(viewMatrix, projection);
-    for (auto& object : m_Scene.getObjects()) {
-
-        object->setLight(m_Scene.getLight());
-        object->render(viewMatrix, projection, render_mode::triangles);
-    }
+	m_Renderer.render(m_Scene, m_Camera, true);
 }
 
 
@@ -44,98 +20,6 @@ void modelviewer_window::addModel(modelViewer::res::model_info& info) {
     m_NewModelsQueue.push_back(info);
 }
 
-
-void verifyShader(shader& shader)
-{
-    shader.compile();
-    if(!shader.isCompiled())
-    {
-        throw std::runtime_error("shader compilation failed: \n" + shader.getCompilationLog());
-    }
-
-    auto log = shader.getCompilationLog();
-    if(!log.empty())
-    {
-        std::cout<< shader.getCompilationLog();
-    }
-}
-
-std::shared_ptr<modelViewer::render::shader_program> modelviewer_window::getProgram(model_info &info) {
-
-    std::vector<shader> shaders;
-    for (auto& shaderInfo : info.material.shaders) {
-        
-        auto shaderAsset = m_ShaderLoader.load(shaderInfo.path, shaderInfo.type);
-        shader shader(shaderAsset);
-        shader.compile();
-        verifyShader(shader);
-
-        shaders.push_back(shader);
-    }
-    
-    auto program = std::make_shared<shader_program>(shaders);
-    if(!program->isLinked())
-    {
-        throw std::runtime_error(program->getLinkLog());
-    }
-    
-    auto log = program->getLinkLog();
-    if(!log.empty())
-    {
-        std::cout << log << std::endl;
-    }
-    
-    return program;
-}
-
-std::shared_ptr<modelViewer::render::mesh> modelviewer_window::getMesh(model_info &info) {
-
-    if (info.mesh)
-    {
-        return std::make_shared<mesh>(info.mesh);
-    }
-    
-    info.mesh = m_MeshLoader.loadMesh(info.path);
-    auto meshPtr  = std::make_shared<mesh>(info.mesh);
-    
-    return meshPtr;
-}
-
-std::vector<std::shared_ptr<modelViewer::render::texture>> modelviewer_window::getTextures(model_info &info) {
-
-    std::vector<std::shared_ptr<modelViewer::render::texture>> textures;
-    for (auto& textureInfo : info.material.textures){
-        if (textureInfo.paths.size() == 0 || textureInfo.paths[0].empty())
-        {
-            continue;
-        }
-
-        texture_setup setup;
-
-        for (auto& path: textureInfo.paths){
-            setup.assets.push_back(m_TextureLoader.load(path, 4));
-        }
-
-        setup.isMipMapActive = true;
-        setup.mipMapMaxLevel = 1000;
-        setup.mipMapMinLevel = 0;
-		setup.type = textureInfo.type;
-
-
-        if (textureInfo.type == modelViewer::res::texture_asset_type::cube)
-        {
-            auto texturePtr = std::make_shared<texture_cube>(setup);
-            textures.push_back(texturePtr);
-        }
-        else
-        {
-            auto texturePtr = std::make_shared<texture_2D>(setup);
-            textures.push_back(texturePtr);
-        }
-    }
-    
-    return textures;
-}
 
 modelviewer_window::modelviewer_window(int width, int height, std::string title, bool fullscreen) : window(width,
                                                                                                            height,
@@ -146,12 +30,19 @@ modelviewer_window::modelviewer_window(int width, int height, std::string title,
     setVsync(false);
     setTargetFrameRate(360);
     updateCameraPosition();
+	//TODO set viewport when the window size changes too
+	m_Camera.setViewPort(getWidth(), getHeight());
+	m_Renderer.init(m_ObjectFactory.getShaderLoader(),m_ObjectFactory.getTextureLoader());
     
     model_platform_info info;
     info.sizeY = 12;
     info.sizeX = 12;
     info.lineSpace = 1;
-    m_Platform.init(m_ShaderLoader, info);
+	
+	auto plane = m_Platform.generatePlane(m_ObjectFactory.getShaderLoader(), info);
+	auto grid = m_Platform.generateGrid(m_ObjectFactory.getShaderLoader(), info);
+	m_Scene.addStaticObject(plane);
+	m_Scene.addStaticObject(grid);
 }
 
 modelviewer_window::~modelviewer_window() {
@@ -159,7 +50,8 @@ modelviewer_window::~modelviewer_window() {
 }
 
 void modelviewer_window::setClearFlag(glm::vec4 color) {
-    m_ClearFlag = color;
+    
+	m_Renderer.setClearFlag(color);
 }
 
 
@@ -211,9 +103,7 @@ void modelviewer_window::onMousePositionChanged(double xpos, double ypos) {
 
 void modelviewer_window::updateCameraPosition() {
     auto pos = getPosition(m_PitchAngle, m_YawAngle, m_ZoomLevel);
-    m_CameraPosition.x = pos.x;
-    m_CameraPosition.y = pos.y;
-    m_CameraPosition.z = pos.z;
+	m_Camera.setPosition(pos);
 }
 
 
@@ -281,7 +171,7 @@ void modelviewer_window::openModelFile() {
         model_info info;
         info.path = path.c_str();
         info.name = path.c_str();
-        m_MeshLoader.load(info.path, info);
+        m_ObjectFactory.getModelLoader().load(info.path, info);
         addModel(info);
     }
 }
@@ -292,24 +182,11 @@ void modelviewer_window::addNewModels()
     //TODO the current imp is not efficient since it first loads the objects then applies limit, a better one should apply the limit when adding objects 
     for (auto& info: m_NewModelsQueue)
     {
-        auto program = getProgram(info);
-        auto mesh = getMesh(info);
-        auto textures = getTextures(info);
-        auto mat = std::make_shared<material>(info.material,textures, program);
-        auto object = std::make_shared<render_object>(mat, mesh, info.name);
-        
-        object->setTransform(info.transform);
-        m_Scene.addObject(object);
+		auto object = m_ObjectFactory.createObject(info);
+		m_Scene.addModelObject(object);
     }
 
     m_NewModelsQueue.clear();
-
-    auto& objects = m_Scene.getObjects();
-    if (objects.size() > MaxRenderingObjects)
-    {
-        int extraObjects =  objects.size() - MaxRenderingObjects;
-        objects.erase(objects.begin(), objects.begin() + extraObjects);
-    }
 }
 void modelviewer_window::openDemoModel(std::string name)
 {
@@ -320,7 +197,7 @@ void modelviewer_window::openDemoModel(std::string name)
     info.material.shaders.push_back(vertShader);
 
     texture_asset_info textureAssetInfo;
-    textureAssetInfo.paths.emplace_back("res/textures/Transparent.png");
+    textureAssetInfo.path = "res/textures/Transparent.png";
     info.material.textures.push_back(textureAssetInfo);
 
     info.path = "res/models/primitives/" + name + ".fbx";

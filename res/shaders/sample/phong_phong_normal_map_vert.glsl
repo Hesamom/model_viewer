@@ -13,37 +13,32 @@ uniform mat4 m_Projection;
 out VS_OUT
 {
     vec2 texCoord;
-    vec3 normal;
     vec3 lightDir;
     vec3 viewDir;
-    mat3 TBN;
 } vs_out;
 
 
 void main()
 {
-    vec3 T = normalize(vec3(m_Model * vec4(v_tangent, 0.0)));
-    vec3 N = normalize(vec3(m_Model * vec4(v_normal, 0.0)));
+    vec3 T = normalize(vec3(m_MV * vec4(v_tangent, 0.0)));
+    vec3 N = normalize(vec3(m_MV * vec4(v_normal, 0.0)));
     T = normalize(T - dot(T, N) * N);
     vec3 B = cross(N, T);
-
-    mat3 TBN = mat3(T, B, N);
+    
+    mat3 TBN = transpose(mat3(T, B, N));
 
 
     //position and normal in view space
     vec4 pos = m_MV * v_position;
-    vec3 normal = mat3(m_MV) * v_normal;
     vec3 lightDir = u_light_pos - pos.xyz;
     vec3 viewDir = -pos.xyz;
 
     lightDir = TBN * normalize(lightDir);
     viewDir = TBN * normalize(viewDir);
-
-    vs_out.normal = normal;
+    
     vs_out.lightDir = lightDir;
     vs_out.viewDir = viewDir;
     vs_out.texCoord = v_uv0;
-    vs_out.TBN = TBN;
 
 
     gl_Position = m_Projection * pos;

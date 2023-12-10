@@ -89,3 +89,17 @@ void modelViewer::render::shader::destroy() const {
     }
     glDeleteShader(m_ShaderId);
 }
+
+void modelViewer::render::shader::verify()
+{
+	if(!isCompiled())
+	{
+		throw std::runtime_error("shader compilation failed: \n" + getCompilationLog());
+	}
+
+	auto log = getCompilationLog();
+	if(!log.empty())
+	{
+		std::cout<< getCompilationLog() << std::endl;
+	}
+}
