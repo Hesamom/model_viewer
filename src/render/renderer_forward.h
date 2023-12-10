@@ -5,6 +5,7 @@
 #include "render_scene.h"
 #include "camera.h"
 #include "framebuffer.h"
+#include "../resource/texture_loader.h"
 
 namespace modelViewer::render
 {
@@ -16,6 +17,8 @@ namespace modelViewer::render
 		
 		const unsigned int SHADOW_WIDTH = 1024;
 		const unsigned int SHADOW_HEIGHT = 1024;
+
+		const std::string m_EmptyShadowmapTexture = "res/textures/white_pixel.png";
 		
 		const std::string m_DepthShaderVert = "res/shaders/sample/simple_depth_vert.glsl";
 		const std::string m_DepthShaderFrag = "res/shaders/sample/simple_depth_frag.glsl";
@@ -23,6 +26,8 @@ namespace modelViewer::render
 
 		modelViewer::render::framebuffer m_shadowBuffer;
 		std::unique_ptr<shader_program> m_shadowProgram;
+		std::shared_ptr<texture> m_EmptyShadowmap;
+		
 		int m_MVPLocation = -1;
 		glm::mat4 m_LightViewProjection; 
 		
@@ -31,7 +36,7 @@ namespace modelViewer::render
 	public:
 		void render(render_scene& scene, camera& camera, bool shadowEnabled);
 		void setClearFlag(glm::vec4 color);
-		void init(modelViewer::res::shader_loader shaderLoader);
+		void init(modelViewer::res::shader_loader& shaderLoader, modelViewer::res::texture_loader& textureLoader);
 	};
 }
 

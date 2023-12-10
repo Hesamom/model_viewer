@@ -12,7 +12,7 @@ void render_object::setTransform(const transform &t) {
 }
 
 
-void render_object::render(glm::mat4 view, glm::mat4 projection, render_mode mode) {
+void render_object::render(glm::mat4 view, glm::mat4 projection) {
 
     glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, ("render: " + m_Name).c_str());
     
@@ -28,7 +28,7 @@ void render_object::render(glm::mat4 view, glm::mat4 projection, render_mode mod
 	
     m_Mesh->bind();
 
-    switch (mode)
+    switch (m_Mode)
     {
         case render_mode::triangles:
             m_Mesh->draw();
@@ -58,8 +58,38 @@ void render_object::setLight(const light_directional &light) {
 
 void render_object::renderShadow()
 {
+	if(!m_CastShadows)
+	{
+		return;
+	}
+	
 	m_Mesh->bind();
 	m_Mesh->draw();
+}
+
+void render_object::setRenderMode(render_mode mode)
+{
+	m_Mode = mode;
+}
+
+void render_object::setCastShadows(bool enabled)
+{
+	m_CastShadows = enabled;
+}
+
+void render_object::setReceiveShadows(bool enabled)
+{
+	m_ReceiveShadows = enabled;
+}
+
+bool render_object::getCastShadows()
+{
+	return  m_CastShadows;
+}
+
+bool render_object::getReceiveShadows()
+{
+	return  m_ReceiveShadows;
 }
 
 

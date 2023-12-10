@@ -27,7 +27,6 @@ private:
     float m_YawAngle = 0;
     float m_ZoomLevel = 5;
     bool m_isImGUIOpen = true;
-    const int MaxRenderingObjects = 1;
     
     const glm::vec2 PitchAngleRange{-80,80};
     const float AngleChangeMul = 0.5f;

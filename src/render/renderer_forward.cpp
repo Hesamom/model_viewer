@@ -24,8 +24,9 @@ void renderer_forward::renderShadows(modelViewer::render::render_scene& scene, c
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 	m_shadowBuffer.bind();
 	glClear(GL_DEPTH_BUFFER_BIT);
-
-	float near_plane = 1.0f, far_plane = 100.0f;
+	glCullFace(GL_FRONT);
+	
+	float near_plane = 30.0f, far_plane = 100.0f;
 	glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
 	glm::mat4 lightView = glm::lookAt(scene.getLight().getPosition(),
 		glm::vec3( 0.0f, 0.0f,  0.0f),
@@ -35,6 +36,11 @@ void renderer_forward::renderShadows(modelViewer::render::render_scene& scene, c
 	m_shadowProgram->bind();
 	for (auto& object : scene.getObjects()) {
 
+		if (!object->getCastShadows())
+		{
+			continue;
+		}
+		
 		auto mvp = m_LightViewProjection * object->getTransform().getMatrix();
 		m_shadowProgram->setUniformMatrix4(m_MVPLocation, mvp);
 		object->renderShadow();
@@ -53,31 +59,38 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 	
 	glClearBufferfv(GL_COLOR, 0, &m_ClearFlag.x);
 	glClear(GL_DEPTH_BUFFER_BIT);
-	
+
+	glCullFace(GL_BACK);
 
 	auto viewMatrix = camera.getView();
 	auto projection = camera.getProjection();
 
-	const int reservedShadowMapSlot = 32;
+	const int shadowmapSlot = 30;
+	const int emptyShadowmapSlot = shadowmapSlot + 1;
 	
 	if(shadowsEnabled)
 	{
 		//TODO consider using another approach that would not be overriden by material, this is safe by now since we dont have 31 textures yet
-		m_shadowBuffer.activateDepthMap(reservedShadowMapSlot);
+		m_shadowBuffer.activateDepthMap(shadowmapSlot);
+		m_EmptyShadowmap->active(emptyShadowmapSlot);
 	}
 	
 	
 	//m_Platform.draw(viewMatrix, projection);
-	for (auto& object : scene.getObjects()) {
-		
-		if(shadowsEnabled)
+	for (auto& object : scene.getObjects())
+	{
+		if(shadowsEnabled && object->getReceiveShadows())
 		{
-			object->getMaterial()->setShadowMapSlot(reservedShadowMapSlot);
+			object->getMaterial()->setShadowMapSlot(shadowmapSlot);
 			object->getMaterial()->setLightViewProjection(m_LightViewProjection);
+		}
+		else
+		{
+			object->getMaterial()->setShadowMapSlot(emptyShadowmapSlot);
 		}
 		
 		object->setLight(scene.getLight());
-		object->render(viewMatrix, projection, render_mode::triangles);
+		object->render(viewMatrix, projection);
 	}
 }
 
@@ -86,7 +99,7 @@ void renderer_forward::setClearFlag(glm::vec4 color)
 	m_ClearFlag = color;
 }
 
-void renderer_forward::init(modelViewer::res::shader_loader shaderLoader)
+void renderer_forward::init(modelViewer::res::shader_loader& shaderLoader, modelViewer::res::texture_loader& textureLoader)
 {
 	auto vertShaderAsset = shaderLoader.load(m_DepthShaderVert, shaderType::vertex);
 	auto fragShaderAsset = shaderLoader.load(m_DepthShaderFrag, shaderType::fragment);
@@ -109,4 +122,11 @@ void renderer_forward::init(modelViewer::res::shader_loader shaderLoader)
 	m_shadowBuffer.bind();
 	m_shadowBuffer.attachDepth(SHADOW_WIDTH, SHADOW_HEIGHT);
 	m_shadowBuffer.unbind();
+	
+	
+	auto textureAsset = textureLoader.load(m_EmptyShadowmapTexture,3);
+	texture_setup setup;
+	setup.asset = textureAsset;
+	
+	m_EmptyShadowmap = std::make_shared<texture>(setup);
 }

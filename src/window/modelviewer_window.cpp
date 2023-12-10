@@ -32,13 +32,17 @@ modelviewer_window::modelviewer_window(int width, int height, std::string title,
     updateCameraPosition();
 	//TODO set viewport when the window size changes too
 	m_Camera.setViewPort(getWidth(), getHeight());
-	m_Renderer.init(m_ObjectFactory.getShaderLoader());
+	m_Renderer.init(m_ObjectFactory.getShaderLoader(),m_ObjectFactory.getTextureLoader());
     
     model_platform_info info;
     info.sizeY = 12;
     info.sizeX = 12;
     info.lineSpace = 1;
-    //m_Platform.init(m_ObjectFactory.getShaderLoader(), info);
+	
+	auto plane = m_Platform.generatePlane(m_ObjectFactory.getShaderLoader(), info);
+	auto grid = m_Platform.generateGrid(m_ObjectFactory.getShaderLoader(), info);
+	m_Scene.addStaticObject(plane);
+	m_Scene.addStaticObject(grid);
 }
 
 modelviewer_window::~modelviewer_window() {
@@ -179,17 +183,10 @@ void modelviewer_window::addNewModels()
     for (auto& info: m_NewModelsQueue)
     {
 		auto object = m_ObjectFactory.createObject(info);
-        m_Scene.addObject(object);
+		m_Scene.addModelObject(object);
     }
 
     m_NewModelsQueue.clear();
-
-    auto& objects = m_Scene.getObjects();
-    if (objects.size() > MaxRenderingObjects)
-    {
-        int extraObjects =  objects.size() - MaxRenderingObjects;
-        objects.erase(objects.begin(), objects.begin() + extraObjects);
-    }
 }
 void modelviewer_window::openDemoModel(std::string name)
 {

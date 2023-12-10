@@ -86,3 +86,8 @@ modelViewer::res::model_loader& object_factory::getModelLoader()
 {
 	return m_ModelLoader;
 }
+
+modelViewer::res::texture_loader& object_factory::getTextureLoader()
+{
+	return m_TextureLoader;
+}

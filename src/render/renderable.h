@@ -8,10 +8,9 @@
 
 namespace modelViewer::render
 {
-
 	class renderable {
 	public:
-		virtual void render(glm::mat4 view, glm::mat4 projection, render_mode mode) = 0;
+		virtual void render(glm::mat4 view, glm::mat4 projection) = 0;
 	};
 }
 

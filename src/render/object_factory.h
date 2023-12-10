@@ -28,6 +28,8 @@ namespace modelViewer::render
 		std::shared_ptr<render_object> createObject(modelViewer::res::model_info& info);
 		modelViewer::res::shader_loader& getShaderLoader();
 		modelViewer::res::model_loader& getModelLoader();
+
+		res::texture_loader& getTextureLoader();
 	};
 
 

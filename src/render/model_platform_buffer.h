@@ -6,6 +6,7 @@
 #include "../resource/shader_loader.h"
 #include "shader_program.h"
 #include "render_object.h"
+#include "renderable.h"
 
 namespace modelViewer::render
 {
@@ -19,13 +20,18 @@ namespace modelViewer::render
     class model_platform_buffer {
 
     private:
-        std::unique_ptr<modelViewer::render::render_object> m_Object;
-        const std::string m_FragShaderPath = "res/shaders/sample/lines_frag.glsl";
-        const std::string m_VertShaderPath = "res/shaders/sample/lines_vert.glsl";
-        
+		
+        const std::string m_GridFragShaderPath = "res/shaders/sample/lines_frag.glsl";
+        const std::string m_GridVertShaderPath = "res/shaders/sample/lines_vert.glsl";
+
+		const std::string m_PlaneFragShaderPath = "res/shaders/sample/phong_phong_frag.glsl";
+		const std::string m_PlaneVertShaderPath = "res/shaders/sample/phong_phong_vert.glsl";
+		
     public:
-       void init(modelViewer::res::shader_loader& shaderLoader, const model_platform_info& info);
-       void draw(glm::mat4 view, glm::mat4 projection);
+		std::shared_ptr<modelViewer::render::render_object> generateGrid(modelViewer::res::shader_loader &shaderLoader,
+			const model_platform_info &info);
+		std::shared_ptr<modelViewer::render::render_object> generatePlane(modelViewer::res::shader_loader &shaderLoader,
+			const model_platform_info &info);
     };
 }
 
