@@ -95,8 +95,13 @@ void model_loader::setMaterialProperties(aiMaterial &material, material_property
     {
         set.shininess = shin;
     }
+
+	float opacity;
+	if (AI_SUCCESS ==  material.Get(AI_MATKEY_OPACITY, opacity))
+	{
+		set.opacity = opacity;
+	}
     
-    //TODO add opacity 
     //TODO add blending mode
     //TODO add face culling 
 }

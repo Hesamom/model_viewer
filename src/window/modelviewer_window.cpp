@@ -39,8 +39,8 @@ modelviewer_window::modelviewer_window(int width, int height, std::string title,
     info.sizeX = 12;
     info.lineSpace = 1;
 	
-	auto plane = m_Platform.generatePlane(m_ObjectFactory.getShaderLoader(), info);
-	auto grid = m_Platform.generateGrid(m_ObjectFactory.getShaderLoader(), info);
+	auto plane = m_Platform.generatePlane(m_ObjectFactory, info);
+	auto grid = m_Platform.generateGrid(m_ObjectFactory, info);
 	m_Scene.addStaticObject(plane);
 	m_Scene.addStaticObject(grid);
 }

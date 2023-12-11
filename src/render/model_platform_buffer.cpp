@@ -1,5 +1,6 @@
 ﻿
 #include "model_platform_buffer.h"
+#include "object_factory.h"
 
 
 using namespace modelViewer::render;
@@ -110,9 +111,10 @@ std::shared_ptr<mesh> generatePlaneMesh(const model_platform_info& info)
 }
 
 
-std::shared_ptr<modelViewer::render::render_object> model_platform_buffer::generateGrid(shader_loader &shaderLoader,
+std::shared_ptr<modelViewer::render::render_object> model_platform_buffer::generateGrid(modelViewer::render::object_factory& objectFactory,
 	const model_platform_info &info)
 {
+	auto shaderLoader = objectFactory.getShaderLoader();
 	auto mesh = generateGridMesh(info);
 	auto fragShaderAsset = shaderLoader.load(m_GridFragShaderPath, shaderType::fragment);
 	auto vertexShaderAsset = shaderLoader.load(m_GridVertShaderPath, shaderType::vertex);
@@ -139,9 +141,10 @@ std::shared_ptr<modelViewer::render::render_object> model_platform_buffer::gener
 	return grid;
 }
 
-std::shared_ptr<modelViewer::render::render_object> model_platform_buffer::generatePlane(shader_loader &shaderLoader,
+std::shared_ptr<modelViewer::render::render_object> model_platform_buffer::generatePlane(modelViewer::render::object_factory& objectFactory,
 	const model_platform_info &info)
 {
+	auto shaderLoader = objectFactory.getShaderLoader();
 	auto mesh = generatePlaneMesh(info);
 	auto fragShaderAsset = shaderLoader.load(m_PlaneFragShaderPath, shaderType::fragment);
 	auto vertexShaderAsset = shaderLoader.load(m_PlaneVertShaderPath, shaderType::vertex);
@@ -156,8 +159,16 @@ std::shared_ptr<modelViewer::render::render_object> model_platform_buffer::gener
 	auto program = std::make_shared<shader_program>(std::initializer_list<shader>{fragShader, vertexShader});
 	program->validate();
 
-	material_info materialInfo;
+
+	auto diffuseTextureAsset = objectFactory.getTextureLoader().load(m_PlaneDiffuseTexture,3);
+	texture_setup textureSetup;
+	textureSetup.assets.push_back(diffuseTextureAsset);
+	auto diffuseTexture = std::make_shared<texture_2D>(textureSetup);
 	std::vector<std::shared_ptr<texture>> textures;
+	textures.push_back(diffuseTexture);
+	material_info materialInfo;
+	materialInfo.propertySet.specularAlbedo = glm::vec3(0);
+	materialInfo.propertySet.opacity = 0.5f;
 	auto mat = std::make_shared<material>(materialInfo, textures, program);
 
 	auto plane = std::make_shared<render_object>(mat, mesh, "platform_plane");

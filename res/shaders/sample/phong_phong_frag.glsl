@@ -9,6 +9,7 @@ uniform vec3 u_ambient;
 uniform vec3 u_diffuseAlbedo;
 uniform vec3 u_specularAlbedo;
 uniform float u_shininess;
+uniform float u_opacity = 1;
 
 in VS_OUT
 {
@@ -69,5 +70,5 @@ void main()
     float shadow = getShadowValue(fs_in.fragPosLightSpace);
     vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * diffuseTextel;
 
-    FragColor = vec4(lighting, 1.0);
+    FragColor = vec4(lighting, u_opacity);
 }

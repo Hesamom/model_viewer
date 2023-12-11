@@ -39,6 +39,7 @@ namespace modelViewer::render
         const std::string  m_DiffuseAlbedo = "u_diffuseAlbedo";
         const std::string  m_SpecularAlbedo = "u_specularAlbedo";
         const std::string  m_Shininess = "u_shininess";
+		const std::string  m_Opacity = "u_opacity";
         
         const std::string  m_LightPos = "u_light_pos";
         const std::string  m_LightColor = "u_light_color";

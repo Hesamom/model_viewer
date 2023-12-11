@@ -53,7 +53,8 @@ namespace modelViewer::res
        color ambient =  color(0.5f);
        color specularAlbedo =  color(0.5f);
        float shininess = 128;
-    };
+	   float opacity = 1;
+	};
     
     struct material_info
     {

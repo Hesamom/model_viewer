@@ -20,7 +20,7 @@ namespace modelViewer::render
 		
 	private:
 		glm::vec4 m_ClearFlag;
-		clear_mode m_ClearMode = clear_mode::skybox;
+		clear_mode m_ClearMode = clear_mode::color;
 		
 		const unsigned int SHADOW_WIDTH = 1024;
 		const unsigned int SHADOW_HEIGHT = 1024;

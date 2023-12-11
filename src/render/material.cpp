@@ -104,6 +104,12 @@ void material::applyMaterialProperties() {
     {
         m_Program->setUniformFloat(shinLoc, m_Info.propertySet.shininess);
     }
+
+	int opacityLoc = m_Program->getUniformLocation(m_Opacity);
+	if (opacityLoc > -1)
+	{
+		m_Program->setUniformFloat(opacityLoc, m_Info.propertySet.opacity);
+	}
 }
 
 void material::bindTextures(std::vector<std::shared_ptr<texture>>& textures)
