@@ -3,6 +3,7 @@
 #include <glm/ext/matrix_transform.hpp>
 #include "renderer_forward.h"
 #include "camera.h"
+#include "object_factory.h"
 
 using namespace modelViewer::res;
 using namespace modelViewer::render;
@@ -56,14 +57,27 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 	int viewportWidth, viewportHeight;
 	camera.getViewport(viewportWidth, viewportHeight);
 	glViewport(0, 0, viewportWidth, viewportHeight);
-	
-	glClearBufferfv(GL_COLOR, 0, &m_ClearFlag.x);
 	glClear(GL_DEPTH_BUFFER_BIT);
-
-	glCullFace(GL_BACK);
-
+	
+	
 	auto viewMatrix = camera.getView();
 	auto projection = camera.getProjection();
+
+	switch (m_ClearMode) {
+
+		case clear_mode::color:
+			glClearBufferfv(GL_COLOR, 0, &m_ClearFlag.x);
+			break;
+		case clear_mode::skybox:
+			glClearBufferfv(GL_COLOR, 0, &m_ClearFlag.x);
+			glDisable(GL_CULL_FACE);
+			//TODO need to change view  to exclude position 
+			m_Skybox->render(viewMatrix, projection);
+			glEnable(GL_CULL_FACE);
+			break;
+	}
+	
+	glCullFace(GL_BACK);
 
 	const int shadowmapSlot = 30;
 	const int emptyShadowmapSlot = shadowmapSlot + 1;
@@ -76,7 +90,6 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 	}
 	
 	
-	//m_Platform.draw(viewMatrix, projection);
 	for (auto& object : scene.getObjects())
 	{
 		if(shadowsEnabled && object->getReceiveShadows())
@@ -99,8 +112,9 @@ void renderer_forward::setClearFlag(glm::vec4 color)
 	m_ClearFlag = color;
 }
 
-void renderer_forward::init(modelViewer::res::shader_loader& shaderLoader, modelViewer::res::texture_loader& textureLoader)
+void renderer_forward::init(modelViewer::render::object_factory& objectFactory)
 {
+	auto shaderLoader = objectFactory.getShaderLoader();
 	auto vertShaderAsset = shaderLoader.load(m_DepthShaderVert, shaderType::vertex);
 	auto fragShaderAsset = shaderLoader.load(m_DepthShaderFrag, shaderType::fragment);
 	
@@ -122,11 +136,40 @@ void renderer_forward::init(modelViewer::res::shader_loader& shaderLoader, model
 	m_shadowBuffer.bind();
 	m_shadowBuffer.attachDepth(SHADOW_WIDTH, SHADOW_HEIGHT);
 	m_shadowBuffer.unbind();
-	
-	
+
+	auto textureLoader = objectFactory.getTextureLoader();
 	auto textureAsset = textureLoader.load(m_EmptyShadowmapTexture,3);
 	texture_setup setup;
-	setup.asset = textureAsset;
+	setup.assets.push_back(textureAsset);
 	
-	m_EmptyShadowmap = std::make_shared<texture>(setup);
+	m_EmptyShadowmap = std::make_shared<texture_2D>(setup);
+
+
+	createSkybox(objectFactory);
+}
+
+void renderer_forward::createSkybox(object_factory& objectFactory)
+{
+	model_info skyboxModel;
+	shader_asset_info fragShader1 { "res/shaders/sample/skybox_frag.glsl", shaderType::fragment};
+	shader_asset_info vertShader1 { "res/shaders/sample/skybox_vert.glsl", shaderType::vertex};
+	skyboxModel.material.shaders.push_back(fragShader1);
+	skyboxModel.material.shaders.push_back(vertShader1);
+
+
+	texture_asset_info skyboxTexture;
+	skyboxTexture.type = texture_asset_type::cube;
+	skyboxTexture.paths.emplace_back("res/textures/sky_right.jpg");
+	skyboxTexture.paths.emplace_back("res/textures/sky_left.jpg");
+	skyboxTexture.paths.emplace_back("res/textures/sky_top.jpg");
+	skyboxTexture.paths.emplace_back("res/textures/sky_bottom.jpg");
+	skyboxTexture.paths.emplace_back("res/textures/sky_back.jpg");
+	skyboxTexture.paths.emplace_back("res/textures/sky_front.jpg");
+	skyboxModel.material.textures.push_back(skyboxTexture);
+
+	skyboxModel.path = "res/models/primitives/cube.fbx";
+	skyboxModel.name = "skybox";
+	skyboxModel.transform.setScale(glm::vec3(100.0));
+
+	m_Skybox = objectFactory.createObject(skyboxModel);
 }

@@ -32,7 +32,7 @@ modelviewer_window::modelviewer_window(int width, int height, std::string title,
     updateCameraPosition();
 	//TODO set viewport when the window size changes too
 	m_Camera.setViewPort(getWidth(), getHeight());
-	m_Renderer.init(m_ObjectFactory.getShaderLoader(),m_ObjectFactory.getTextureLoader());
+	m_Renderer.init(m_ObjectFactory);
     
     model_platform_info info;
     info.sizeY = 12;

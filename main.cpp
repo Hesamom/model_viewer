@@ -33,28 +33,6 @@ int main()
     wallModel.material.propertySet.shininess = 10;
     window.addModel(wallModel);
 
-    model_info skyboxModel;
-    shader_asset_info fragShader1 { "res/shaders/sample/skybox_frag.glsl", shaderType::fragment};
-    shader_asset_info vertShader1 { "res/shaders/sample/skybox_vert.glsl", shaderType::vertex};
-    skyboxModel.material.shaders.push_back(fragShader1);
-    skyboxModel.material.shaders.push_back(vertShader1);
-
-
-    texture_asset_info skyboxTexture;
-    skyboxTexture.type = texture_asset_type::cube;
-    skyboxTexture.paths.emplace_back("res/textures/sky_right.jpg");
-    skyboxTexture.paths.emplace_back("res/textures/sky_left.jpg");
-    skyboxTexture.paths.emplace_back("res/textures/sky_top.jpg");
-    skyboxTexture.paths.emplace_back("res/textures/sky_bottom.jpg");
-    skyboxTexture.paths.emplace_back("res/textures/sky_back.jpg");
-    skyboxTexture.paths.emplace_back("res/textures/sky_front.jpg");
-    skyboxModel.material.textures.push_back(skyboxTexture);
-
-    skyboxModel.path = "res/models/primitives/cube.fbx";
-    skyboxModel.name = "skybox";
-    skyboxModel.transform.setScale(glm::vec3(10.0));
-
-    window.addModel(skyboxModel);
 
     window.draw();
     return 0;

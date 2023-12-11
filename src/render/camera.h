@@ -11,7 +11,7 @@ namespace modelViewer::render
 	class camera {
 	private:
 		glm::vec3 m_Position{0.0f,4.0f,5.0f};
-		frustum_perspective m_Frustum {45,0.1f,100};
+		frustum_perspective m_Frustum {45,0.1f,500};
 		int m_ViewportWidth = 0;
 		int m_ViewportHeight = 0;
 	public:
