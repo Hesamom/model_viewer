@@ -54,6 +54,8 @@ void renderer_forward::renderShadows(modelViewer::render::render_scene& scene, c
 
 void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool shadowsEnabled)
 {
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "rendering objects");
+	
 	int viewportWidth, viewportHeight;
 	camera.getViewport(viewportWidth, viewportHeight);
 	glViewport(0, 0, viewportWidth, viewportHeight);
@@ -105,6 +107,8 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 		object->setLight(scene.getLight());
 		object->render(viewMatrix, projection);
 	}
+
+	glPopDebugGroup();
 }
 
 void renderer_forward::setClearFlag(glm::vec4 color)
@@ -134,7 +138,7 @@ void renderer_forward::init(modelViewer::render::object_factory& objectFactory)
 	m_MVPLocation = m_shadowProgram->getUniformLocation(m_MVPUniformName);
 
 	m_shadowBuffer.bind();
-	m_shadowBuffer.attachDepth(SHADOW_WIDTH, SHADOW_HEIGHT);
+	m_shadowBuffer.attachDepth(SHADOW_WIDTH, SHADOW_HEIGHT, true);
 	m_shadowBuffer.unbind();
 
 	auto textureLoader = objectFactory.getTextureLoader();

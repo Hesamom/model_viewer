@@ -14,7 +14,7 @@ namespace modelViewer::render
 		~framebuffer();
 		void bind();
 		void unbind();
-		void attachDepth(int width, int height);
+		void attachDepth(int width, int height, bool enableDepthCompare);
 		void activateDepthMap(int slot);
 	};
 

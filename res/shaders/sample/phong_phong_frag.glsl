@@ -1,7 +1,8 @@
 #version 330 core
 
+uniform sampler2DShadow u_shadowSampler;
 uniform sampler2D u_diffuseSampler;
-uniform sampler2D u_shadowSampler;
+
 
 uniform vec3 u_light_color;
 
@@ -10,6 +11,8 @@ uniform vec3 u_diffuseAlbedo;
 uniform vec3 u_specularAlbedo;
 uniform float u_shininess;
 uniform float u_opacity = 1;
+
+#define PCF
 
 in VS_OUT
 {
@@ -28,26 +31,31 @@ float getShadowValue(vec4 fragPosLightSpace)
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     // transform to [0,1] range
     projCoords = projCoords * 0.5 + 0.5;
-    // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
-    float closestDepth = texture(u_shadowSampler, projCoords.xy).r;
     // get depth of current fragment from light's perspective
     float currentDepth = projCoords.z;
     // check whether current frag pos is in shadow
     float bias = max(0.005 * (1.0 - dot(fs_in.normal, fs_in.lightDir)), 0.0005);
-
-
+    
     float shadow = 0.0;
+    
+    #ifdef PCF
     const int area = 3;
     vec2 texelSize = 1.0 / textureSize(u_shadowSampler, 0);
-    for(int x = -1; x <= 1; ++x)
+    float biasedDepth = currentDepth - bias;
+    for(int x = -area/2; x <= area/2; ++x)
     {
-        for(int y = -1; y <= 1; ++y)
+        for(int y =  -area/2; y <= area/2; ++y)
         {
-            float pcfDepth = texture(u_shadowSampler, projCoords.xy + vec2(x, y) * texelSize).r;
-            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+            float pcfDepth = texture(u_shadowSampler, vec3(projCoords.xy + vec2(x, y) * texelSize, biasedDepth));
+            shadow += pcfDepth;
         }
     }
     shadow /= (area * area);
+    #else
+      float depth = texture(u_shadowSampler, vec3(projCoords.xy, biasedDepth));
+      shadow += depth;
+    #endif
+    
     
     return shadow;
 }

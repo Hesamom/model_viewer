@@ -16,17 +16,28 @@ void modelViewer::render::framebuffer::bind()
 	}
 }
 
-void modelViewer::render::framebuffer::attachDepth(int width, int height)
+void modelViewer::render::framebuffer::attachDepth(int width, int height, bool enableDepthCompare)
 {
 	glGenTextures(1, &m_DepthTextureId);
 	glBindTexture(GL_TEXTURE_2D, m_DepthTextureId);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
 		width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	
+	
 
-	//TODO maybe change filtering later?
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
+	if(enableDepthCompare)
+	{
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE , GL_COMPARE_REF_TO_TEXTURE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC  , GL_GREATER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	}
+	else
+	{
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	}
+	
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -36,6 +47,8 @@ void modelViewer::render::framebuffer::attachDepth(int width, int height)
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_DepthTextureId, 0);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
+
+	glBindTexture(GL_TEXTURE_2D,0);
 }
 
 void modelViewer::render::framebuffer::unbind()

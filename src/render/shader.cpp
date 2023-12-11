@@ -94,7 +94,8 @@ void modelViewer::render::shader::verify()
 {
 	if(!isCompiled())
 	{
-		throw std::runtime_error("shader compilation failed: \n" + getCompilationLog());
+		std::cout<< getCompilationLog() << std::endl;
+		throw std::runtime_error("shader compilation failed: \n");
 	}
 
 	auto log = getCompilationLog();
