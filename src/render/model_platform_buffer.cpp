@@ -15,19 +15,19 @@ std::shared_ptr<mesh> generateGridMesh(const model_platform_info& info)
     
     glm::vec3 startPos(-info.sizeX/2 * info.lineSpace, -1, info.sizeX/2 * info.lineSpace);
     glm::vec3 currentPos = startPos;
-    for (int i = 0; i < info.sizeX; ++i) {
+    for (int i = 0; i < info.sizeX + 1; ++i) {
 
         positions->emplace_back(currentPos.x,currentPos.y, currentPos.z);
-        positions->emplace_back(currentPos.x,currentPos.y, currentPos.z - (info.lineSpace * (info.sizeY - 1)));
+        positions->emplace_back(currentPos.x,currentPos.y, currentPos.z - (info.lineSpace * (info.sizeZ)));
         colors->emplace_back(mainLineColor);
         colors->emplace_back(mainLineColor);
 
-        if (i == info.sizeX - 1)
+        if (i == info.sizeX)
             break;
         
         for (int j = 0; j < 10; ++j) {
             positions->emplace_back(currentPos.x,currentPos.y, currentPos.z);
-            positions->emplace_back(currentPos.x,currentPos.y, currentPos.z - (info.lineSpace * (info.sizeY - 1)));
+            positions->emplace_back(currentPos.x,currentPos.y, currentPos.z - (info.lineSpace * (info.sizeZ)));
             colors->emplace_back(sideLineColor);
             colors->emplace_back(sideLineColor);
             currentPos.x += info.lineSpace/10;
@@ -35,20 +35,20 @@ std::shared_ptr<mesh> generateGridMesh(const model_platform_info& info)
     }
 
     currentPos = startPos;
-    for (int i = 0; i < info.sizeY; ++i) {
+    for (int i = 0; i < info.sizeZ + 1; ++i) {
 
         positions->emplace_back(currentPos.x,currentPos.y, currentPos.z);
-        positions->emplace_back(currentPos.x + (info.lineSpace * (info.sizeX - 1)),currentPos.y, currentPos.z);
+        positions->emplace_back(currentPos.x + (info.lineSpace * (info.sizeX)),currentPos.y, currentPos.z);
         colors->emplace_back(mainLineColor);
         colors->emplace_back(mainLineColor);
 
-        if (i == info.sizeY - 1)
+        if (i == info.sizeZ)
             break;
         
         for (int j = 0; j < 10; ++j) {
 
             positions->emplace_back(currentPos.x,currentPos.y, currentPos.z);
-            positions->emplace_back(currentPos.x + (info.lineSpace * (info.sizeX - 1)),currentPos.y, currentPos.z);
+            positions->emplace_back(currentPos.x + (info.lineSpace * (info.sizeX)),currentPos.y, currentPos.z);
             colors->emplace_back(sideLineColor);
             colors->emplace_back(sideLineColor);
             currentPos.z -= info.lineSpace/10;
@@ -78,7 +78,7 @@ std::shared_ptr<mesh> generatePlaneMesh(const model_platform_info& info)
 	auto normals = std::make_shared<std::vector<glm::vec3>>();
 	
 	float xWidth = info.sizeX * info.lineSpace;
-	float zWidth = info.sizeY * info.lineSpace;
+	float zWidth = info.sizeZ * info.lineSpace;
 	
 	float height = -1;
 

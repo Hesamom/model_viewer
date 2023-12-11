@@ -15,7 +15,7 @@ namespace modelViewer::render
     {
         float lineSpace = 0;
         int sizeX = 0;
-        int sizeY = 0;
+        int sizeZ = 0;
     };
     
     class model_platform_buffer {

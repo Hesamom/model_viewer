@@ -35,7 +35,7 @@ modelviewer_window::modelviewer_window(int width, int height, std::string title,
 	m_Renderer.init(m_ObjectFactory);
     
     model_platform_info info;
-    info.sizeY = 12;
+    info.sizeZ = 12;
     info.sizeX = 12;
     info.lineSpace = 1;
 	
