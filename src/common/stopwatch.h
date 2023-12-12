@@ -6,8 +6,8 @@
 class stopwatch {
     
 private:
-    std::chrono::time_point<std::chrono::steady_clock> m_Start;
-    std::chrono::time_point<std::chrono::steady_clock> m_End;
+    std::chrono::time_point<std::chrono::high_resolution_clock> m_Start;
+    std::chrono::time_point<std::chrono::high_resolution_clock> m_End;
 public:
     void start();
     void stop();

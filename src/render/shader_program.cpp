@@ -92,14 +92,12 @@ void shader_program::setUniformMatrix4(int index, glm::mat4& mat) {
     glUniformMatrix4fv(index, 1, false, glm::value_ptr(mat));
 }
 
-void shader_program::validate()
+void shader_program::validateLinking()
 {
-	glValidateProgram(m_ProgramId);
-	int valid = 0;
-	glGetProgramiv(m_ProgramId, GL_VALIDATE_STATUS, &valid);
-	if (valid == GL_FALSE)
+	if (!isLinked())
 	{
-		throw std::runtime_error("validation failed");
+        std::cerr<< getLinkLog() << std::endl;
+		throw std::runtime_error("linking failed");
 	}
 	
 	auto log = getLinkLog();

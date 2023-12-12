@@ -144,7 +144,7 @@ void renderer_forward::init(modelViewer::render::object_factory& objectFactory)
 	fragShader.verify();
 	
 	m_shadowProgram = std::make_unique<shader_program>(std::initializer_list<shader>{vertShader, fragShader});
-	m_shadowProgram->validate();
+    m_shadowProgram->validateLinking();
 	
 	m_shadowProgram->bind();
 	m_MVPLocation = m_shadowProgram->getUniformLocation(m_MVPUniformName);

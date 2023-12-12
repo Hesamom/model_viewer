@@ -74,7 +74,7 @@ std::shared_ptr<modelViewer::render::shader_program> object_factory::getProgram(
 	}
 
 	auto program = std::make_shared<shader_program>(shaders);
-	program->validate();
+    program->validateLinking();
 	return program;
 }
 

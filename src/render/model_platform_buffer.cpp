@@ -127,7 +127,7 @@ std::shared_ptr<modelViewer::render::render_object> model_platform_buffer::gener
 	vertexShader.verify();
 	
 	auto program = std::make_shared<shader_program>(std::initializer_list<shader>{fragShader, vertexShader});
-	program->validate();
+    program->validateLinking();
 
 	material_info materialInfo;
 	std::vector<std::shared_ptr<texture>> textures;
@@ -159,7 +159,7 @@ std::shared_ptr<modelViewer::render::render_object> model_platform_buffer::gener
 	vertexShader.verify();
 	
 	auto program = std::make_shared<shader_program>(std::initializer_list<shader>{fragShader, vertexShader});
-	program->validate();
+    program->validateLinking();
 
 
 	auto diffuseTextureAsset = objectFactory.getTextureLoader().load(m_PlaneDiffuseTexture,3);
