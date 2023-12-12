@@ -73,8 +73,7 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 		case clear_mode::skybox:
 			glClearBufferfv(GL_COLOR, 0, &m_ClearFlag.x);
 			glDisable(GL_CULL_FACE);
-			//TODO need to change view  to exclude position 
-			m_Skybox->render(viewMatrix, projection);
+			m_Skybox->render(glm::mat4(glm::mat3(viewMatrix)), projection);
 			glEnable(GL_CULL_FACE);
 			break;
 	}
@@ -163,12 +162,12 @@ void renderer_forward::createSkybox(object_factory& objectFactory)
 
 	texture_asset_info skyboxTexture;
 	skyboxTexture.type = texture_asset_type::cube;
-	skyboxTexture.paths.emplace_back("res/textures/sky_right.jpg");
-	skyboxTexture.paths.emplace_back("res/textures/sky_left.jpg");
-	skyboxTexture.paths.emplace_back("res/textures/sky_top.jpg");
-	skyboxTexture.paths.emplace_back("res/textures/sky_bottom.jpg");
-	skyboxTexture.paths.emplace_back("res/textures/sky_back.jpg");
-	skyboxTexture.paths.emplace_back("res/textures/sky_front.jpg");
+	skyboxTexture.paths.emplace_back("res/textures/right.jpg");
+	skyboxTexture.paths.emplace_back("res/textures/left.jpg");
+    skyboxTexture.paths.emplace_back("res/textures/bottom.jpg");
+	skyboxTexture.paths.emplace_back("res/textures/top.jpg");
+    skyboxTexture.paths.emplace_back("res/textures/front.jpg");
+	skyboxTexture.paths.emplace_back("res/textures/back.jpg");
 	skyboxModel.material.textures.push_back(skyboxTexture);
 
 	skyboxModel.path = "res/models/primitives/cube.fbx";

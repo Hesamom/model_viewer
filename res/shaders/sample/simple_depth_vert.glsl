@@ -1,4 +1,4 @@
-﻿#version 330
+   #version 330
 
 in vec4 v_position;
 uniform mat4 u_MVP;
