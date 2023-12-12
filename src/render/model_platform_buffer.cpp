@@ -10,7 +10,7 @@ std::shared_ptr<mesh> generateGridMesh(const model_platform_info& info)
 {
     auto positions = std::make_shared<std::vector<glm::vec3>>();
     auto colors = std::make_shared<std::vector<glm::vec4>>();
-    glm::vec4 mainLineColor(1,1,1,0.3f);
+    glm::vec4 mainLineColor(1,1,1,0.5f);
     glm::vec4 sideLineColor(1,1,1,0.1f);
     
     glm::vec3 startPos(-info.sizeX/2 * info.lineSpace, -1, info.sizeX/2 * info.lineSpace);
@@ -131,8 +131,10 @@ std::shared_ptr<modelViewer::render::render_object> model_platform_buffer::gener
 
 	material_info materialInfo;
 	std::vector<std::shared_ptr<texture>> textures;
-	auto mat = std::make_shared<material>(materialInfo, textures, program);
+	materialInfo.propertySet.opacity = 0.5f;
+	materialInfo.propertySet.renderQueue = (render_queue_transparent + 1);
 	
+	auto mat = std::make_shared<material>(materialInfo, textures, program);
 	auto grid = std::make_shared<render_object>(mat, mesh, "platform_grid");
 	grid->setRenderMode(render_mode::lines);
 	grid->setCastShadows(false);
@@ -169,6 +171,7 @@ std::shared_ptr<modelViewer::render::render_object> model_platform_buffer::gener
 	material_info materialInfo;
 	materialInfo.propertySet.specularAlbedo = glm::vec3(0);
 	materialInfo.propertySet.opacity = 0.5f;
+	materialInfo.propertySet.renderQueue = render_queue_transparent;
 	auto mat = std::make_shared<material>(materialInfo, textures, program);
 
 	auto plane = std::make_shared<render_object>(mat, mesh, "platform_plane");

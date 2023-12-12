@@ -31,6 +31,12 @@ namespace modelViewer::res
         clamp,
         mirror
     };
+	
+	enum render_queue
+	{
+		render_queue_opaque = 0,
+		render_queue_transparent = 1000
+	};
 
     struct texture_asset_info
     {
@@ -54,6 +60,10 @@ namespace modelViewer::res
        color specularAlbedo =  color(0.5f);
        float shininess = 128;
 	   float opacity = 1;
+	   
+	   bool depthWriteEnabled = true;
+	   int renderQueue = render_queue_opaque;
+	   bool cullFaceEnabled = true;
 	};
     
     struct material_info

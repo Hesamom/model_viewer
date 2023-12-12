@@ -63,6 +63,8 @@ namespace modelViewer::render
 
 		void setShadowMapSlot(int slot);
 		void setLightViewProjection(glm::mat4& matrix);
+
+		modelViewer::res::material_info& getInfo();
     };
 }
 

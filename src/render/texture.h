@@ -2,12 +2,12 @@
 #define MODEL_VIEWER_TEXTURE_H
 
 #include "../resource/model_info.h"
-#include "GL/glew.h"
+#include "gl/glew.h"
 
 namespace modelViewer::render {
     class texture {
     protected:
-        unsigned int m_TextureId;
+        unsigned int m_TextureId = -1;
 
         void setBind(bool bind) {
 

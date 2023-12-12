@@ -26,7 +26,7 @@ void renderer_forward::renderShadows(modelViewer::render::render_scene& scene, c
 	m_shadowBuffer.bind();
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glCullFace(GL_FRONT);
-	
+
 	float near_plane = 30.0f, far_plane = 100.0f;
 	glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
 	glm::mat4 lightView = glm::lookAt(scene.getLight().getPosition(),
@@ -42,6 +42,13 @@ void renderer_forward::renderShadows(modelViewer::render::render_scene& scene, c
 			continue;
 		}
 		
+		//currently transparent objects can not cast shadows 
+		if (object->getMaterial()->getInfo().propertySet.renderQueue >= render_queue_transparent)
+		{
+			continue;
+		}
+
+
 		auto mvp = m_LightViewProjection * object->getTransform().getMatrix();
 		m_shadowProgram->setUniformMatrix4(m_MVPLocation, mvp);
 		object->renderShadow();
@@ -52,36 +59,35 @@ void renderer_forward::renderShadows(modelViewer::render::render_scene& scene, c
 	glPopDebugGroup();
 }
 
+bool compareRenderQueue(std::shared_ptr<render_object> o1, std::shared_ptr<render_object> o2)
+{
+	return o1->getMaterial()->getInfo().propertySet.renderQueue < o2->getMaterial()->getInfo().propertySet.renderQueue;
+}
+
+std::vector<std::shared_ptr<render_object>> renderer_forward::getSortedObjects(render_scene& scene)
+{
+	std::vector<std::shared_ptr<render_object>> objects;
+	objects = scene.getObjects();
+	if(m_ClearMode == clear_mode::skybox)
+	{
+		objects.push_back(m_Skybox);
+	}
+	std::sort(objects.begin(), objects.end(), compareRenderQueue);
+	
+	return objects;
+}
+
 void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool shadowsEnabled)
 {
 	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "rendering objects");
 	
 	int viewportWidth, viewportHeight;
 	camera.getViewport(viewportWidth, viewportHeight);
+	
 	glViewport(0, 0, viewportWidth, viewportHeight);
 	glClear(GL_DEPTH_BUFFER_BIT);
-	
-	
-	auto viewMatrix = camera.getView();
-	auto projection = camera.getProjection();
-
-	switch (m_ClearMode) {
-
-		case clear_mode::color:
-			glClearBufferfv(GL_COLOR, 0, &m_ClearFlag.x);
-			break;
-		case clear_mode::skybox:
-			glClearBufferfv(GL_COLOR, 0, &m_ClearFlag.x);
-			glDisable(GL_CULL_FACE);
-			m_Skybox->render(glm::mat4(glm::mat3(viewMatrix)), projection);
-			glEnable(GL_CULL_FACE);
-			break;
-	}
-	
+	glClearBufferfv(GL_COLOR, 0, &m_ClearFlag.x);
 	glCullFace(GL_BACK);
-
-	const int shadowmapSlot = 30;
-	const int emptyShadowmapSlot = shadowmapSlot + 1;
 	
 	if(shadowsEnabled)
 	{
@@ -90,22 +96,29 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 		m_EmptyShadowmap->active(emptyShadowmapSlot);
 	}
 	
+
+	auto viewMatrix = camera.getView();
+	auto projection = camera.getProjection();
 	
-	for (auto& object : scene.getObjects())
+	for (auto& object : getSortedObjects(scene))
 	{
-		if(shadowsEnabled && object->getReceiveShadows())
+		if (shadowsEnabled)
 		{
-			object->getMaterial()->setShadowMapSlot(shadowmapSlot);
-			object->getMaterial()->setLightViewProjection(m_LightViewProjection);
-		}
-		else
-		{
-			object->getMaterial()->setShadowMapSlot(emptyShadowmapSlot);
+			if(object->getReceiveShadows())
+			{
+				object->getMaterial()->setShadowMapSlot(shadowmapSlot);
+				object->getMaterial()->setLightViewProjection(m_LightViewProjection);
+			}
+			else
+			{
+				object->getMaterial()->setShadowMapSlot(emptyShadowmapSlot);
+			}
 		}
 		
 		object->setLight(scene.getLight());
 		object->render(viewMatrix, projection);
 	}
+	
 
 	glPopDebugGroup();
 }
@@ -162,17 +175,24 @@ void renderer_forward::createSkybox(object_factory& objectFactory)
 
 	texture_asset_info skyboxTexture;
 	skyboxTexture.type = texture_asset_type::cube;
-	skyboxTexture.paths.emplace_back("res/textures/right.jpg");
-	skyboxTexture.paths.emplace_back("res/textures/left.jpg");
-    skyboxTexture.paths.emplace_back("res/textures/bottom.jpg");
-	skyboxTexture.paths.emplace_back("res/textures/top.jpg");
-    skyboxTexture.paths.emplace_back("res/textures/front.jpg");
-	skyboxTexture.paths.emplace_back("res/textures/back.jpg");
+	skyboxTexture.paths.emplace_back("res/textures/skybox/sample/right.jpg");
+	skyboxTexture.paths.emplace_back("res/textures/skybox/sample/left.jpg");
+    skyboxTexture.paths.emplace_back("res/textures/skybox/sample/bottom.jpg");
+	skyboxTexture.paths.emplace_back("res/textures/skybox/sample/top.jpg");
+    skyboxTexture.paths.emplace_back("res/textures/skybox/sample/front.jpg");
+	skyboxTexture.paths.emplace_back("res/textures/skybox/sample/back.jpg");
 	skyboxModel.material.textures.push_back(skyboxTexture);
-
-	skyboxModel.path = "res/models/primitives/cube.fbx";
+	//skyboxModel.transform.setEularRotation(glm::vec3 (90,0,0));
+	skyboxModel.path = "res/models/primitives/cube.obj";
 	skyboxModel.name = "skybox";
 	skyboxModel.transform.setScale(glm::vec3(100.0));
+	skyboxModel.material.propertySet.renderQueue = render_queue_transparent - 1;
+	skyboxModel.material.propertySet.cullFaceEnabled = false;
 
 	m_Skybox = objectFactory.createObject(skyboxModel);
+}
+
+void renderer_forward::setClearMode(clear_mode mode)
+{
+	m_ClearMode = mode;
 }

@@ -8,14 +8,18 @@ modelViewer::render::texture_cube::texture_cube(texture_setup& textureSetup) {
 
     auto optimalFormat = texture_format::getOptimalFormat(textureSetup.assets[0]->getChannelType(), textureSetup.compress);
 
-    for (int i = 0;i < textureSetup.assets.size(); ++i) {
+	assert(textureSetup.assets.size() == 6);
+	
+    for (int i = 0;i < 6; ++i)
+	{
         auto texture = textureSetup.assets[i];
-
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
                      0, optimalFormat, texture->getWidth(), texture->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, texture->getContent()
         );
     }
 
+	
+	//TODO filtering and clamping needs to be taken from setup
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

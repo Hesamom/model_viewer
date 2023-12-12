@@ -156,7 +156,20 @@ void modelviewer_window::onRenderImGUI() {
         ImGui::EndMenu();
       }
 
-        ImGui::EndMenuBar();
+	  if (ImGui::BeginMenu("clear"))
+	  {
+			if(ImGui::MenuItem("color"))
+			{
+				setClearMode(clear_mode::color);
+			}
+		  if(ImGui::MenuItem("skybox"))
+		  {
+			  setClearMode(clear_mode::skybox);
+		  }
+			ImGui::EndMenu();
+	  }
+	  
+		ImGui::EndMenuBar();
     }
 
     ImGui::End();
@@ -204,4 +217,9 @@ void modelviewer_window::openDemoModel(std::string name)
     info.name = name;
   
     addModel(info);
+}
+
+void modelviewer_window::setClearMode(modelViewer::render::clear_mode mode)
+{
+	m_Renderer.setClearMode(mode);
 }

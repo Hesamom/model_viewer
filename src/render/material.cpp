@@ -140,7 +140,17 @@ void material::bindTextures(std::vector<std::shared_ptr<texture>>& textures)
 
 void material::bind() {
     m_Program->bind();
-    
+	
+	glDepthMask(m_Info.propertySet.depthWriteEnabled);
+	if (m_Info.propertySet.cullFaceEnabled)
+	{
+		glEnable(GL_CULL_FACE);
+	}
+	else
+	{
+		glDisable(GL_CULL_FACE);
+	}
+	
     int index = 0;
     for (const auto &item: m_Textures)
     {
@@ -193,4 +203,9 @@ void material::setLightViewProjection(glm::mat4& matrix)
 	}
 
 	m_Program->setUniformMatrix4(m_LightViewProjectionLocation, matrix);
+}
+
+modelViewer::res::material_info& material::getInfo()
+{
+	return m_Info;
 }

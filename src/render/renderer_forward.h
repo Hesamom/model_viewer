@@ -25,6 +25,9 @@ namespace modelViewer::render
 		const unsigned int SHADOW_WIDTH = 1024;
 		const unsigned int SHADOW_HEIGHT = 1024;
 
+		const int shadowmapSlot = 30;
+		const int emptyShadowmapSlot = shadowmapSlot + 1;
+
 		const std::string m_EmptyShadowmapTexture = "res/textures/white_pixel.png";
 		
 		const std::string m_DepthShaderVert = "res/shaders/sample/simple_depth_vert.glsl";
@@ -47,6 +50,10 @@ namespace modelViewer::render
 		void init(modelViewer::render::object_factory& objectFactory);
 
 		void createSkybox(object_factory& objectFactory);
+
+		void setClearMode(clear_mode mode);
+
+		std::vector<std::shared_ptr<render_object>> getSortedObjects(render_scene& scene);
 	};
 }
 

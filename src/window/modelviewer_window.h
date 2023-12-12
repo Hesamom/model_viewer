@@ -51,6 +51,8 @@ public:
      ~modelviewer_window() override;
      void addModel(modelViewer::res::model_info& info);
      void setClearFlag(glm::vec4 color);
+
+	void setClearMode(modelViewer::render::clear_mode mode);
 };
 
 
