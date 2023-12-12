@@ -71,7 +71,6 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 		case clear_mode::skybox:
 			glClearBufferfv(GL_COLOR, 0, &m_ClearFlag.x);
 			glDisable(GL_CULL_FACE);
-			//TODO need to change view  to exclude position
 			m_Skybox->render(glm::mat4(glm::mat3(viewMatrix)), projection);
 			glEnable(GL_CULL_FACE);
 			break;
