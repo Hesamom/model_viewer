@@ -35,11 +35,12 @@ namespace modelViewer::render
 		int m_LightViewProjectionLocation = -1;
 		int m_ShadowMapSamplerLocation = -1;
 
-        const std::string  m_AmbientAlbedo = "u_ambient";
-        const std::string  m_DiffuseAlbedo = "u_diffuseAlbedo";
-        const std::string  m_SpecularAlbedo = "u_specularAlbedo";
-        const std::string  m_Shininess = "u_shininess";
-		const std::string  m_Opacity = "u_opacity";
+		const std::string  m_MaterialBlock = "mat.";
+        const std::string  m_AmbientAlbedo = "ambient";
+        const std::string  m_DiffuseAlbedo = "diffuseAlbedo";
+        const std::string  m_SpecularAlbedo = "specularAlbedo";
+        const std::string  m_Shininess = "shininess";
+		const std::string  m_Opacity = "opacity";
         
         const std::string  m_LightPos = "u_light_pos";
         const std::string  m_LightColor = "u_light_color";

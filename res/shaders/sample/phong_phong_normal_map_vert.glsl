@@ -9,12 +9,14 @@ uniform vec3 u_light_pos;
 uniform mat4 m_Model;
 uniform mat4 m_MV;
 uniform mat4 m_Projection;
-
+uniform mat4 m_LightViewProjection;
+   
 out VS_OUT
 {
     vec2 texCoord;
     vec3 lightDir;
     vec3 viewDir;
+    vec4 fragPosLightSpace;
 } vs_out;
 
 
@@ -33,13 +35,13 @@ void main()
     vec3 lightDir = u_light_pos - pos.xyz;
     vec3 viewDir = -pos.xyz;
 
-    lightDir = TBN * normalize(lightDir);
-    viewDir = TBN * normalize(viewDir);
+    lightDir = TBN * (lightDir);
+    viewDir = TBN * (viewDir);
     
     vs_out.lightDir = lightDir;
     vs_out.viewDir = viewDir;
     vs_out.texCoord = v_uv0;
-
+    vs_out.fragPosLightSpace = m_LightViewProjection * m_Model * v_position;
 
     gl_Position = m_Projection * pos;
 }

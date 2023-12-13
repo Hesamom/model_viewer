@@ -3,7 +3,7 @@
 
 using namespace modelViewer::res;
 
-std::string readFile(const std::filesystem::path &path) {
+std::string shader_loader::readFile(const std::filesystem::path &path) {
 
     std::ifstream stream(path);
 
@@ -16,6 +16,18 @@ std::string readFile(const std::filesystem::path &path) {
     std::string line;
     while (getline(stream, line))
     {
+		if (line.starts_with("#include"))
+		{
+			//TODO consider trimming 
+			auto includeFile = line.substr(9);
+			auto filePath = m_IncludePath + includeFile;
+			auto includedContent = readFile(filePath);
+			content += includedContent;
+			content += "\n";
+			continue;
+		}
+		
+		
         content += line;
         content += "\n";
     }
@@ -24,7 +36,7 @@ std::string readFile(const std::filesystem::path &path) {
 }
 
 
-std::shared_ptr<shader_asset> modelViewer::res::shader_loader::load(const std::string& filePath, shaderType type)
+std::shared_ptr<shader_asset> shader_loader::load(const std::string& filePath, shaderType type)
 {
     if (m_LoadedAssets.contains(filePath))
     {

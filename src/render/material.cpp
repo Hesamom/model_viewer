@@ -81,31 +81,31 @@ void material::setProjection(glm::mat4 &projection) {
 
 void material::applyMaterialProperties() {
     
-    int ambientLoc = m_Program->getUniformLocation(m_AmbientAlbedo);
+    int ambientLoc = m_Program->getUniformLocation(m_MaterialBlock + m_AmbientAlbedo);
     if (ambientLoc > -1)
     {
         m_Program->setUniformVector3(ambientLoc, m_Info.propertySet.ambient);
     }
 
-    int diffuseLoc = m_Program->getUniformLocation(m_DiffuseAlbedo);
+    int diffuseLoc = m_Program->getUniformLocation(m_MaterialBlock + m_DiffuseAlbedo);
     if (diffuseLoc > -1)
     {
         m_Program->setUniformVector3(diffuseLoc, m_Info.propertySet.diffuseAlbedo);
     }
 
-    int specLoc = m_Program->getUniformLocation(m_SpecularAlbedo);
+    int specLoc = m_Program->getUniformLocation( m_MaterialBlock + m_SpecularAlbedo);
     if (specLoc > -1)
     {
         m_Program->setUniformVector3(specLoc, m_Info.propertySet.specularAlbedo);
     }
 
-    int shinLoc = m_Program->getUniformLocation(m_Shininess);
+    int shinLoc = m_Program->getUniformLocation(m_MaterialBlock + m_Shininess);
     if (shinLoc > -1)
     {
         m_Program->setUniformFloat(shinLoc, m_Info.propertySet.shininess);
     }
 
-	int opacityLoc = m_Program->getUniformLocation(m_Opacity);
+	int opacityLoc = m_Program->getUniformLocation(m_MaterialBlock + m_Opacity);
 	if (opacityLoc > -1)
 	{
 		m_Program->setUniformFloat(opacityLoc, m_Info.propertySet.opacity);

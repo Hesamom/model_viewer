@@ -24,7 +24,7 @@ void main()
 {
 	//position and normal in view space
 	vec4 pos = m_MV * v_position;
-	vec3 normal = mat3(m_MV) * v_normal;
+	vec3 normal = normalize(mat3(m_MV) * v_normal);
 	vec3 lightDir = u_light_pos - pos.xyz;
 	vec3 viewDir = -pos.xyz;
 

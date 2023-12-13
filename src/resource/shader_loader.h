@@ -2,6 +2,8 @@
 #define MODEL_VIEWER_SHADER_LOADER_H
 
 
+#include <filesystem>
+
 namespace modelViewer::res {
 
     class shader_asset;
@@ -10,9 +12,13 @@ namespace modelViewer::res {
     class shader_loader {
     private:
         std::unordered_map<std::string , std::shared_ptr<shader_asset>> m_LoadedAssets;
+		std::string readFile(const std::filesystem::path& path);
+		const std::string m_IncludePath = "res/shaders/include/";
     public:
         std::shared_ptr<shader_asset> load(const std::string& filePath, shaderType type);
-    };
+
+
+	};
 
 }
 
