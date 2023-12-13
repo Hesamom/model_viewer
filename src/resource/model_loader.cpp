@@ -11,6 +11,7 @@ using namespace modelViewer::res;
 
 auto processSteps =
         aiProcess_CalcTangentSpace       |
+        aiProcess_ConvertToLeftHanded    |
         aiProcess_Triangulate            |
         aiProcess_JoinIdenticalVertices  |
         aiProcess_SortByPType | aiProcess_ImproveCacheLocality;

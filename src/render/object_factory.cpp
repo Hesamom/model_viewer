@@ -26,7 +26,7 @@ std::vector<std::shared_ptr<modelViewer::render::texture>> object_factory::getTe
 
         for (auto &path: textureInfo.paths)
         {
-            auto textureAsset = m_TextureLoader.load(path, 4);
+            auto textureAsset = m_TextureLoader.load(path, 4, textureInfo.forceFlip);
             setup.assets.emplace_back(textureAsset);
         }
 

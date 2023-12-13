@@ -14,6 +14,7 @@ namespace modelViewer::res
     
     struct textureInfo
     {
+        bool forceFlip = true;
         int width = 0;
         int height = 0;
         int channels = 0;

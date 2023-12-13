@@ -9,7 +9,7 @@ namespace modelViewer::res {
     private:
         std::unordered_map<std::filesystem::path, std::shared_ptr<texture_asset>> m_LoadedAssets;
     public:
-        std::shared_ptr<texture_asset> load(const std::string& path, int channelsCount = 3);
+        std::shared_ptr<texture_asset> load(const std::string& path, int channelsCount = 3, bool forceFlip = true);
     };
 
 }

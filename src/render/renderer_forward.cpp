@@ -177,10 +177,11 @@ void renderer_forward::createSkybox(object_factory& objectFactory)
 	skyboxTexture.type = texture_asset_type::cube;
 	skyboxTexture.paths.emplace_back("res/textures/skybox/sample/right.jpg");
 	skyboxTexture.paths.emplace_back("res/textures/skybox/sample/left.jpg");
+    skyboxTexture.paths.emplace_back("res/textures/skybox/sample/top.jpg");
     skyboxTexture.paths.emplace_back("res/textures/skybox/sample/bottom.jpg");
-	skyboxTexture.paths.emplace_back("res/textures/skybox/sample/top.jpg");
     skyboxTexture.paths.emplace_back("res/textures/skybox/sample/front.jpg");
 	skyboxTexture.paths.emplace_back("res/textures/skybox/sample/back.jpg");
+    skyboxTexture.forceFlip = false;
 	skyboxModel.material.textures.push_back(skyboxTexture);
 	//skyboxModel.transform.setEularRotation(glm::vec3 (90,0,0));
 	skyboxModel.path = "res/models/primitives/cube.obj";

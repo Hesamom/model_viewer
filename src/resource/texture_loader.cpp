@@ -8,14 +8,14 @@ using namespace modelViewer::res;
 byte * readFile(const std::string &path, textureInfo* info) {
     
     //TODO add a flag later?
-    stbi_set_flip_vertically_on_load(1);
+    stbi_set_flip_vertically_on_load(info->forceFlip);
     
     byte* content = stbi_load(path.c_str(), &(info->width), &(info->height), &(info->channels), info->channels);
     return content;
 }
 
 
-std::shared_ptr<texture_asset> modelViewer::res::texture_loader::load(const std::string &path, int channelsCount) {
+std::shared_ptr<texture_asset> modelViewer::res::texture_loader::load(const std::string &path, int channelsCount, bool forceFlip) {
 
     if (m_LoadedAssets.contains(path))
     {
@@ -33,6 +33,7 @@ std::shared_ptr<texture_asset> modelViewer::res::texture_loader::load(const std:
     }
 
     textureInfo info;
+    info.forceFlip = forceFlip;
     info.channels = channelsCount;
     auto content = readFile(path, &info);
     auto asset = std::make_shared<texture_asset>(content, info, path);
