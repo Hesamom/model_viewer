@@ -5,9 +5,10 @@
 #include "shader.h"
 #include "glm/glm.hpp"
 
-namespace modelViewer::render{
-    class shader_program {
-        
+namespace modelViewer::render
+{
+    class shader_program
+		{
 private:
         unsigned int m_ProgramId = 0;
     public:

@@ -1,6 +1,7 @@
-﻿#include "material.h"
+﻿#include "shader_program.h"
+#include "material.h"
 #include "texture_2D.h"
-#include "shader_program.h"
+
 
 using namespace modelViewer::render;
 using namespace modelViewer::res;
@@ -12,12 +13,15 @@ material::material(const material_info &info, std::vector<std::shared_ptr<textur
     m_Program = program;
 
     m_Program->bind();
-    m_ModelLocation = m_Program->getUniformLocation(m_ModelUniform);;
-    m_ModelViewLocation = m_Program->getUniformLocation(m_ModelViewUniform);
-    m_MVPLocation = m_Program->getUniformLocation(m_MVPUniform);
-    m_ProjectionLocation = m_Program->getUniformLocation(m_ProjectionUniform);
-	m_LightViewProjectionLocation = m_Program->getUniformLocation(m_LightViewProjectionUniform);
-
+	m_ModelUniform.getLocation(*m_Program);
+    m_ModelViewUniform.getLocation(*m_Program);
+	m_MVPUniform.getLocation(*m_Program);
+	m_ProjectionUniform.getLocation(*m_Program);
+	
+	m_LightViewProjectionUniform.getLocation(*m_Program);
+	m_LightColorUniform.getLocation(*m_Program);
+	m_LightPosUniform.getLocation(*m_Program);
+	
 	m_ShadowMapSamplerLocation = m_Program->getUniformLocation(m_ShadowSampler);
     
     applyMaterialProperties();
@@ -43,72 +47,61 @@ std::string material::getSamplerName(modelViewer::res::texture_asset_type type) 
 
 void material::setMVP(glm::mat4 &matrix) 
 {
-    if (m_MVPLocation < 0)
-    {
-        return;
-    }
-    
-    m_Program->setUniformMatrix4(m_MVPLocation, matrix);
+    m_MVPUniform.setValue(matrix, *m_Program);
 }
 
-void material::setModelView(glm::mat4 &matrix) {
-    if (m_ModelViewLocation < 0)
-    {
-        return;
-    }
-
-    m_Program->setUniformMatrix4(m_ModelViewLocation, matrix);
+void material::setModelView(glm::mat4 &matrix) 
+{
+	m_ModelViewUniform.setValue(matrix, *m_Program);
 }
 
-void
-material::setModel(glm::mat4 &model) {
-    if (m_ModelLocation < 0)
-    {
-        return;
-    }
-
-    m_Program->setUniformMatrix4(m_ModelLocation, model);
+void material::setModel(glm::mat4 &model)
+{
+	m_ModelUniform.setValue(model, *m_Program);
 }
 
-void material::setProjection(glm::mat4 &projection) {
-    if (m_ProjectionLocation < 0)
-    {
-        return;
-    }
-
-    m_Program->setUniformMatrix4(m_ProjectionLocation, projection);
+void material::setProjection(glm::mat4 &projection)
+{
+	m_ProjectionUniform.setValue(projection, *m_Program);
 }
 
 void material::applyMaterialProperties() {
-    
-    int ambientLoc = m_Program->getUniformLocation(m_MaterialBlock + m_AmbientAlbedo);
-    if (ambientLoc > -1)
-    {
-        m_Program->setUniformVector3(ambientLoc, m_Info.propertySet.ambient);
-    }
 
-    int diffuseLoc = m_Program->getUniformLocation(m_MaterialBlock + m_DiffuseAlbedo);
-    if (diffuseLoc > -1)
-    {
-        m_Program->setUniformVector3(diffuseLoc, m_Info.propertySet.diffuseAlbedo);
-    }
-
-    int specLoc = m_Program->getUniformLocation( m_MaterialBlock + m_SpecularAlbedo);
-    if (specLoc > -1)
-    {
-        m_Program->setUniformVector3(specLoc, m_Info.propertySet.specularAlbedo);
-    }
-
-    int shinLoc = m_Program->getUniformLocation(m_MaterialBlock + m_Shininess);
-    if (shinLoc > -1)
-    {
-        m_Program->setUniformFloat(shinLoc, m_Info.propertySet.shininess);
-    }
-
-	int opacityLoc = m_Program->getUniformLocation(m_MaterialBlock + m_Opacity);
-	if (opacityLoc > -1)
+	for (auto& floatProp : m_Info.propertySet.floats)
 	{
-		m_Program->setUniformFloat(opacityLoc, m_Info.propertySet.opacity);
+		int loc = m_Program->getUniformLocation(floatProp.name);
+		if (loc > -1)
+		{
+			m_Program->setUniformFloat(loc, floatProp.value);
+		}
+	}
+
+	for (auto& intProp : m_Info.propertySet.ints)
+	{
+		int loc = m_Program->getUniformLocation(intProp.name);
+		if (loc > -1)
+		{
+			m_Program->setUniformInt(loc, intProp.value);
+		}
+	}
+
+	for (auto& colorProp : m_Info.propertySet.colors)
+	{
+		int loc = m_Program->getUniformLocation(colorProp.name);
+		if (loc > -1)
+		{
+			m_Program->setUniformVector3(loc, colorProp.value);
+		}
+	}
+
+
+	for (auto& boolProp : m_Info.propertySet.booleans)
+	{
+		int loc = m_Program->getUniformLocation(boolProp.name);
+		if (loc > -1)
+		{
+			m_Program->setUniformInt(loc, boolProp.value);
+		}
 	}
 }
 
@@ -170,17 +163,12 @@ int material::getAttributeLocation(std::string name) const {
 void material::setLight(const light_directional &light) {
     
     m_Program->bind();
-    int lightPos = m_Program->getUniformLocation(m_LightPos);
-    if (lightPos > -1)
-    {
-        m_Program->setUniformVector3(lightPos, light.getPosition());
-    }
+	
+	auto pos = light.getPosition();
+	m_LightPosUniform.setValue(pos, *m_Program);
 
-    int lightColor = m_Program->getUniformLocation(m_LightColor);
-    if (lightColor > -1)
-    {
-        m_Program->setUniformVector3(lightColor, light.getColor());
-    }
+	auto color = light.getColor();
+    m_LightColorUniform.setValue(color, *m_Program);
 }
 
 
@@ -197,12 +185,7 @@ void material::setShadowMapSlot(int slot)
 
 void material::setLightViewProjection(glm::mat4& matrix)
 {
-	if (m_LightViewProjectionLocation < 0)
-	{
-		return;
-	}
-
-	m_Program->setUniformMatrix4(m_LightViewProjectionLocation, matrix);
+	m_LightViewProjectionUniform.setValue(matrix, *m_Program);
 }
 
 modelViewer::res::material_info& material::getInfo()

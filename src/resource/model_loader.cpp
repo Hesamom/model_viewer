@@ -11,7 +11,6 @@ using namespace modelViewer::res;
 
 auto processSteps =
         aiProcess_CalcTangentSpace       |
-        aiProcess_ConvertToLeftHanded    |
         aiProcess_Triangulate            |
         aiProcess_JoinIdenticalVertices  |
         aiProcess_SortByPType | aiProcess_ImproveCacheLocality;
@@ -75,32 +74,52 @@ void model_loader::setMaterialProperties(aiMaterial &material, material_property
     aiColor3D diffuse;
     if (AI_SUCCESS == material.Get(AI_MATKEY_COLOR_DIFFUSE, diffuse))
     {
-        set.diffuseAlbedo = toColor (diffuse);
+		set.colors.push_back({Literals::DiffuseAlbedo, toColor (diffuse)});
     }
+	else
+	{
+		set.colors.push_back({Literals::DiffuseAlbedo, Literals::DefaultDiffuseAlbedo});
+	}
 
 
     aiColor3D ambient;
     if (AI_SUCCESS ==  material.Get(AI_MATKEY_COLOR_AMBIENT, ambient))
     {
-        set.ambient = toColor (ambient);
+		set.colors.push_back({Literals::AmbientAlbedo, toColor (ambient)});
     }
+	else
+	{
+		set.colors.push_back({Literals::AmbientAlbedo, Literals::DefaultAmbientAlbedo});
+	}
     
     aiColor3D spec;
     if (AI_SUCCESS == material.Get(AI_MATKEY_COLOR_SPECULAR, spec))
     {
-        set.specularAlbedo = toColor (spec);
+		set.colors.push_back({Literals::SpecularAlbedo, toColor (spec)});
     }
+	else
+	{
+		set.colors.push_back({Literals::AmbientAlbedo, Literals::DefaultSpecularAlbedo});
+	}
 
     float shin;
     if (AI_SUCCESS ==  material.Get(AI_MATKEY_SHININESS, shin))
     {
-        set.shininess = shin;
+        set.floats.push_back({Literals::Shininess, shin});
     }
+	else
+	{
+		set.floats.push_back({Literals::Shininess, Literals::DefaultShininess});
+	}
 
 	float opacity;
 	if (AI_SUCCESS ==  material.Get(AI_MATKEY_OPACITY, opacity))
 	{
-		set.opacity = opacity;
+		set.floats.push_back({Literals::Opacity, opacity});
+	}
+	else
+	{
+		set.floats.push_back({Literals::Opacity, Literals::DefaultOpacity});
 	}
     
     //TODO add blending mode

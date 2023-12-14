@@ -131,7 +131,7 @@ std::shared_ptr<modelViewer::render::render_object> model_platform_buffer::gener
 
 	material_info materialInfo;
 	std::vector<std::shared_ptr<texture>> textures;
-	materialInfo.propertySet.opacity = 0.5f;
+	materialInfo.propertySet.floats.push_back({Literals::Opacity, 0.5f});
 	materialInfo.propertySet.renderQueue = (render_queue_transparent + 1);
 	
 	auto mat = std::make_shared<material>(materialInfo, textures, program);
@@ -169,8 +169,11 @@ std::shared_ptr<modelViewer::render::render_object> model_platform_buffer::gener
 	std::vector<std::shared_ptr<texture>> textures;
 	textures.push_back(diffuseTexture);
 	material_info materialInfo;
-	materialInfo.propertySet.specularAlbedo = glm::vec3(0);
-	materialInfo.propertySet.opacity = 0.5f;
+	materialInfo.propertySet.colors.push_back({Literals::SpecularAlbedo, glm::vec3 (0)});
+	materialInfo.propertySet.colors.push_back({Literals::DiffuseAlbedo, Literals::DefaultDiffuseAlbedo});
+	materialInfo.propertySet.colors.push_back({Literals::AmbientAlbedo, Literals::DefaultAmbientAlbedo});
+	materialInfo.propertySet.floats.push_back({Literals::Opacity, 0.5f});
+	materialInfo.propertySet.floats.push_back({Literals::Shininess, 1});
 	materialInfo.propertySet.renderQueue = render_queue_transparent;
 	auto mat = std::make_shared<material>(materialInfo, textures, program);
 

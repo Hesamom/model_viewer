@@ -75,6 +75,8 @@ void shader_program::setUniformVector3(int location, glm::vec3 vec3) {
      glUniform3f(location, vec3.x,vec3.y,vec3.z);
 }
 
+
+
 void shader_program::setUniformVector4(int location, glm::vec4 vec4) {
     bind();
     glUniform4f(location, vec4.x,vec4.y,vec4.z,vec4.w);
