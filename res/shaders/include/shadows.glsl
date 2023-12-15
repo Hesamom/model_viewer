@@ -1,4 +1,3 @@
-﻿
 #define PCF
 
 float getShadowValue(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir, sampler2DShadow shadowmap)

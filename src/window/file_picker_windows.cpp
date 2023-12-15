@@ -4,7 +4,10 @@
 
 bool file_picker_windows::tryOpenPicker(std::string& path) {
 
-    
+
+    char currentDir[MAX_PATH];
+    GetCurrentDirectoryA(MAX_PATH, currentDir);
+
     OPENFILENAMEA ofn;
     ZeroMemory(&ofn, sizeof(ofn));
     ofn.lStructSize = sizeof(ofn);
@@ -18,10 +21,12 @@ bool file_picker_windows::tryOpenPicker(std::string& path) {
     ofn.Flags = OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST;
     if (GetOpenFileNameA(&ofn)) // user selected an input file
     {
+        SetCurrentDirectoryA(currentDir);
         return true;
     }
     else
     {
+        SetCurrentDirectoryA(currentDir);
         return false;
     }
 }
