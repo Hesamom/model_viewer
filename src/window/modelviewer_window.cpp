@@ -201,6 +201,17 @@ void modelviewer_window::addNewModels()
 
     m_NewModelsQueue.clear();
 }
+
+void addDefaults(material_property_set& set)
+{
+	set.floats.push_back({Literals::Opacity, Literals::DefaultOpacity});
+	set.floats.push_back({Literals::Shininess, Literals::DefaultShininess});
+
+	set.colors.push_back({Literals::AmbientAlbedo, Literals::DefaultAmbientAlbedo});
+	set.colors.push_back({Literals::DiffuseAlbedo, Literals::DefaultDiffuseAlbedo});
+	set.colors.push_back({Literals::SpecularAlbedo, Literals::DefaultSpecularAlbedo});
+}
+
 void modelviewer_window::openDemoModel(std::string name)
 {
     model_info info;
@@ -208,6 +219,7 @@ void modelviewer_window::openDemoModel(std::string name)
     shader_asset_info vertShader { "res/shaders/sample/phong_phong_vert.glsl", shaderType::vertex};
     info.material.shaders.push_back(fragShader);
     info.material.shaders.push_back(vertShader);
+	addDefaults(info.material.propertySet);
 
     texture_asset_info textureAssetInfo;
     textureAssetInfo.paths.emplace_back("res/textures/Transparent.png");

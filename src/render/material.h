@@ -3,6 +3,7 @@
 #include "../resource/model_info.h"
 #include "light_directional.h"
 #include "texture.h"
+#include "shader_uniform.h"
 
 
 namespace modelViewer::render
@@ -22,28 +23,18 @@ namespace modelViewer::render
 		const std::string  m_ShadowSampler = "u_shadowSampler";
 
         //TODO consider using a uniform block
-        const std::string  m_MVPUniform = "m_MVP";
-        const std::string  m_ModelViewUniform = "m_MV";
-        const std::string  m_ModelUniform = "m_Model";
-        const std::string  m_ProjectionUniform = "m_Projection";
-		const std::string  m_LightViewProjectionUniform = "m_LightViewProjection";
-
-        int m_MVPLocation = -1;
-        int m_ModelViewLocation = -1;
-        int m_ModelLocation = -1;
-        int m_ProjectionLocation = -1;
-		int m_LightViewProjectionLocation = -1;
+		shader_uniform<glm::mat4> m_MVPUniform{"m_MVP", ""};
+		shader_uniform<glm::mat4> m_ModelViewUniform{"m_MV", ""};
+		shader_uniform<glm::mat4> m_ModelUniform{"m_Model", ""};
+		shader_uniform<glm::mat4> m_ProjectionUniform{"m_Projection",""};
+		
+		shader_uniform<glm::mat4> m_LightViewProjectionUniform{"m_LightViewProjection",""};
+		shader_uniform<glm::vec3> m_LightPosUniform{"u_light_pos",""};
+		shader_uniform<glm::vec3> m_LightColorUniform{"u_light_color",""};
+		
+		
 		int m_ShadowMapSamplerLocation = -1;
-
-		const std::string  m_MaterialBlock = "mat.";
-        const std::string  m_AmbientAlbedo = "ambient";
-        const std::string  m_DiffuseAlbedo = "diffuseAlbedo";
-        const std::string  m_SpecularAlbedo = "specularAlbedo";
-        const std::string  m_Shininess = "shininess";
-		const std::string  m_Opacity = "opacity";
-        
-        const std::string  m_LightPos = "u_light_pos";
-        const std::string  m_LightColor = "u_light_color";
+		
 
 		const std::set<int> m_AssignedTextureLocations;
 

@@ -28,9 +28,11 @@ int main()
 
     wallModel.path = "res/models/primitives/plane.fbx";
     wallModel.name = "default model";
-    wallModel.material.propertySet.diffuseAlbedo = glm::vec3 (1.0f);
-    wallModel.material.propertySet.specularAlbedo = glm::vec3 (0.2f);
-    wallModel.material.propertySet.shininess = 10;
+	wallModel.material.propertySet.colors.push_back({Literals::DiffuseAlbedo, glm::vec3 (1.0f)});
+	wallModel.material.propertySet.colors.push_back({Literals::AmbientAlbedo, glm::vec3 (1.0f)});
+	wallModel.material.propertySet.colors.push_back({Literals::SpecularAlbedo, glm::vec3 (0.2f)});
+	wallModel.material.propertySet.floats.push_back({Literals::Shininess, 10});
+	wallModel.material.propertySet.floats.push_back({Literals::Opacity, 1});
 	wallModel.material.propertySet.cullFaceEnabled = false;
     window.addModel(wallModel);
 

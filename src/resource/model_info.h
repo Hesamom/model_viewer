@@ -10,6 +10,7 @@ using color = glm::vec3;
 
 namespace modelViewer::res
 {
+	
     enum class texture_asset_type
     {
         none,
@@ -53,15 +54,22 @@ namespace modelViewer::res
         std::string path;
         shaderType type;
     };
+	
+	
+	template<typename T>
+	struct material_property
+	{
+		std::string  name;
+		T value;
+	};
     
     struct material_property_set
     {
-       color diffuseAlbedo = color(0.2f);
-       color ambient =  color(0.5f);
-       color specularAlbedo =  color(0.5f);
-       float shininess = 128;
-	   float opacity = 1;
-	   
+		std::vector<material_property<float>> floats;
+		std::vector<material_property<color>> colors;
+		std::vector<material_property<bool>> booleans;
+		std::vector<material_property<int>> ints;
+		
 	   bool depthWriteEnabled = true;
 	   int renderQueue = render_queue_opaque;
 	   bool cullFaceEnabled = true;
@@ -81,6 +89,21 @@ namespace modelViewer::res
         std::string name;
         std::string path;
     };
+
+	namespace Literals
+	{
+		const std::string  AmbientAlbedo = "mat.ambient";
+		const std::string  DiffuseAlbedo = "mat.diffuseAlbedo";
+		const std::string  SpecularAlbedo = "mat.specularAlbedo";
+		const std::string  Shininess = "mat.shininess";
+		const std::string  Opacity = "mat.opacity";
+
+		const color DefaultAmbientAlbedo{0.5f};
+		const color DefaultDiffuseAlbedo{0.2f};
+		const color DefaultSpecularAlbedo{0.5f};
+		const float DefaultShininess = 128;
+		const float DefaultOpacity = 1;
+	}
 }
 
 #endif
