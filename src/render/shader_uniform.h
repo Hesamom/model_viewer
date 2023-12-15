@@ -9,7 +9,7 @@ namespace modelViewer::render
 		unsigned int m_Location = -1;
 		std::string m_Name;
 	public:
-		explicit shader_uniform(std::string name, std::string blockName)
+		explicit shader_uniform(std::string name, std::string blockName, int blockIndex = -1)
 		{
 			if (name.empty())
 			{
@@ -17,7 +17,14 @@ namespace modelViewer::render
 			}
 			if(!blockName.empty())
 			{
-				m_Name = blockName + "." + name;
+				if (blockIndex >= 0)
+				{
+					m_Name = blockName + '[' + std::to_string(blockIndex) + ']' + "." + name;
+				}
+				else
+				{
+					m_Name = blockName + "." + name;
+				}
 			}
 			else
 			{
@@ -37,25 +44,25 @@ namespace modelViewer::render
 				return;
 			}
 			
-			if constexpr (std::is_same<T, float>::value)
+			if constexpr (std::is_same<T,  float>::value)
 			{
-				program.setUniformFloat(m_Location, value);
+				program.setUniform(m_Location, value);
 			}
-			if constexpr (std::is_same<T, int>::value)
+			if constexpr (std::is_same<T,  int>::value)
 			{
-				program.setUniformInt(m_Location, value);
+				program.setUniform(m_Location, value);
 			}
-			if constexpr (std::is_same<T, glm::mat4>::value)
+			if constexpr (std::is_same<T,  glm::mat4>::value)
 			{
-				program.setUniformMatrix4(m_Location, value);
+				program.setUniform(m_Location, value);
 			}
-			if constexpr (std::is_same<T, glm::vec3>::value)
+			if constexpr (std::is_same<T,  glm::vec3>::value)
 			{
-				program.setUniformVector3(m_Location, value);
+				program.setUniform(m_Location, value);
 			}
-			if constexpr (std::is_same<T, glm::vec4>::value)
+			if constexpr (std::is_same<T,  glm::vec4>::value)
 			{
-				program.setUniformVector4(m_Location, value);
+				program.setUniform(m_Location, value);
 			}
 			else
 			{

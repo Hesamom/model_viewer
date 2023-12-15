@@ -8,14 +8,11 @@ namespace modelViewer::render {
     class light_directional {
         
     private:
-        glm::vec3 m_Position {50};
-        glm::vec3 m_Color{1};
+      
     public:
-        glm::vec3 getPosition() const;
-        void setPosition(glm::vec3 position);
-        
-        glm::vec3 getColor() const;
-        void setColor(glm::vec3 color);
+		glm::vec3 position {50};
+		glm::vec3 ambient{0.5f};
+		glm::vec3 diffuse{0.8f};
     };
 }
 

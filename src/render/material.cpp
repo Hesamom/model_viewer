@@ -19,7 +19,8 @@ material::material(const material_info &info, std::vector<std::shared_ptr<textur
 	m_ProjectionUniform.getLocation(*m_Program);
 	
 	m_LightViewProjectionUniform.getLocation(*m_Program);
-	m_LightColorUniform.getLocation(*m_Program);
+	m_LightAmbientUniform.getLocation(*m_Program);
+	m_LightDiffuseUniform.getLocation(*m_Program);
 	m_LightPosUniform.getLocation(*m_Program);
 	
 	m_ShadowMapSamplerLocation = m_Program->getUniformLocation(m_ShadowSampler);
@@ -50,17 +51,17 @@ void material::setMVP(glm::mat4 &matrix)
     m_MVPUniform.setValue(matrix, *m_Program);
 }
 
-void material::setModelView(glm::mat4 &matrix) 
+void material::setModelView( glm::mat4 &matrix) 
 {
 	m_ModelViewUniform.setValue(matrix, *m_Program);
 }
 
-void material::setModel(glm::mat4 &model)
+void material::setModel( glm::mat4 &model)
 {
 	m_ModelUniform.setValue(model, *m_Program);
 }
 
-void material::setProjection(glm::mat4 &projection)
+void material::setProjection( glm::mat4 &projection)
 {
 	m_ProjectionUniform.setValue(projection, *m_Program);
 }
@@ -72,7 +73,7 @@ void material::applyMaterialProperties() {
 		int loc = m_Program->getUniformLocation(floatProp.name);
 		if (loc > -1)
 		{
-			m_Program->setUniformFloat(loc, floatProp.value);
+			m_Program->setUniform(loc, floatProp.value);
 		}
 	}
 
@@ -81,7 +82,7 @@ void material::applyMaterialProperties() {
 		int loc = m_Program->getUniformLocation(intProp.name);
 		if (loc > -1)
 		{
-			m_Program->setUniformInt(loc, intProp.value);
+			m_Program->setUniform(loc, intProp.value);
 		}
 	}
 
@@ -90,7 +91,7 @@ void material::applyMaterialProperties() {
 		int loc = m_Program->getUniformLocation(colorProp.name);
 		if (loc > -1)
 		{
-			m_Program->setUniformVector3(loc, colorProp.value);
+			m_Program->setUniform(loc, colorProp.value);
 		}
 	}
 
@@ -100,7 +101,7 @@ void material::applyMaterialProperties() {
 		int loc = m_Program->getUniformLocation(boolProp.name);
 		if (loc > -1)
 		{
-			m_Program->setUniformInt(loc, boolProp.value);
+			m_Program->setUniform(loc, boolProp.value);
 		}
 	}
 }
@@ -125,7 +126,7 @@ void material::bindTextures(std::vector<std::shared_ptr<texture>>& textures)
         
         item->active(index);
         m_Program->bind();
-        m_Program->setUniformInt(loc, index);
+		m_Program->setUniform(loc, index);
         index++;
         m_Textures.push_back(item);
     }
@@ -164,11 +165,12 @@ void material::setLight(const light_directional &light) {
     
     m_Program->bind();
 	
-	auto pos = light.getPosition();
+	auto pos = light.position;
 	m_LightPosUniform.setValue(pos, *m_Program);
-
-	auto color = light.getColor();
-    m_LightColorUniform.setValue(color, *m_Program);
+	auto ambient = light.ambient;
+    m_LightAmbientUniform.setValue(ambient, *m_Program);
+	auto diffuse = light.diffuse;
+	m_LightAmbientUniform.setValue(diffuse, *m_Program);
 }
 
 
@@ -180,7 +182,7 @@ void material::setShadowMapSlot(int slot)
 	}
 
 	m_Program->bind();
-	m_Program->setUniformInt(m_ShadowMapSamplerLocation, slot);
+	m_Program->setUniform(m_ShadowMapSamplerLocation, slot);
 }
 
 void material::setLightViewProjection(glm::mat4& matrix)
@@ -191,4 +193,40 @@ void material::setLightViewProjection(glm::mat4& matrix)
 modelViewer::res::material_info& material::getInfo()
 {
 	return m_Info;
+}
+
+void material::setPointLights(std::vector<light_point>& lights)
+{
+	//TODO can cache the uniforms here 
+	int index = 0;
+	const std::string blockName = "pointLights";
+	m_Program->setUniform(m_Program->getUniformLocation("u_pointLightCount"), (int)lights.size());
+	
+	for (auto& item : lights)
+	{
+		shader_uniform<glm::vec3> positionMember{"position",blockName, index};
+		positionMember.getLocation(*m_Program);
+		positionMember.setValue(item.position, *m_Program);
+
+		shader_uniform<glm::vec3> ambientMember{"ambient",blockName, index};
+		ambientMember.getLocation(*m_Program);
+		ambientMember.setValue(item.ambient, *m_Program);
+
+		shader_uniform<glm::vec3> diffuseMember{"diffuse",blockName, index};
+		diffuseMember.getLocation(*m_Program);
+		diffuseMember.setValue(item.diffuse, *m_Program);
+
+		float range = 0;
+		float insideRange = 0;
+		item.getRanges(range, insideRange);
+		shader_uniform<float> rangeMember{"range",blockName, index};
+		rangeMember.getLocation(*m_Program);
+		rangeMember.setValue(range, *m_Program);
+
+		shader_uniform<float> insideRangeMember{"insideRange",blockName, index};
+		insideRangeMember.getLocation(*m_Program);
+		insideRangeMember.setValue(insideRange, *m_Program);
+		
+		index++;
+	}
 }

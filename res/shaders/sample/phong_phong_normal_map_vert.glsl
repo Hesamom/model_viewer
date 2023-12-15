@@ -22,8 +22,8 @@ out VS_OUT
 
 void main()
 {
-    vec3 T = normalize(vec3(m_MV * vec4(v_tangent, 0.0)));
-    vec3 N = normalize(vec3(m_MV * vec4(v_normal, 0.0)));
+    vec3 T = normalize(vec3(m_Model * vec4(v_tangent, 0.0)));
+    vec3 N = normalize(vec3(m_Model * vec4(v_normal, 0.0)));
     T = normalize(T - dot(T, N) * N);
     vec3 B = cross(N, T);
     

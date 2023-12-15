@@ -8,9 +8,21 @@ using namespace modelViewer::res;
 using namespace modelViewer::render;
 using namespace modelViewer::common;
 
+glm::vec3 getPosition(float pitch, float yaw, float zoomLevel);
+
 void modelviewer_window::onRender(float elapsed) {
 
+	static float angle = 0;
+	angle += 1 * elapsed;
     addNewModels();
+	auto pos = glm::vec3 (0, 20, cos(angle) * -100);
+	m_Scene.getPointLights()[0].position = pos;
+	m_Scene.getObjects()[2]->getTransform().setPosition(pos);
+	
+	auto pos2 = glm::vec3 (-100 * cos(angle) , 20,0);
+	m_Scene.getPointLights()[1].position = pos2;
+	m_Scene.getObjects()[3]->getTransform().setPosition(pos2);
+	
 	m_Renderer.render(m_Scene, m_Camera, true);
 }
 
@@ -25,7 +37,7 @@ modelviewer_window::modelviewer_window(int width, int height, std::string title,
                                                                                                            height,
                                                                                                            title,
                                                                                                            fullscreen)
-                                                                                                           {
+    {
     
     setVsync(false);
     setTargetFrameRate(360);
@@ -43,6 +55,38 @@ modelviewer_window::modelviewer_window(int width, int height, std::string title,
 	auto grid = m_Platform.generateGrid(m_ObjectFactory, info);
 	m_Scene.addStaticObject(plane);
 	m_Scene.addStaticObject(grid);
+	
+	light_point point1{};
+	point1.position =  glm::vec3{100,20,0};
+	point1.ambient =  glm::vec3{0.2f,0,0};
+	point1.diffuse =  glm::vec3{1,0,0};
+	point1.setRange(100,1);
+	m_Scene.addPointLight(point1);
+	
+	auto lightObjectModel = getDemoModel("cube");
+	lightObjectModel.transform.setPosition(point1.position);
+	lightObjectModel.transform.setScale(glm::vec3(0.1f));
+	lightObjectModel.name = "point light 1";
+	auto lightObject = m_ObjectFactory.createObject(lightObjectModel);
+	lightObject->setCastShadows(false);
+	
+	m_Scene.addStaticObject(lightObject);
+	
+	light_point point2{};
+	point2.position =  glm::vec3{-100,20,0};
+	point2.ambient =  glm::vec3{0,0.2f,0};
+	point2.diffuse =  glm::vec3{0,1,0};
+	point2.setRange(100,1);
+	m_Scene.addPointLight(point2);
+
+	auto lightObjectModel2 = getDemoModel("cube");
+	lightObjectModel2.transform.setPosition(point2.position);
+	lightObjectModel2.transform.setScale(glm::vec3(0.1f));
+	lightObjectModel2.name = "point light 2";
+	auto lightObject2 = m_ObjectFactory.createObject(lightObjectModel2);
+	lightObject2->setCastShadows(false);
+
+	m_Scene.addStaticObject(lightObject2);
 }
 
 modelviewer_window::~modelviewer_window() {
@@ -214,21 +258,26 @@ void addDefaults(material_property_set& set)
 
 void modelviewer_window::openDemoModel(std::string name)
 {
-    model_info info;
-    shader_asset_info fragShader { "res/shaders/sample/phong_phong_frag.glsl", shaderType::fragment};
-    shader_asset_info vertShader { "res/shaders/sample/phong_phong_vert.glsl", shaderType::vertex};
-    info.material.shaders.push_back(fragShader);
-    info.material.shaders.push_back(vertShader);
+	model_info info = getDemoModel(name);
+	addModel(info);
+}
+
+model_info modelviewer_window::getDemoModel(const std::string& name) const
+{
+	model_info info;
+	shader_asset_info fragShader { "res/shaders/sample/phong_phong_frag.glsl", shaderType::fragment};
+	shader_asset_info vertShader { "res/shaders/sample/phong_phong_vert.glsl", shaderType::vertex};
+	info.material.shaders.push_back(fragShader);
+	info.material.shaders.push_back(vertShader);
 	addDefaults(info.material.propertySet);
 
-    texture_asset_info textureAssetInfo;
-    textureAssetInfo.paths.emplace_back("res/textures/Transparent.png");
-    info.material.textures.push_back(textureAssetInfo);
+	texture_asset_info textureAssetInfo;
+	textureAssetInfo.paths.emplace_back("res/textures/Transparent.png");
+	info.material.textures.push_back(textureAssetInfo);
 
-    info.path = "res/models/primitives/" + name + ".fbx";
-    info.name = name;
-  
-    addModel(info);
+	info.path = "res/models/primitives/" + name + ".fbx";
+	info.name = name;
+	return info;
 }
 
 void modelviewer_window::setClearMode(modelViewer::render::clear_mode mode)

@@ -38,3 +38,13 @@ void render_scene::addModelObject(std::shared_ptr<render_object>& object)
 	m_Objects.push_back(object);
 }
 
+void render_scene::addPointLight(light_point& light)
+{
+	m_PointLights.push_back(light);
+}
+
+std::vector<light_point>& render_scene::getPointLights()
+{
+	return m_PointLights;
+}
+

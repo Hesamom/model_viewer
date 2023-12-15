@@ -4,6 +4,7 @@
 #include "light_directional.h"
 #include "texture.h"
 #include "shader_uniform.h"
+#include "light_point.h"
 
 
 namespace modelViewer::render
@@ -30,8 +31,8 @@ namespace modelViewer::render
 		
 		shader_uniform<glm::mat4> m_LightViewProjectionUniform{"m_LightViewProjection",""};
 		shader_uniform<glm::vec3> m_LightPosUniform{"u_light_pos",""};
-		shader_uniform<glm::vec3> m_LightColorUniform{"u_light_color",""};
-		
+		shader_uniform<glm::vec3> m_LightAmbientUniform{"u_lightAmbient",""};
+		shader_uniform<glm::vec3> m_LightDiffuseUniform{"u_lightDiffuse",""};
 		
 		int m_ShadowMapSamplerLocation = -1;
 		
@@ -42,14 +43,15 @@ namespace modelViewer::render
         std::string  getSamplerName(modelViewer::res::texture_asset_type type);
     public:
         explicit material(const modelViewer::res::material_info& info, std::vector<std::shared_ptr<texture>>& textures, std::shared_ptr<shader_program>& program);
-        void setMVP(glm::mat4& matrix);
-        void setModelView(glm::mat4& matrix);
-        void setProjection(glm::mat4& projection);
-        void setModel(glm::mat4& model);
+        void setMVP( glm::mat4& matrix);
+        void setModelView( glm::mat4& matrix);
+        void setProjection( glm::mat4& projection);
+        void setModel( glm::mat4& model);
         void bind();
         int getUniformLocation(std::string name) const;
         int getAttributeLocation(std::string name) const;
         void setLight(const light_directional& light);
+		void setPointLights(std::vector<light_point>& lights);
 		void bindTextures(std::vector<std::shared_ptr<texture>>& textures);
 
 

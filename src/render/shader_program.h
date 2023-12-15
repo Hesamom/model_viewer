@@ -21,11 +21,11 @@ private:
         void bind();
         int getAttributeLocation(const std::string& attributeName);
         int getUniformLocation(const std::string& uniformName);
-        void setUniformVector3(int location, glm::vec3 vec3);
-        void setUniformVector4(int location, glm::vec4 vec4);
-        void setUniformFloat(int location, float value);
-        void setUniformInt(int location, int value);
-        void setUniformMatrix4(int index, glm::mat4& mat);
+        void setUniform(int location, glm::vec3 vec3);
+        void setUniform(int location, glm::vec4 vec4);
+        void setUniform(int location, float value);
+        void setUniform(int location, int value);
+        void setUniform(int index, glm::mat4& mat);
 };
 }
 

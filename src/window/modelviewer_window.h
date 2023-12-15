@@ -53,6 +53,8 @@ public:
      void setClearFlag(glm::vec4 color);
 
 	void setClearMode(modelViewer::render::clear_mode mode);
+
+	modelViewer::res::model_info getDemoModel(const std::string& name) const;
 };
 
 

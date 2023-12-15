@@ -29,7 +29,7 @@ void renderer_forward::renderShadows(modelViewer::render::render_scene& scene, c
 
 	float near_plane = 30.0f, far_plane = 100.0f;
 	glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-	glm::mat4 lightView = glm::lookAt(scene.getLight().getPosition(),
+	glm::mat4 lightView = glm::lookAt(scene.getLight().position,
 		glm::vec3( 0.0f, 0.0f,  0.0f),
 		glm::vec3( 0.0f, 1.0f,  0.0f));
 	m_LightViewProjection = lightProjection * lightView;
@@ -50,7 +50,7 @@ void renderer_forward::renderShadows(modelViewer::render::render_scene& scene, c
 
 
 		auto mvp = m_LightViewProjection * object->getTransform().getMatrix();
-		m_shadowProgram->setUniformMatrix4(m_MVPLocation, mvp);
+		m_shadowProgram->setUniform(m_MVPLocation, mvp);
 		object->renderShadow();
 	}
 	
@@ -116,6 +116,8 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 		}
 		
 		object->setLight(scene.getLight());
+		//TODO compare the point light ray with an object's AABB intersection and if its more than point light range, ignore the light since its not effective 
+		object->getMaterial()->setPointLights(scene.getPointLights());
 		object->render(viewMatrix, projection);
 	}
 	
