@@ -16,6 +16,7 @@ option(glew-cmake_BUILD_STATIC "Build the static glew library" ON)
 option(USE_GLU "Use GLU" OFF)
 option(PKG_CONFIG_REPRESENTATIVE_TARGET "Generate pc file for specified target as glew. libglew_static|libglew_shared" OFF)
 option(ONLY_LIBS "Do not build executables" OFF)
+option(INSTALL_FILES "Install files" ON)
 
 file(STRINGS ${CMAKE_CURRENT_SOURCE_DIR}/config/version  _VERSION_MAJOR_STRING REGEX "GLEW_MAJOR[ ]*=[ ]*[0-9]+.*")
 string(REGEX REPLACE "GLEW_MAJOR[ ]*=[ ]*([0-9]+)" "\\1" CPACK_PACKAGE_VERSION_MAJOR ${_VERSION_MAJOR_STRING})
@@ -130,34 +131,4 @@ if(PKG_CONFIG_REPRESENTATIVE_TARGET)
 		NAME "glew"
 		LIBRARY_DIR lib
 		REQUIRES ${pc_requires})
-endif()
-
-install(TARGETS ${GLEW_TARGETS}
-		EXPORT glew-cmake
-		ARCHIVE DESTINATION lib)
-install(EXPORT glew-cmake DESTINATION lib/cmake/glew FILE glewConfig.cmake)
-
-file(GLOB PUBLIC_HEADERS "include/GL/*.h")
-install(FILES ${PUBLIC_HEADERS} DESTINATION include/GL/)
-
-if(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR} AND NOT ONLY_LIBS)
-	set(GLEWINFO_SRCS ${SRC_DIR}/glewinfo.c)
-	set(VISUALINFO_SRCS ${SRC_DIR}/visualinfo.c)
-	if(MSVS)
-		list(APPEND GLEWINFO_SRCS ${RC_DIR}/glewinfo.rc)
-		list(APPEND VISUALINFO_SRCS ${RC_DIR}/visualinfo.rc)
-	endif()
-
-	add_executable(glewinfo ${GLEWINFO_SRCS})
-	add_executable(visualinfo ${VISUALINFO_SRCS})
-
-	if(glew-cmake_BUILD_STATIC)
-		target_link_libraries(glewinfo libglew_static)
-		target_link_libraries(visualinfo libglew_static)
-	else()
-		target_link_libraries(glewinfo libglew_shared)
-		target_link_libraries(visualinfo libglew_shared)
-	endif()
-
-	install(TARGETS glewinfo visualinfo DESTINATION bin)
 endif()

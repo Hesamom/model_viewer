@@ -40,7 +40,7 @@ namespace modelViewer::render
         void render(glm::mat4 view, glm::mat4 projection) override;
 		void renderShadow();
 		
-		void setCastShadows(bool enabled);
+		void setCastShadow(bool enabled);
 		void setReceiveShadows(bool enabled);
 
 		bool getCastShadows();

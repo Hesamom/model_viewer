@@ -72,7 +72,7 @@ void render_object::setRenderMode(render_mode mode)
 	m_Mode = mode;
 }
 
-void render_object::setCastShadows(bool enabled)
+void render_object::setCastShadow(bool enabled)
 {
 	m_CastShadows = enabled;
 }

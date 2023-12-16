@@ -137,7 +137,7 @@ std::shared_ptr<modelViewer::render::render_object> model_platform_buffer::gener
 	auto mat = std::make_shared<material>(materialInfo, textures, program);
 	auto grid = std::make_shared<render_object>(mat, mesh, "platform_grid");
 	grid->setRenderMode(render_mode::lines);
-	grid->setCastShadows(false);
+	grid->setCastShadow(false);
 	grid->setReceiveShadows(false);
 	
 	return grid;
@@ -178,7 +178,7 @@ std::shared_ptr<modelViewer::render::render_object> model_platform_buffer::gener
 	auto mat = std::make_shared<material>(materialInfo, textures, program);
 
 	auto plane = std::make_shared<render_object>(mat, mesh, "platform_plane");
-	plane->setCastShadows(false);
+	plane->setCastShadow(false);
 	
 	return plane;
 }

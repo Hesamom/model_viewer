@@ -68,7 +68,7 @@ modelviewer_window::modelviewer_window(int width, int height, std::string title,
 	lightObjectModel.transform.setScale(glm::vec3(0.1f));
 	lightObjectModel.name = "point light 1";
 	auto lightObject = m_ObjectFactory.createObject(lightObjectModel);
-	lightObject->setCastShadows(false);
+	lightObject->setCastShadow(false);
 	
 	m_Scene.addStaticObject(lightObject);
 	
@@ -84,7 +84,7 @@ modelviewer_window::modelviewer_window(int width, int height, std::string title,
 	lightObjectModel2.transform.setScale(glm::vec3(0.1f));
 	lightObjectModel2.name = "point light 2";
 	auto lightObject2 = m_ObjectFactory.createObject(lightObjectModel2);
-	lightObject2->setCastShadows(false);
+	lightObject2->setCastShadow(false);
 
 	m_Scene.addStaticObject(lightObject2);
 }
