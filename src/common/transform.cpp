@@ -29,14 +29,17 @@ glm::vec3 transform::getScale() {
 
 void transform::setPosition(glm::vec3 position) {
     m_Position = position;
+    dirty = true;
 }
 
 void transform::setRotation(const quaternion& rotation) {
     m_Rotation = rotation;
+    dirty = true;
 }
 
 void transform::setScale(glm::vec3 scale) {
     m_Scale = scale;
+    dirty = true;
 }
 
 glm::vec3 transform::getEularRotation() {

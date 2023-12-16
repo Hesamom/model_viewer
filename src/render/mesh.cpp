@@ -88,4 +88,8 @@ void modelViewer::render::mesh::drawLines() {
     m_IndexBuffer->drawLines();
 }
 
+std::shared_ptr<modelViewer::res::mesh_asset> modelViewer::render::mesh::getAsset() {
+    return m_Asset;
+}
+
 

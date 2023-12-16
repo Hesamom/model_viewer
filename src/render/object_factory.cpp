@@ -1,6 +1,7 @@
 ﻿
 #include "object_factory.h"
 #include "texture_cube.h"
+#include "texture_2D.h"
 
 using namespace modelViewer::res;
 using namespace modelViewer::render;

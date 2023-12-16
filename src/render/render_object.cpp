@@ -50,6 +50,7 @@ render_object::render_object(std::shared_ptr<material>& material, std::shared_pt
     m_Material = material;
     m_Name = name;
     m_Mesh->bindAttributes(*m_Material);
+    m_BaseBoundingBox = m_Mesh->getAsset()->getBoundingBox();
 }
 
 void render_object::setLight(const light_directional &light) {
@@ -80,6 +81,23 @@ void render_object::setCastShadow(bool enabled)
 void render_object::setReceiveShadows(bool enabled)
 {
 	m_ReceiveShadows = enabled;
+}
+
+void render_object::computeBoundingBox() {
+    if (!m_Transform.dirty) {
+        return;
+    }
+
+    const auto transformation = m_Transform.getMatrix();
+    const auto min = transformation * glm::vec4{m_BaseBoundingBox.getMin(),1};
+    const auto max =  transformation * glm::vec4{m_BaseBoundingBox.getMax(),1};
+    m_BoundingBox = aabb{min, max};
+    
+    m_Transform.dirty = true;
+}
+
+aabb render_object::getBoundingBox() {
+    return m_BoundingBox;
 }
 
 bool render_object::getCastShadows()

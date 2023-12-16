@@ -3,9 +3,8 @@
 
 #include "glm/glm.hpp"
 #include "../common/transform.h"
-#include "shader_program.h"
+#include "../common/aabb.h"
 #include "mesh.h"
-#include "texture_2D.h"
 #include "material.h"
 #include "renderable.h"
 
@@ -21,11 +20,13 @@ namespace modelViewer::render
         
     private:
         common::transform m_Transform{};
-        
+    	common::aabb m_BaseBoundingBox;
+        common::aabb m_BoundingBox;
         std::shared_ptr<material> m_Material;
         std::shared_ptr<mesh> m_Mesh;
         std::string m_Name;
 		render_mode m_Mode = render_mode::triangles;
+    	
 		bool m_CastShadows = true;
 		bool m_ReceiveShadows = true;
         
@@ -42,7 +43,8 @@ namespace modelViewer::render
 		
 		void setCastShadow(bool enabled);
 		void setReceiveShadows(bool enabled);
-
+    	void computeBoundingBox();
+    	common::aabb getBoundingBox();
 		bool getCastShadows();
 		bool getReceiveShadows();
     };

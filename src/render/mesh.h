@@ -26,6 +26,7 @@ namespace modelViewer::render {
         void bind();
         void draw();
         void drawLines();
+        std::shared_ptr<modelViewer::res::mesh_asset> getAsset();
         explicit mesh(std::shared_ptr<modelViewer::res::mesh_asset>& asset);
         ~mesh();
     };

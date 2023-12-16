@@ -1,7 +1,8 @@
 ﻿
 #include "model_platform_buffer.h"
 #include "object_factory.h"
-
+#include "texture_setup.h"
+#include "texture_2D.h"
 
 using namespace modelViewer::render;
 using namespace modelViewer::res;

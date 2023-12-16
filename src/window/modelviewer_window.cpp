@@ -245,6 +245,10 @@ void modelviewer_window::openModelFile() {
 }
 
 
+void repositionModel(std::shared_ptr<render_object> object) {
+	
+}
+
 void modelviewer_window::addNewModels()
 {
     //TODO the current imp is not efficient since it first loads the objects then applies limit, a better one should apply the limit when adding objects 
