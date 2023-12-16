@@ -8,10 +8,9 @@ glm::mat4 transform::getMatrix() const {
     
     auto identity = glm::mat4 (1);
     auto translation = glm::translate(identity, m_Position);
-    float radian = glm::radians(1.0);
     auto rotation = m_Rotation.toMat4();
     auto scale = glm::scale(identity, m_Scale);
-    auto transform = scale * translation * rotation;
+    auto transform =  scale * translation * rotation;
     return transform;
 }
 
@@ -39,6 +38,11 @@ void transform::setRotation(const quaternion& rotation) {
 
 void transform::setScale(glm::vec3 scale) {
     m_Scale = scale;
+    dirty = true;
+}
+
+void transform::translate(glm::vec3 translation) {
+    m_Position += translation;
     dirty = true;
 }
 

@@ -22,6 +22,7 @@ namespace modelViewer::common {
         void setEularRotation(glm::vec3 eular);
         void setRotation(const quaternion& rotation);
         void setScale(glm::vec3 scale);
+        void translate(glm::vec3 translation);
 
         bool dirty = true;
     };

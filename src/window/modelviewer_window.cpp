@@ -245,8 +245,22 @@ void modelviewer_window::openModelFile() {
 }
 
 
-void repositionModel(std::shared_ptr<render_object> object) {
+void transformModel(const std::shared_ptr<render_object>& object) {
+	object->computeBoundingBox();
+	auto box = object->getBoundingBox();
+	auto boxSize = box.getSize();
+	float largestSize = std::max(boxSize.x,  std::max(boxSize.y, boxSize.z));
+	const float MaxSize = 4;
+	if (largestSize > MaxSize) {
+		 object->getTransform().setScale(glm::vec3{MaxSize/largestSize});
+	}
 	
+	if (box.getMin().y < 0)
+	{
+		 object->getTransform().translate(glm::vec3{0, -box.getMin().y, 0});
+	}
+	
+	object->computeBoundingBox();
 }
 
 void modelviewer_window::addNewModels()
@@ -255,6 +269,7 @@ void modelviewer_window::addNewModels()
     for (auto& info: m_NewModelsQueue)
     {
 		auto object = m_ObjectFactory.createObject(info);
+    	transformModel(object);
 		m_Scene.addModelObject(object);
     }
 

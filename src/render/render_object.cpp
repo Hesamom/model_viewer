@@ -93,7 +93,7 @@ void render_object::computeBoundingBox() {
     const auto max =  transformation * glm::vec4{m_BaseBoundingBox.getMax(),1};
     m_BoundingBox = aabb{min, max};
     
-    m_Transform.dirty = true;
+    m_Transform.dirty = false;
 }
 
 aabb render_object::getBoundingBox() {

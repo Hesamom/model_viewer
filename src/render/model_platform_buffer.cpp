@@ -14,7 +14,7 @@ std::shared_ptr<mesh> generateGridMesh(const model_platform_info& info)
     glm::vec4 mainLineColor(1,1,1,0.5f);
     glm::vec4 sideLineColor(1,1,1,0.1f);
     
-    glm::vec3 startPos(-info.sizeX/2 * info.lineSpace, -1, info.sizeX/2 * info.lineSpace);
+    glm::vec3 startPos(-info.sizeX/2 * info.lineSpace, 0, info.sizeX/2 * info.lineSpace);
     glm::vec3 currentPos = startPos;
     for (int i = 0; i < info.sizeX + 1; ++i) {
 
@@ -81,7 +81,7 @@ std::shared_ptr<mesh> generatePlaneMesh(const model_platform_info& info)
 	float xWidth = info.sizeX * info.lineSpace;
 	float zWidth = info.sizeZ * info.lineSpace;
 	
-	float height = -1;
+	float height = 0;
 
 	positions->emplace_back(xWidth/2, height , -zWidth/2);
 	positions->emplace_back(-xWidth/2, height , -zWidth/2);
@@ -89,7 +89,7 @@ std::shared_ptr<mesh> generatePlaneMesh(const model_platform_info& info)
 	positions->emplace_back(xWidth/2, height , zWidth/2);
 
 	for (int i = 0; i < 4; ++i) {
-		normals->emplace_back(0, 1 , 0);
+		normals->emplace_back(0, 1, 0);
 	}
 	
 	
