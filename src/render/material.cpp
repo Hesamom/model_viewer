@@ -170,7 +170,7 @@ void material::setLight(const light_directional &light) {
 	auto ambient = light.ambient;
     m_LightAmbientUniform.setValue(ambient, *m_Program);
 	auto diffuse = light.diffuse;
-	m_LightAmbientUniform.setValue(diffuse, *m_Program);
+	m_LightDiffuseUniform.setValue(diffuse, *m_Program);
 }
 
 
