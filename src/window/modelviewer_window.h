@@ -25,7 +25,7 @@ private:
     bool m_IsMouseButtonDown = false;
     float m_PitchAngle = 0;
     float m_YawAngle = 0;
-    float m_ZoomLevel = 5;
+    float m_ZoomLevel = 10;
     bool m_isImGUIOpen = true;
     
     const glm::vec2 PitchAngleRange{-80,80};

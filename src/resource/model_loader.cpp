@@ -152,9 +152,9 @@ void model_loader::setShaders(aiMaterial& material, std::vector<shader_asset_inf
     }
 }
 
-void fetchTextures(aiMaterial* material, model_info& info, aiTextureType type)
+void fetchTextures(const aiMaterial& material, const aiScene& scene, model_info& info, aiTextureType type)
 {
-    int texturesCount = material->GetTextureCount(type);
+    const unsigned int texturesCount = material.GetTextureCount(type);
     
     for (int i = 0; i < texturesCount; ++i) {
         
@@ -162,7 +162,11 @@ void fetchTextures(aiMaterial* material, model_info& info, aiTextureType type)
         aiTextureMapping mapping;
         unsigned uvIndex = 0;
         aiTextureMapMode wrapMode;
-        material->GetTexture(type, i ,&path, &mapping,&uvIndex, nullptr, nullptr, &wrapMode);
+        material.GetTexture(type, i ,&path, &mapping,&uvIndex, nullptr, nullptr, &wrapMode);
+    	if (scene.GetEmbeddedTexture(path.C_Str()) != nullptr) {
+    		//TODO implement supporting embedded textures 
+    		return;
+    	}
     	std::string fullPath = std::filesystem::path{info.path}.parent_path().append(std::string(path.C_Str())).string();
         texture_asset_info textureAssetInfo;
         textureAssetInfo.uvIndex = uvIndex;
@@ -291,15 +295,14 @@ void model_loader::load(std::string filePath, model_info& info)
     
     if (scene == nullptr) 
     {
-        std::cerr << importer.GetErrorString() << std::endl;
-        throw std::runtime_error("could not load the file");
+        throw std::runtime_error(importer.GetErrorString() );
     }
     
     if (scene->mNumMaterials > 0)
     {
-        auto material = scene->mMaterials[0];
-        fetchTextures(material, info, aiTextureType_DIFFUSE);
-        fetchTextures(material, info, aiTextureType_NORMALS);
+        auto const material = scene->mMaterials[0];
+        fetchTextures(*material, *scene, info, aiTextureType_DIFFUSE);
+        fetchTextures(*material, *scene, info, aiTextureType_NORMALS);
         setShaders(*material, info.material.shaders);
         setMaterialProperties(*material, info.material.propertySet);
     }

@@ -239,7 +239,16 @@ void modelviewer_window::openModelFile() {
         model_info info;
         info.path = path.c_str();
         info.name = path.c_str();
-        m_ObjectFactory.getModelLoader().load(info.path, info);
+        try
+        {
+        	m_ObjectFactory.getModelLoader().load(info.path, info);
+        }
+    	catch (std::runtime_error& error)
+        {
+	        std::cerr<< error.what() << std::endl;
+    		return;
+        }
+       
         addModel(info);
     }
 }
