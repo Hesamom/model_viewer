@@ -149,8 +149,6 @@ void model_loader::setShaders(aiMaterial& material, std::vector<shader_asset_inf
 				shaders.emplace_back(m_PhongVertPath, shaderType::vertex);
 				shaders.emplace_back(m_PhongFragPath, shaderType::fragment);
 			}
-      
-            return;
     }
 }
 
@@ -165,10 +163,10 @@ void fetchTextures(aiMaterial* material, model_info& info, aiTextureType type)
         unsigned uvIndex = 0;
         aiTextureMapMode wrapMode;
         material->GetTexture(type, i ,&path, &mapping,&uvIndex, nullptr, nullptr, &wrapMode);
-        
+    	std::string fullPath = std::filesystem::path{info.path}.parent_path().append(std::string(path.C_Str())).string();
         texture_asset_info textureAssetInfo;
         textureAssetInfo.uvIndex = uvIndex;
-        textureAssetInfo.paths.emplace_back(path.C_Str());
+        textureAssetInfo.paths.emplace_back(fullPath);
         textureAssetInfo.wrappingMode = getWrappingMode(wrapMode);
         textureAssetInfo.mappingMode = getMappingMode(mapping);
         textureAssetInfo.type = getTextureType(type);
