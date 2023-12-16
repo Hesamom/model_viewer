@@ -221,6 +221,11 @@ void modelviewer_window::onRenderImGUI() {
 
 void modelviewer_window::onSizeChanged(int height, int width)
 {
+	window::onSizeChanged(height, width);
+	
+	if(height == 0 || width == 0) {
+		return;
+	}
 	glViewport(0, 0, width, height);
 	m_Camera.setViewPort(width, height);
 }

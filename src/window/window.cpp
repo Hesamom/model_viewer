@@ -93,6 +93,12 @@ void window::draw()
     watch.start();
     while (!glfwWindowShouldClose(m_Window))
     {
+        if (m_Paused)
+        {
+            glfwPollEvents();
+            continue;
+        }
+        
         watch.stop();
         double elapsed = watch.getSeconds();
         watch.start();
@@ -299,7 +305,10 @@ void window::onMousePositionChanged(double xpos, double ypos) {
 }
 
 void window::onSizeChanged(int height, int width) {
-    
+    m_Height = height;
+    m_Width = width;
+
+    m_Paused = m_Height == 0 || m_Width == 0;
 }
 
 void window::onRenderImGUI() {

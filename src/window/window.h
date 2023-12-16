@@ -12,8 +12,9 @@ private:
     int m_Width = 0; 
     int m_Height = 0;
     int m_TargetFrameRate = -1;
-    long double m_elapsedTimeSinceStart;
-    
+    long double m_elapsedTimeSinceStart = 0;
+    bool m_Paused = false;
+
     void initContext(bool vSync);
     void subscribeEvents();
     
