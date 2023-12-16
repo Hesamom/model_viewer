@@ -22,6 +22,7 @@ protected:
     virtual void onScrollChanged(double yOffset);
     virtual void onMouseButtonChanged(int button, int action, int mods);
     virtual void onMousePositionChanged(double xpos, double ypos);
+    virtual void onSizeChanged(int height, int width);
     virtual void onRenderImGUI();
     
 public:

@@ -45,6 +45,7 @@ protected:
     void onMouseButtonChanged(int button, int action, int mods) override;
     void onMousePositionChanged(double xpos, double ypos) override;
     void onRenderImGUI() override;
+	void onSizeChanged(int height, int width) override;
     
 public:
     modelviewer_window(int width, int height, std::string title, bool fullscreen);

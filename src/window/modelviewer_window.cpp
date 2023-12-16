@@ -219,6 +219,12 @@ void modelviewer_window::onRenderImGUI() {
     ImGui::End();
 }
 
+void modelviewer_window::onSizeChanged(int height, int width)
+{
+	glViewport(0, 0, width, height);
+	m_Camera.setViewPort(width, height);
+}
+
 void modelviewer_window::openModelFile() {
     
     std::string path;

@@ -1,17 +1,10 @@
 ﻿#include <GL/glew.h>
 #include "GLFW/glfw3.h"
 #include "window.h"
-#include "chrono"
 #include "../common/stopwatch.h"
-#include "thread"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
-
-void onSizeChanged(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
-}
 
 window::window(int width, int height, const std::string& title, bool fullscreen, bool vSync,  int mssaLevel ) 
 {
@@ -43,9 +36,6 @@ window::window(int width, int height, const std::string& title, bool fullscreen,
     //BUG fullscreen mode casues exception 
     m_Window = glfwCreateWindow(width, height, title.c_str(), m_Monitor, nullptr);
     glViewport(0, 0, width, height);
-   
-    
-    glfwSetWindowSizeCallback(m_Window, onSizeChanged);
     
     m_Width = width;
     m_Height = height;
@@ -287,6 +277,16 @@ void window::subscribeEvents() {
                                    callback_static_3(window, xpos, ypos);
                                }
     );
+
+    static auto callback_static_4 = [this](GLFWwindow* window, int width, int height){
+        onSizeChanged(height, width);
+    };
+
+    glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
+                               {
+                                   callback_static_4(window, width, height);
+                               }
+    );
 }
 
 void window::onMouseButtonChanged(int button, int action, int mods) {
@@ -295,6 +295,10 @@ void window::onMouseButtonChanged(int button, int action, int mods) {
 }
 
 void window::onMousePositionChanged(double xpos, double ypos) {
+    
+}
+
+void window::onSizeChanged(int height, int width) {
     
 }
 
