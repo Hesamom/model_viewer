@@ -2,7 +2,7 @@
 #include "file_picker_windows.h"
 #include "Windows.h"
 
-bool file_picker_windows::tryOpenPicker(std::string& path) {
+bool file_picker_windows::tryOpenPicker(std::string& path, const std::vector<file_filter>& filters) {
 
 
     char currentDir[MAX_PATH];
@@ -12,7 +12,14 @@ bool file_picker_windows::tryOpenPicker(std::string& path) {
     ZeroMemory(&ofn, sizeof(ofn));
     ofn.lStructSize = sizeof(ofn);
     ofn.hwndOwner = nullptr;
-    ofn.lpstrFilter = "FBX\0*.fbx\0";
+
+    //TODO add all supported formats 
+    std::string filter;
+    
+    for (const auto & f : filters) {
+        filter += f.displayName + '\0' + "*." + f.format + '\0';
+    }
+    ofn.lpstrFilter = filter.c_str();
     ofn.lpstrFile = path.data(); 
     ofn.nMaxFile = MAX_PATH;
     ofn.lpstrFileTitle = nullptr;

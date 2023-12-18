@@ -231,10 +231,15 @@ void modelviewer_window::onSizeChanged(int height, int width)
 }
 
 void modelviewer_window::openModelFile() {
-    
+
+	std::vector<file_filter> filters;
+	filters.push_back({"fbx files", "fbx"});
+	filters.push_back({"obj files", "obj"});
+	filters.push_back({"stl files", "stl"});
+	
     std::string path;
     path.reserve(256);
-    if(m_FilePicker.tryOpenPicker(path))
+    if(m_FilePicker.tryOpenPicker(path,filters))
     {
         model_info info;
         info.path = path.c_str();

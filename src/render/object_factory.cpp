@@ -1,5 +1,4 @@
-﻿
-#include "object_factory.h"
+﻿#include "object_factory.h"
 #include "texture_cube.h"
 #include "texture_2D.h"
 
@@ -8,9 +7,9 @@ using namespace modelViewer::render;
 using namespace modelViewer::common;
 
 
-std::vector<std::shared_ptr<modelViewer::render::texture>> object_factory::getTextures(const model_info &info) {
+std::vector<std::shared_ptr<texture>> object_factory::getTextures(const model_info &info) {
 
-	std::vector<std::shared_ptr<modelViewer::render::texture>> textures;
+	std::vector<std::shared_ptr<texture>> textures;
 	for (auto& textureInfo : info.material.textures ) {
 		if (textureInfo.paths.empty())
 		{
@@ -27,11 +26,20 @@ std::vector<std::shared_ptr<modelViewer::render::texture>> object_factory::getTe
 
         for (auto &path: textureInfo.paths)
         {
-            auto textureAsset = m_TextureLoader.load(path, 4, textureInfo.forceFlip);
-            setup.assets.emplace_back(textureAsset);
+        	try {
+        		auto textureAsset = m_TextureLoader.load(path, 4, textureInfo.forceFlip);
+        		setup.assets.emplace_back(textureAsset);
+        	}
+        	catch (std::exception& exception) {
+        		std::cerr << exception.what() << std::endl;
+        	}
         }
 
-        if (textureInfo.type == res::texture_asset_type::cube)
+		if (setup.assets.empty()) {
+			continue;
+		}
+
+        if (textureInfo.type == texture_asset_type::cube)
         {
             auto texturePtr = std::make_shared<texture_cube>(setup);
             textures.push_back(texturePtr);
@@ -47,7 +55,7 @@ std::vector<std::shared_ptr<modelViewer::render::texture>> object_factory::getTe
 }
 
 
-std::shared_ptr<modelViewer::render::mesh> object_factory::getMesh(model_info &info) {
+std::shared_ptr<mesh> object_factory::getMesh(model_info &info) {
 
 	if (info.mesh)
 	{
@@ -61,7 +69,7 @@ std::shared_ptr<modelViewer::render::mesh> object_factory::getMesh(model_info &i
 }
 
 
-std::shared_ptr<modelViewer::render::shader_program> object_factory::getProgram(const model_info &info) {
+std::shared_ptr<shader_program> object_factory::getProgram(const model_info &info) {
 
 	std::vector<shader> shaders;
 	for (auto& shaderInfo : info.material.shaders) {
@@ -92,17 +100,17 @@ std::shared_ptr<render_object> object_factory::createObject(model_info& info)
 	return object;
 }
 
-modelViewer::res::shader_loader& object_factory::getShaderLoader()
+shader_loader& object_factory::getShaderLoader()
 {
 	return m_ShaderLoader;
 }
 
-modelViewer::res::model_loader& object_factory::getModelLoader()
+model_loader& object_factory::getModelLoader()
 {
 	return m_ModelLoader;
 }
 
-modelViewer::res::texture_loader& object_factory::getTextureLoader()
+texture_loader& object_factory::getTextureLoader()
 {
 	return m_TextureLoader;
 }

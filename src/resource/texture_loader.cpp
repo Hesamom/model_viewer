@@ -1,5 +1,4 @@
-﻿
-#include "texture_loader.h"
+﻿#include "texture_loader.h"
 #include <ReadImage.h>
 #include "texture_asset.h"
 
@@ -7,7 +6,6 @@ using namespace modelViewer::res;
 
 byte * readFile(const std::string &path, textureInfo* info) {
     
-    //TODO add a flag later?
     stbi_set_flip_vertically_on_load(info->forceFlip);
     
     byte* content = stbi_load(path.c_str(), &(info->width), &(info->height), &(info->channels), info->channels);
@@ -15,7 +13,7 @@ byte * readFile(const std::string &path, textureInfo* info) {
 }
 
 
-std::shared_ptr<texture_asset> modelViewer::res::texture_loader::load(const std::string &path, int channelsCount, bool forceFlip) {
+std::shared_ptr<texture_asset> texture_loader::load(const std::string &path, int channelsCount, bool forceFlip) {
 
     if (m_LoadedAssets.contains(path))
     {

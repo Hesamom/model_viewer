@@ -14,7 +14,7 @@ namespace modelViewer::render
     class material
     {
     private:
-        modelViewer::res::material_info m_Info;
+        res::material_info m_Info;
         std::vector<std::shared_ptr<texture>> m_Textures;
         std::shared_ptr<shader_program> m_Program;
         
@@ -40,9 +40,9 @@ namespace modelViewer::render
 		const std::set<int> m_AssignedTextureLocations;
 
         void applyMaterialProperties();
-        std::string  getSamplerName(modelViewer::res::texture_asset_type type);
+        std::string  getSamplerName(res::texture_asset_type type);
     public:
-        explicit material(const modelViewer::res::material_info& info, std::vector<std::shared_ptr<texture>>& textures, std::shared_ptr<shader_program>& program);
+        explicit material(const res::material_info& info, std::vector<std::shared_ptr<texture>>& textures, std::shared_ptr<shader_program>& program);
         void setMVP( glm::mat4& matrix);
         void setModelView( glm::mat4& matrix);
         void setProjection( glm::mat4& projection);
@@ -58,7 +58,7 @@ namespace modelViewer::render
 		void setShadowMapSlot(int slot);
 		void setLightViewProjection(glm::mat4& matrix);
 
-		modelViewer::res::material_info& getInfo();
+		res::material_info& getInfo();
     };
 }
 

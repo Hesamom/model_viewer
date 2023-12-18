@@ -1,5 +1,4 @@
-﻿
-#ifndef RENDERER_FORWARD_H
+﻿#ifndef RENDERER_FORWARD_H
 #define RENDERER_FORWARD_H
 
 #include "render_scene.h"

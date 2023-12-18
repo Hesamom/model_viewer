@@ -209,6 +209,15 @@ void window::initContext(bool vSync) {
     
     std::cout<< "window with title: \"" << m_Title << "\" was created successfully \n";
     std::cout << glGetString(GL_VERSION) << " OpenGL Driver Version \n";
+
+    int maxSamples;
+    glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
+    int maxTexturesFrag;
+    glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTexturesFrag);
+    int maxTexturesVert;
+    glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &maxTexturesVert);
+    std::cout << "max samplers: " << maxSamples << ", max texture units in frag: " << maxTexturesFrag <<
+         ",max texture units in vert: " << maxTexturesVert << "\n";
 }
 
 void window::setTitle(std::string title) {
