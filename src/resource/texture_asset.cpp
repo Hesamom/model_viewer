@@ -2,7 +2,7 @@
 
 using namespace modelViewer::res;
 
-texture_asset::texture_asset(modelViewer::res::byte* content, textureInfo info, std::string name) : m_Info{info}, m_Name{name} {
+texture_asset::texture_asset(byte* content, textureInfo info, std::string name) : m_Info{info}, m_Name{name} {
     std::unique_ptr<byte []> p(content);
     m_Content = std::move(p);
 }

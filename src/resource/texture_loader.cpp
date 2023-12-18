@@ -12,6 +12,14 @@ byte * readFile(const std::string &path, textureInfo* info) {
     return content;
 }
 
+byte * readFile(byte * data, int length, textureInfo* info) {
+    
+    stbi_set_flip_vertically_on_load(info->forceFlip);
+    
+    byte* content = stbi_load_from_memory(data, length, &(info->width), &(info->height), &(info->channels), info->channels);
+    return content;
+}
+
 
 std::shared_ptr<texture_asset> texture_loader::load(const std::string &path, int channelsCount, bool forceFlip) {
 
@@ -38,6 +46,22 @@ std::shared_ptr<texture_asset> texture_loader::load(const std::string &path, int
     m_LoadedAssets[path] = asset;
 
     assert(m_LoadedAssets.contains(path));
+    return asset;
+}
+
+std::shared_ptr<texture_asset> texture_loader::loadFromMemmory(byte* data, int size, int channelsCount, bool forceFlip) {
+    
+    if (data == nullptr)
+    {
+        throw std::runtime_error("data is empty!");
+    }
+
+    textureInfo info;
+    info.forceFlip = forceFlip;
+    info.channels = channelsCount;
+    auto content = readFile(data, size, &info);
+    auto asset = std::make_shared<texture_asset>(content, info, "");
+    
     return asset;
 }
 

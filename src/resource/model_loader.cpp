@@ -5,6 +5,7 @@
 #include "model_loader.h"
 #include "model_info.h"
 #include "shader_asset.h"
+#include "texture_asset.h"
 
 using namespace modelViewer::res;
 
@@ -152,6 +153,60 @@ void model_loader::setShaders(aiMaterial& material, std::vector<shader_asset_inf
     }
 }
 
+std::shared_ptr<texture_embedded> getEmbeddedTexture(const aiScene& scene, const aiString& path) {
+	
+	const auto embeddedTexture = scene.GetEmbeddedTexture(path.C_Str()) ;
+	if (embeddedTexture == nullptr) {
+		return nullptr;
+	}
+
+	const bool isCompressed = embeddedTexture->mHeight == 0;
+	auto textureSize = embeddedTexture->mWidth * embeddedTexture->mHeight;
+	constexpr int channelsCount = 4;
+	
+	if (!isCompressed)
+	{
+		textureSize *= channelsCount;
+	}
+	else {
+		textureSize = embeddedTexture->mWidth;
+	}
+	
+	auto pixels = new unsigned char[textureSize];
+
+	if(isCompressed) {
+		int index = 0;
+		for (int i = 0; i < textureSize; i+=4)
+		{
+			const auto pixel = embeddedTexture->pcData[index];
+			pixels[i] = pixel.b;
+			pixels[i + 1] = pixel.g;
+			pixels[i + 2] = pixel.r;
+			pixels[i + 3] = pixel.a;
+
+			index++;
+		}
+	}
+	else {
+		int index = 0;
+		for (int i = 0; i < textureSize; i+=4)
+		{
+			const auto pixel = embeddedTexture->pcData[index];
+			pixels[i] = pixel.r;
+			pixels[i + 1] = pixel.g;
+			pixels[i + 2] = pixel.b;
+			pixels[i + 3] = pixel.a;
+
+			index++;
+		}
+	}
+	
+	
+	
+	auto asset = std::make_shared<texture_embedded>(pixels, textureSize, 4, embeddedTexture->mWidth , embeddedTexture->mHeight,isCompressed);
+	return asset;
+}
+
 void fetchTextures(const aiMaterial& material, const aiScene& scene, model_info& info, aiTextureType type)
 {
     const unsigned int texturesCount = material.GetTextureCount(type);
@@ -163,10 +218,7 @@ void fetchTextures(const aiMaterial& material, const aiScene& scene, model_info&
         unsigned uvIndex = 0;
         aiTextureMapMode wrapMode;
         material.GetTexture(type, i ,&path, &mapping,&uvIndex, nullptr, nullptr, &wrapMode);
-    	if (scene.GetEmbeddedTexture(path.C_Str()) != nullptr) {
-    		//TODO implement supporting embedded textures 
-    		return;
-    	}
+    	
     	std::string fullPath = std::filesystem::path{info.path}.parent_path().append(std::string(path.C_Str())).string();
         texture_asset_info textureAssetInfo;
         textureAssetInfo.uvIndex = uvIndex;
@@ -175,6 +227,12 @@ void fetchTextures(const aiMaterial& material, const aiScene& scene, model_info&
         textureAssetInfo.mappingMode = getMappingMode(mapping);
         textureAssetInfo.type = texture_asset_type::texture2D;
     	textureAssetInfo.samplerName = getSamplerName(type);
+
+    	auto embeddedTexture = getEmbeddedTexture(scene, path);
+    	if (embeddedTexture != nullptr) {
+    		textureAssetInfo.embedded = embeddedTexture;
+    	}
+    	
         info.material.textures.push_back(textureAssetInfo);
     }
 }

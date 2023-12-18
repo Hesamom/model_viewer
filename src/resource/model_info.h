@@ -5,6 +5,7 @@
 #include "mesh_asset.h"
 #include "../common/transform.h"
 #include "shader_loader.h"
+#include "texture_asset.h"
 
 using color = glm::vec3;
 
@@ -37,6 +38,15 @@ namespace modelViewer::res
 		render_queue_transparent = 1000
 	};
 
+	struct texture_embedded {
+		unsigned char* data = nullptr;
+		int dataSize = 0;
+		int channelsCount = 3;
+		int width = 0;
+		int height = 0;
+		bool isCompressed = false;
+	};
+	
     struct texture_asset_info
     {
         bool forceFlip = true;
@@ -46,6 +56,7 @@ namespace modelViewer::res
         texture_asset_wrapping_mode wrappingMode = texture_asset_wrapping_mode::wrap;
     	texture_asset_type type = texture_asset_type::texture2D;
     	std::string samplerName;
+    	std::shared_ptr<texture_embedded> embedded = nullptr;
     };
     
     struct shader_asset_info

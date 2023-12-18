@@ -9,6 +9,7 @@
 #include "mesh.h"
 #include "texture.h"
 #include "render_object.h"
+#include "texture_setup.h"
 
 namespace modelViewer::render
 {
@@ -23,7 +24,9 @@ namespace modelViewer::render
 		std::shared_ptr<shader_program> getProgram(const res::model_info& info);
 		std::shared_ptr<mesh> getMesh(res::model_info& info);
 
-		std::shared_ptr<texture> createTexture(const res::texture_asset_info& textureInfo);
+		std::shared_ptr<texture> createEmbeddedTexture(std::shared_ptr<res::texture_embedded> embedded, texture_setup setup);
+
+		std::shared_ptr<texture> createTexture(const res::texture_asset_info& info);
 
 		std::vector<texture_binding> getTextures(const res::model_info& info);
 		
