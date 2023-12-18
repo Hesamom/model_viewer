@@ -83,6 +83,5 @@ modelViewer::render::texture_format::getOptimalFormat(texture_channel_type chann
         }
     }
 
-    std::cout << "optimal selected format is: " + optimalFormatName << "\n";
     return optimalFormat;
 }

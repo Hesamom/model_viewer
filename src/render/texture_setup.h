@@ -32,7 +32,7 @@ namespace modelViewer::render {
         texture_filtering_mode filteringMin = texture_filtering_mode::linear_linear;
         texture_filtering_mode filteringMag = texture_filtering_mode::linear;
         texture_wrapping_mode wrapping = texture_wrapping_mode::clamp_to_edge;
-        res::texture_asset_type type =  res::texture_asset_type::diffuse;
+        res::texture_asset_type type =  res::texture_asset_type::texture2D;
         bool compress = true;
     };
 }

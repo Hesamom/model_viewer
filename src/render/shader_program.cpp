@@ -94,6 +94,44 @@ void shader_program::setUniform(int index, glm::mat4& mat) {
     glUniformMatrix4fv(index, 1, false, glm::value_ptr(mat));
 }
 
+shader_uniform_type getUniformType(GLenum internalType) {
+    switch (internalType) {
+        case GL_SAMPLER_2D:
+            return shader_uniform_type::sampler2D;
+        case GL_SAMPLER_2D_SHADOW:
+            return shader_uniform_type::sampler2DShadow;
+        case GL_SAMPLER_CUBE:
+            return shader_uniform_type::samplerCube;
+        default:
+            return shader_uniform_type::none;
+    }
+}
+
+std::vector<shader_uniform_info> shader_program::getActiveUniforms() {
+    
+
+    const int uniformsCount = getActiveUniformsCount();
+    const int bufSize = 64;
+    GLchar nameBuffer[bufSize];
+    GLsizei length;
+    GLint size;
+    GLenum type;
+
+    std::vector<shader_uniform_info> uniforms;
+    for (int i = 0; i < uniformsCount; ++i) {
+        glGetActiveUniform(m_ProgramId, i, bufSize, &length, &size, &type, nameBuffer);
+        uniforms.push_back({std::string(nameBuffer),getUniformType(type) });
+    }
+
+    return uniforms;
+}
+
+int shader_program::getActiveUniformsCount() {
+    int count = 0;
+    glGetProgramiv(m_ProgramId, GL_ACTIVE_UNIFORMS, &count);
+    return count;
+}
+
 void shader_program::validateLinking()
 {
 	if (!isLinked())

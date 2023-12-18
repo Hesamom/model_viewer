@@ -16,20 +16,26 @@ namespace modelViewer::render
 	class object_factory {
 
 	private:
-		modelViewer::res::model_loader m_ModelLoader;
-		modelViewer::res::texture_loader m_TextureLoader;
-		modelViewer::res::shader_loader m_ShaderLoader;
+		res::model_loader m_ModelLoader;
+		res::texture_loader m_TextureLoader;
+		res::shader_loader m_ShaderLoader;
 
-		std::shared_ptr<modelViewer::render::shader_program> getProgram(const modelViewer::res::model_info& info);
-		std::shared_ptr<modelViewer::render::mesh> getMesh(modelViewer::res::model_info& info);
-		std::vector<std::shared_ptr<modelViewer::render::texture>> getTextures(const modelViewer::res::model_info& info);
+		std::shared_ptr<shader_program> getProgram(const res::model_info& info);
+		std::shared_ptr<mesh> getMesh(res::model_info& info);
+
+		std::shared_ptr<texture> createTexture(const res::texture_asset_info& textureInfo);
+
+		std::vector<texture_binding> getTextures(const res::model_info& info);
+		
+		std::unordered_map<shader_uniform_type, std::shared_ptr<texture>> m_DefaultTextures;
 		
 	public:
-		std::shared_ptr<render_object> createObject(modelViewer::res::model_info& info);
-		modelViewer::res::shader_loader& getShaderLoader();
-		modelViewer::res::model_loader& getModelLoader();
-
+		object_factory();
+		std::shared_ptr<render_object> createObject(res::model_info& info);
+		res::shader_loader& getShaderLoader();
+		res::model_loader& getModelLoader();
 		res::texture_loader& getTextureLoader();
+		std::unordered_map<shader_uniform_type, std::shared_ptr<texture>> getDefaultTextures();
 	};
 
 

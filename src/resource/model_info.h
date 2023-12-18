@@ -13,10 +13,8 @@ namespace modelViewer::res
 	
     enum class texture_asset_type
     {
-        none,
-        diffuse,
-        normal,
-        cube
+        texture2D,
+        textureCube
     };
     
     enum class texture_asset_mapping_mode
@@ -46,7 +44,8 @@ namespace modelViewer::res
         unsigned int uvIndex = 0;
         texture_asset_mapping_mode mappingMode = texture_asset_mapping_mode::uv;
         texture_asset_wrapping_mode wrappingMode = texture_asset_wrapping_mode::wrap;
-        texture_asset_type type = texture_asset_type::diffuse;
+    	texture_asset_type type = texture_asset_type::texture2D;
+    	std::string samplerName;
     };
     
     struct shader_asset_info
@@ -85,7 +84,7 @@ namespace modelViewer::res
     struct model_info {
         std::shared_ptr<mesh_asset> mesh;
         material_info material;
-        modelViewer::common::transform transform;
+        common::transform transform;
         std::string name;
         std::string path;
     };

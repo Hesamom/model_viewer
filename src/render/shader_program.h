@@ -7,6 +7,25 @@
 
 namespace modelViewer::render
 {
+    enum class shader_uniform_type {
+        none,
+        sampler2D,
+        sampler2DShadow,
+        samplerCube
+    };
+    
+    struct shader_uniform_info {
+        std::string name;
+        shader_uniform_type type = shader_uniform_type::none;
+        bool isSampler() const {
+            return type == shader_uniform_type::sampler2D || type == shader_uniform_type::sampler2DShadow || type == shader_uniform_type::samplerCube;
+        }
+
+        bool isShadowSampler() const {
+            return type == shader_uniform_type::sampler2DShadow;
+        }
+    };
+    
     class shader_program
 		{
 private:
@@ -26,7 +45,9 @@ private:
         void setUniform(int location, float value);
         void setUniform(int location, int value);
         void setUniform(int index, glm::mat4& mat);
-};
+        std::vector<shader_uniform_info> getActiveUniforms();
+        int getActiveUniformsCount();
+}; 
 }
 
 

@@ -7,10 +7,11 @@ using namespace modelViewer::render;
 using namespace modelViewer::res;
 
 
-material::material(const material_info &info, std::vector<std::shared_ptr<texture>>& textures, std::shared_ptr<shader_program>& program) {
+material::material(const material_info& info, std::vector<texture_binding>& textures, std::shared_ptr<shader_program>& program, std::unordered_map<shader_uniform_type, std::shared_ptr<texture>>& defaultTextures) {
 
     m_Info = info;
     m_Program = program;
+	m_DefaultTetxures = defaultTextures;
 
     m_Program->bind();
 	m_ModelUniform.getLocation(*m_Program);
@@ -29,22 +30,6 @@ material::material(const material_info &info, std::vector<std::shared_ptr<textur
     bindTextures(textures);
 }
 
-std::string material::getSamplerName(modelViewer::res::texture_asset_type type) {
-    switch (type) {
-
-        case texture_asset_type::none:
-            break;
-        case texture_asset_type::diffuse:
-            return m_DiffuseSampler;
-        case texture_asset_type::normal:
-            return m_NormalSampler;
-        case texture_asset_type::cube:
-            return m_SkyboxSampler;
-        default:
-            throw std::runtime_error("not supported!");
-    }
-    return {};
-}
 
 void material::setMVP(glm::mat4 &matrix) 
 {
@@ -106,30 +91,45 @@ void material::applyMaterialProperties() {
 	}
 }
 
-void material::bindTextures(std::vector<std::shared_ptr<texture>>& textures)
-{
-    int index = 0;
-	std::set<int> assignedLocs;
-    for (const auto &item: textures)
-    {
-        auto loc = m_Program->getUniformLocation(getSamplerName(item->getType()));
-        if (loc < 0)
-        {
-            continue;
-        }
-		if (assignedLocs.contains(loc))
-		{
-			throw std::runtime_error("the texture would override the previous ones since they share the same sampler");
-		}
+std::shared_ptr<texture> material::getTextureForSampler(const std::string& samplerName, shader_uniform_type type, const std::vector<texture_binding>& textures) {
 
-		assignedLocs.insert(loc);
-        
-        item->active(index);
-        m_Program->bind();
-		m_Program->setUniform(loc, index);
-        index++;
-        m_Textures.push_back(item);
-    }
+	for (const auto& texture : textures) {
+		if (texture.samplerName == samplerName) {
+			return texture.texture;
+		}
+	}
+
+	if (m_DefaultTetxures.contains(type)) {
+		return m_DefaultTetxures[type];
+	}
+
+	return nullptr;
+}
+
+void material::bindTextures(const std::vector<texture_binding>& textures)
+{
+	const auto activeUniforms = m_Program->getActiveUniforms();
+	int textureUnit = 0;
+	for (const auto & uniform : activeUniforms)
+	{
+		if (uniform.isSampler())
+		{
+			if (uniform.isShadowSampler()) {
+				continue;
+			}
+			
+			auto texture = getTextureForSampler(uniform.name, uniform.type, textures);
+			if (texture == nullptr) {
+				std::cerr << "Failed to select a texture for uniform with name: " << uniform.name << "\n";
+				continue;
+			}
+
+			const auto loc = m_Program->getUniformLocation(uniform.name);
+			m_Program->setUniform(loc, textureUnit);
+			m_ActiveTextures.push_back(texture);
+			textureUnit++;
+		}
+	}
 }
 
 void material::bind() {
@@ -146,7 +146,7 @@ void material::bind() {
 	}
 	
     int index = 0;
-    for (const auto &item: m_Textures)
+    for (const auto &item: m_ActiveTextures)
     {
         item->active(index);
         index++;
@@ -190,7 +190,7 @@ void material::setLightViewProjection(glm::mat4& matrix)
 	m_LightViewProjectionUniform.setValue(matrix, *m_Program);
 }
 
-modelViewer::res::material_info& material::getInfo()
+material_info& material::getInfo()
 {
 	return m_Info;
 }

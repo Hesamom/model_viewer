@@ -1,6 +1,4 @@
 ﻿#include "src/resource/shader_asset.h"
-#include "src/resource/texture_loader.h"
-#include "src/resource/model_loader.h"
 #include "src/window/modelviewer_window.h"
 
 
@@ -17,13 +15,15 @@ int main()
     wallModel.material.shaders.push_back(vertShader);
 
     texture_asset_info diffuseTexture;
-	diffuseTexture.type = texture_asset_type::diffuse;
+	diffuseTexture.type = texture_asset_type::texture2D;
 	diffuseTexture.paths.emplace_back("res/textures/wall.jpg");
+	diffuseTexture.samplerName = "u_diffuseSampler";
     wallModel.material.textures.push_back(diffuseTexture);
 
 	texture_asset_info normalTexture;
-	normalTexture.type = texture_asset_type::normal;
+	normalTexture.type = texture_asset_type::texture2D;
 	normalTexture.paths.emplace_back("res/textures/normal_map_wall.png");
+	normalTexture.samplerName = "u_normalSampler";
 	wallModel.material.textures.push_back(normalTexture);
 
     wallModel.path = "res/models/primitives/plane.fbx";

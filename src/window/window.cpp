@@ -153,12 +153,6 @@ int window::getWidth() {
      return m_Width;
 }
 
-std::ostream& getStream(GLenum severity)
-{
-   
-    
-    return std::cout;
-}
 
 void APIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
     switch (severity) {

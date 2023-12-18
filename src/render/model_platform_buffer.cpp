@@ -131,11 +131,12 @@ std::shared_ptr<modelViewer::render::render_object> model_platform_buffer::gener
     program->validateLinking();
 
 	material_info materialInfo;
-	std::vector<std::shared_ptr<texture>> textures;
+	std::vector<texture_binding> textures;
 	materialInfo.propertySet.floats.push_back({Literals::Opacity, 0.5f});
 	materialInfo.propertySet.renderQueue = (render_queue_transparent + 1);
-	
-	auto mat = std::make_shared<material>(materialInfo, textures, program);
+
+	auto defaults = objectFactory.getDefaultTextures();
+	auto mat = std::make_shared<material>(materialInfo, textures, program, defaults);
 	auto grid = std::make_shared<render_object>(mat, mesh, "platform_grid");
 	grid->setRenderMode(render_mode::lines);
 	grid->setCastShadow(false);
@@ -167,8 +168,13 @@ std::shared_ptr<modelViewer::render::render_object> model_platform_buffer::gener
 	texture_setup textureSetup;
 	textureSetup.assets.push_back(diffuseTextureAsset);
 	auto diffuseTexture = std::make_shared<texture_2D>(textureSetup);
-	std::vector<std::shared_ptr<texture>> textures;
-	textures.push_back(diffuseTexture);
+	
+	std::vector<texture_binding> textures;
+	texture_binding binding;
+	binding.texture =  diffuseTexture;
+	binding.samplerName = "u_diffuseSampler";
+	textures.push_back(binding);
+	
 	material_info materialInfo;
 	materialInfo.propertySet.colors.push_back({Literals::SpecularAlbedo, glm::vec3 (0)});
 	materialInfo.propertySet.colors.push_back({Literals::DiffuseAlbedo, Literals::DefaultDiffuseAlbedo});
@@ -176,7 +182,8 @@ std::shared_ptr<modelViewer::render::render_object> model_platform_buffer::gener
 	materialInfo.propertySet.floats.push_back({Literals::Opacity, 0.5f});
 	materialInfo.propertySet.floats.push_back({Literals::Shininess, 1});
 	materialInfo.propertySet.renderQueue = render_queue_transparent;
-	auto mat = std::make_shared<material>(materialInfo, textures, program);
+	auto defaults = objectFactory.getDefaultTextures();
+	auto mat = std::make_shared<material>(materialInfo, textures, program, defaults);
 
 	auto plane = std::make_shared<render_object>(mat, mesh, "platform_plane");
 	plane->setCastShadow(false);

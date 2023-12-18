@@ -10,7 +10,7 @@ namespace modelViewer::render {
     public:
         explicit texture_cube(texture_setup& textureSetup);
         virtual unsigned int GetTextureType() override{return GL_TEXTURE_CUBE_MAP;};
-        virtual res::texture_asset_type GetTextureAssetType() const override{return res::texture_asset_type::cube;};
+        virtual res::texture_asset_type GetTextureAssetType() const override{return res::texture_asset_type::textureCube;};
     };
 }
 

@@ -51,16 +51,16 @@ texture_asset_mapping_mode getMappingMode(aiTextureMapping mode)
     }
 }
 
-texture_asset_type getTextureType(aiTextureType type)
+std::string getSamplerName(aiTextureType type)
 {
     switch (type) {
 
         case aiTextureType_DIFFUSE:
-            return texture_asset_type::diffuse;
+            return "u_diffuseSampler";
         case aiTextureType_NORMALS:
-            return texture_asset_type::normal;
-        default:
-            return texture_asset_type::none;
+             return "u_normalSampler";
+    	default:
+            return {};
     }
 }
 
@@ -173,7 +173,8 @@ void fetchTextures(const aiMaterial& material, const aiScene& scene, model_info&
         textureAssetInfo.paths.emplace_back(fullPath);
         textureAssetInfo.wrappingMode = getWrappingMode(wrapMode);
         textureAssetInfo.mappingMode = getMappingMode(mapping);
-        textureAssetInfo.type = getTextureType(type);
+        textureAssetInfo.type = texture_asset_type::texture2D;
+    	textureAssetInfo.samplerName = getSamplerName(type);
         info.material.textures.push_back(textureAssetInfo);
     }
 }
