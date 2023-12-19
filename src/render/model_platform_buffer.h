@@ -28,7 +28,7 @@ namespace modelViewer::render
 		const std::string m_PlaneFragShaderPath = "res/shaders/sample/phong_phong_frag.glsl";
 		const std::string m_PlaneVertShaderPath = "res/shaders/sample/phong_phong_vert.glsl";
 
-		const std::string m_PlaneDiffuseTexture = "res/textures/white_pixel.png";
+		const std::string m_PlaneDiffuseTexture = "res/textures/default/white.png";
 		
     public:
 		std::shared_ptr<modelViewer::render::render_object> generateGrid(modelViewer::render::object_factory& objectFactory,

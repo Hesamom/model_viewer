@@ -27,7 +27,7 @@ namespace modelViewer::render
 		const int shadowmapSlot = 30;
 		const int emptyShadowmapSlot = shadowmapSlot + 1;
 
-		const std::string m_EmptyShadowmapTexture = "res/textures/white_pixel.png";
+		const std::string m_EmptyShadowmapTexture = "res/textures/default/white.png";
 		
 		const std::string m_DepthShaderVert = "res/shaders/sample/simple_depth_vert.glsl";
 		const std::string m_DepthShaderFrag = "res/shaders/sample/simple_depth_frag.glsl";
