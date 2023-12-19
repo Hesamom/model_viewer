@@ -3,6 +3,7 @@
 
 #include "render_object.h"
 #include "light_point.h"
+#include "light_spot.h"
 
 namespace modelViewer::render {
     class render_scene {
@@ -12,7 +13,7 @@ namespace modelViewer::render {
         light_directional m_Light;
 		const int MaxModelObjects = 1;
 		std::vector<light_point> m_PointLights;
-		
+    	std::vector<light_spot> m_SpotLights;
     public:
         explicit render_scene(std::vector<std::shared_ptr<render_object>> renderObjects);
         render_scene();
@@ -22,7 +23,10 @@ namespace modelViewer::render {
         void addStaticObject(std::shared_ptr<render_object>& object);
 		void addModelObject(std::shared_ptr<render_object>& object);
 		void addPointLight(light_point& light);
+    	void addSpotLight(light_spot& light);
+    	
 		std::vector<light_point>& getPointLights();
+        std::vector<light_spot>& getSpotLights();
         light_directional& getLight();
     };
 }

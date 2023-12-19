@@ -31,6 +31,19 @@ struct pointLight
     vec3 diffuse;
 };
 
+struct spotLight
+{
+    vec3 position;
+    vec3 direction;
+    
+    float innerCutoff;
+    float outerCutoff;
+    
+    vec3 ambient;
+    vec3 diffuse;
+};
+
+
 
 vec3 getPointLight(surface surf, pointLight light, float shadow, material mat)
 {
@@ -56,6 +69,24 @@ vec3 getDirLight(surface surf, directLight light, float shadow, material mat)
     //calculate light components
     vec3 diffuse = max(dot(surf.normal, light.direction), 0.0) * mat.diffuseAlbedo * light.diffuse;
     vec3 specular = pow(max(dot(lightReflection, surf.viewDir), 0.0), mat.shininess) * mat.specularAlbedo * light.diffuse;
+    vec3 ambient = (mat.ambient * light.ambient);
+
+    vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular));
+    return lighting;
+}
+
+vec3 getSpotLight(surface surf, spotLight light, float shadow, material mat)
+{
+    vec3 lightDir = normalize(light.position - surf.fragPos);
+    float theta     = dot(lightDir, normalize(-light.direction));
+    float epsilon   = light.innerCutoff - light.outerCutoff;
+    float intensity = clamp((theta - light.outerCutoff) / epsilon, 0.0, 1.0);
+    
+    vec3 lightReflection = reflect(-lightDir, surf.normal);
+    
+    //calculate light components
+    vec3 diffuse =  max(dot(surf.normal, lightDir), 0.0) * mat.diffuseAlbedo * light.diffuse * intensity;
+    vec3 specular = pow(max(dot(lightReflection, surf.viewDir), 0.0), mat.shininess) * mat.specularAlbedo * light.diffuse * intensity;
     vec3 ambient = (mat.ambient * light.ambient);
 
     vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular));

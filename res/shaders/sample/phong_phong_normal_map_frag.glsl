@@ -13,7 +13,11 @@ uniform material mat;
 
 uniform int u_pointLightCount = 0;
 #define NR_POINT_LIGHTS 4
-uniform pointLight pointLights[NR_POINT_LIGHTS];
+uniform pointLight u_pointLights[NR_POINT_LIGHTS];
+
+uniform int u_spotLightCount = 0;
+#define NR_SPOT_LIGHTS 4
+uniform spotLight u_spotLights[NR_SPOT_LIGHTS];
 
 in VS_OUT
 {
@@ -50,8 +54,17 @@ void main()
     {
         //TODO add shadow here
         float shadow = 0;
-        vec3 lighting = getPointLight(surf, pointLights[i], shadow, mat);
+        vec3 lighting = getPointLight(surf, u_pointLights[i], shadow, mat);
         pointColors += lighting * diffuseTextel;
+    }
+
+    //spot
+    for (int i =0; i < u_spotLightCount; i++)
+    {
+        //TODO add shadow here
+        float shadow = 0;
+        vec3 lighting = getSpotLight(surf, u_spotLights[i], shadow, mat);
+        pointColors += lighting;
     }
 
     vec3 finalColor = dirColor + pointColors;

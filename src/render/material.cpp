@@ -195,11 +195,49 @@ material_info& material::getInfo()
 	return m_Info;
 }
 
+void material::setSpotLights(std::vector<light_spot>& lights) {
+	int index = 0;
+	const std::string blockName = "u_spotLights";
+	m_Program->setUniform(m_Program->getUniformLocation("u_spotLightCount"), (int)lights.size());
+	
+	for (auto& item : lights)
+	{
+		shader_uniform<glm::vec3> positionMember{"position",blockName, index};
+		positionMember.getLocation(*m_Program);
+		positionMember.setValue(item.position, *m_Program);
+
+		shader_uniform<glm::vec3> directionMember{"direction",blockName, index};
+		directionMember.getLocation(*m_Program);
+		directionMember.setValue(item.direction, *m_Program);
+
+		shader_uniform<glm::vec3> ambientMember{"ambient",blockName, index};
+		ambientMember.getLocation(*m_Program);
+		ambientMember.setValue(item.ambient, *m_Program);
+
+		shader_uniform<glm::vec3> diffuseMember{"diffuse",blockName, index};
+		diffuseMember.getLocation(*m_Program);
+		diffuseMember.setValue(item.diffuse, *m_Program);
+
+		
+		shader_uniform<float> rangeMember{"innerCutoff",blockName, index};
+		rangeMember.getLocation(*m_Program);
+		auto innerCutoff = cos(glm::radians(item.innerCutoff));
+		rangeMember.setValue(innerCutoff, *m_Program);
+
+		shader_uniform<float> insideRangeMember{"outerCutoff",blockName, index};
+		auto outterCutoff = cos(glm::radians(item.outerCutoff));
+		insideRangeMember.getLocation(*m_Program);
+		insideRangeMember.setValue(outterCutoff, *m_Program);
+		
+		index++;
+	}
+}
+
 void material::setPointLights(std::vector<light_point>& lights)
 {
 	//TODO can cache the uniforms here 
 	int index = 0;
-	const std::string blockName = "pointLights";
+	const std::string blockName = "u_pointLights";
 	m_Program->setUniform(m_Program->getUniformLocation("u_pointLightCount"), (int)lights.size());
 	
 	for (auto& item : lights)

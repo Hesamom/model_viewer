@@ -13,15 +13,19 @@ glm::vec3 getPosition(float pitch, float yaw, float zoomLevel);
 void modelviewer_window::onRender(float elapsed) {
 
 	static float angle = 0;
-	angle += 1 * elapsed;
+	angle += 0.2f * elapsed;
     addNewModels();
-	auto pos = glm::vec3 (0, 20, cos(angle) * -100);
-	m_Scene.getPointLights()[0].position = pos;
-	m_Scene.getObjects()[2]->getTransform().setPosition(pos);
+
 	
-	auto pos2 = glm::vec3 (-100 * cos(angle) , 20,0);
+	auto pos = glm::vec3 (0, 25, cos(angle) * -75);
+	m_Scene.getSpotLights()[0].position = pos;
+	m_Scene.getObjects()[2]->getTransform().setPosition(pos);
+
+	
+	
+	/*auto pos2 = glm::vec3 (-100 * cos(angle) , 20,0);
 	m_Scene.getPointLights()[1].position = pos2;
-	m_Scene.getObjects()[3]->getTransform().setPosition(pos2);
+	m_Scene.getObjects()[3]->getTransform().setPosition(pos2);*/
 	
 	m_Renderer.render(m_Scene, m_Camera, true);
 }
@@ -61,7 +65,7 @@ modelviewer_window::modelviewer_window(int width, int height, std::string title,
 	point1.ambient =  glm::vec3{0.2f,0,0};
 	point1.diffuse =  glm::vec3{1,0,0};
 	point1.setRange(100,1);
-	m_Scene.addPointLight(point1);
+	//m_Scene.addPointLight(point1);
 	
 	auto lightObjectModel = getDemoModel("cube");
 	lightObjectModel.transform.setPosition(point1.position);
@@ -70,14 +74,14 @@ modelviewer_window::modelviewer_window(int width, int height, std::string title,
 	auto lightObject = m_ObjectFactory.createObject(lightObjectModel);
 	lightObject->setCastShadow(false);
 	
-	m_Scene.addStaticObject(lightObject);
+	//m_Scene.addStaticObject(lightObject);
 	
 	light_point point2{};
 	point2.position =  glm::vec3{-100,20,0};
 	point2.ambient =  glm::vec3{0,0.2f,0};
 	point2.diffuse =  glm::vec3{0,1,0};
 	point2.setRange(100,1);
-	m_Scene.addPointLight(point2);
+	//m_Scene.addPointLight(point2);
 
 	auto lightObjectModel2 = getDemoModel("cube");
 	lightObjectModel2.transform.setPosition(point2.position);
@@ -86,7 +90,24 @@ modelviewer_window::modelviewer_window(int width, int height, std::string title,
 	auto lightObject2 = m_ObjectFactory.createObject(lightObjectModel2);
 	lightObject2->setCastShadow(false);
 
-	m_Scene.addStaticObject(lightObject2);
+	//m_Scene.addStaticObject(lightObject2);
+
+	light_spot spot1;
+	spot1.outerCutoff = 24;
+	spot1.innerCutoff = 12;
+	spot1.position = glm::vec3{0,50,0};
+	spot1.direction = glm::vec3{0,-1,0};
+	spot1.diffuse = glm::vec3{0.8f};
+	spot1.ambient = glm::vec3{0.2f};
+	m_Scene.addSpotLight(spot1);
+
+	auto spotModel1 = getDemoModel("sphere");
+	spotModel1.transform.setPosition(spot1.position);
+	spotModel1.transform.setScale(glm::vec3(0.1f));
+	spotModel1.name = "spot light 1";
+	auto spotObject2 = m_ObjectFactory.createObject(spotModel1);
+	spotObject2->setCastShadow(false);
+	m_Scene.addStaticObject(spotObject2);
 }
 
 modelviewer_window::~modelviewer_window() {
@@ -324,7 +345,7 @@ model_info modelviewer_window::getDemoModel(const std::string& name) const
 	return info;
 }
 
-void modelviewer_window::setClearMode(modelViewer::render::clear_mode mode)
+void modelviewer_window::setClearMode(clear_mode mode)
 {
 	m_Renderer.setClearMode(mode);
 }

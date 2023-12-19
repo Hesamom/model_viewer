@@ -2,6 +2,8 @@
 
 #include <utility>
 
+#include "light_spot.h"
+
 
 using namespace modelViewer::render;
 
@@ -43,8 +45,17 @@ void render_scene::addPointLight(light_point& light)
 	m_PointLights.push_back(light);
 }
 
+void render_scene::addSpotLight(light_spot& light) {
+	m_SpotLights.push_back(light);
+}
+
 std::vector<light_point>& render_scene::getPointLights()
 {
 	return m_PointLights;
 }
+
+std::vector<light_spot>& render_scene::getSpotLights() {
+	return m_SpotLights;
+}
+	
 

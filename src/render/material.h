@@ -1,10 +1,14 @@
 ﻿#ifndef MODEL_VIEWER_MATERIAL_H
 #define MODEL_VIEWER_MATERIAL_H
+#include <complex.h>
+#include <vector>
+
 #include "../resource/model_info.h"
 #include "light_directional.h"
 #include "texture.h"
 #include "shader_uniform.h"
 #include "light_point.h"
+#include "light_spot.h"
 #include "shader_program.h"
 
 
@@ -58,6 +62,8 @@ namespace modelViewer::render
 		void setLightViewProjection(glm::mat4& matrix);
 
 		res::material_info& getInfo();
+
+        void setSpotLights(std::vector<light_spot>& lights);
     };
 }
 

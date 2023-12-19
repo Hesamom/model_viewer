@@ -117,9 +117,11 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 			}
 		}
 		
+		//TODO implement light culling 
 		object->setLight(scene.getLight());
-		//TODO compare the point light ray with an object's AABB intersection and if its more than point light range, ignore the light since its not effective 
 		object->getMaterial()->setPointLights(scene.getPointLights());
+		object->getMaterial()->setSpotLights(scene.getSpotLights());
+		
 		object->render(viewMatrix, projection);
 	}
 	

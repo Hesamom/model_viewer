@@ -11,8 +11,8 @@ namespace modelViewer::render {
       
     public:
 		glm::vec3 position {50};
-		glm::vec3 ambient{0.5f};
-		glm::vec3 diffuse{0.8f};
+		glm::vec3 ambient{0.0f};
+		glm::vec3 diffuse{0.0f};
     };
 }
 
