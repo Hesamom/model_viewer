@@ -9,22 +9,28 @@ int main()
     window.setClearFlag(glm::vec4(0.15f,0.15f,0.15f,0));
 
     model_info wallModel;
-    shader_asset_info fragShader { "res/shaders/sample/phong_phong_normal_map_frag.glsl", shaderType::fragment};
+    shader_asset_info fragShader { "res/shaders/sample/phong_phong_parallex_mapping_frag.glsl", shaderType::fragment};
     shader_asset_info vertShader { "res/shaders/sample/phong_phong_normal_map_vert.glsl", shaderType::vertex};
     wallModel.material.shaders.push_back(fragShader);
     wallModel.material.shaders.push_back(vertShader);
 
     texture_asset_info diffuseTexture;
 	diffuseTexture.type = texture_asset_type::texture2D;
-	diffuseTexture.paths.emplace_back("res/textures/wall.jpg");
+	diffuseTexture.paths.emplace_back("res/textures/ParallexMapping/wood.png");
 	diffuseTexture.samplerName = "u_diffuseSampler";
     wallModel.material.textures.push_back(diffuseTexture);
 
 	texture_asset_info normalTexture;
 	normalTexture.type = texture_asset_type::texture2D;
-	normalTexture.paths.emplace_back("res/textures/normal_map_wall.png");
+	normalTexture.paths.emplace_back("res/textures/ParallexMapping/toy_box_normal.png");
 	normalTexture.samplerName = "u_normalSampler";
 	wallModel.material.textures.push_back(normalTexture);
+
+	texture_asset_info parallaxMappingTexture;
+	parallaxMappingTexture.type = texture_asset_type::texture2D;
+	parallaxMappingTexture.paths.emplace_back("res/textures/ParallexMapping/toy_box_disp.png");
+	parallaxMappingTexture.samplerName = "u_depthSampler";
+	wallModel.material.textures.push_back(parallaxMappingTexture);
 
     wallModel.path = "res/models/primitives/plane.fbx";
     wallModel.name = "default model";
