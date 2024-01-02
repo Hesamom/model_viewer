@@ -24,7 +24,7 @@ void render_scene::addStaticObject(std::shared_ptr<render_object> &object) {
     m_Objects.push_back(object);
 }
 
-light_directional &render_scene::getLight() {
+light_directional &render_scene::getDirectionalLight() {
     return m_Light;
 }
 

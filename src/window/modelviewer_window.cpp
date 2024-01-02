@@ -166,78 +166,193 @@ void modelviewer_window::onMousePositionChanged(double xpos, double ypos) {
     m_LastMousePosition.y = ypos;
 }
 
+std::string modelviewer_window::label(std::string str, int id) {
+	return str + "##" + std::to_string(id);
+}
+
+void modelviewer_window::drawSpotLightSettings() {
+
+	ImGui::Dummy(ImVec2(0.0f,20.0f));
+	ImGui::Text("Spot lights");
+	
+	auto& spotLights = m_Scene.getSpotLights();
+	if (spotLights.empty()) {
+		ImGui::Text("No active spot lights");
+		return;
+	}
+
+	int index = 0;
+	constexpr int bias = 1000;
+	int biasedIndex = index + bias;
+	for (auto& light: spotLights) {
+		
+		ImGui::Text(label("Light#" + std::to_string(index), biasedIndex).c_str());
+		
+		ImGui::ColorEdit3(label("ambient", biasedIndex).c_str(), &light.ambient.x, ImGuiColorEditFlags_NoAlpha);
+		ImGui::ColorEdit3(label("diffuse",biasedIndex).c_str(),  &light.diffuse.x, ImGuiColorEditFlags_NoAlpha);
+		
+		ImGui::SliderFloat3(label("direction",biasedIndex).c_str(), &light.direction.x, 0,1, "%.2f");
+		ImGui::InputFloat3(label("position", biasedIndex).c_str(), &light.position.x, "%.2f");
+
+		ImGui::SliderFloat(label("outter cutoff angle",biasedIndex).c_str(), &light.outerCutoff, 0,360, "%.2f");
+		ImGui::SliderFloat(label("inner cutoff angle", biasedIndex).c_str(), &light.innerCutoff, 0,light.outerCutoff, "%.2f");
+		
+		index++;
+		biasedIndex = index + bias;
+		ImGui::Dummy(ImVec2(0.0f,20.0f));
+	}
+}
+
+void modelviewer_window::drawPointLightSettings() {
+	
+	ImGui::Dummy(ImVec2(0.0f,20.0f));
+	ImGui::Text("Point lights");
+
+	auto& pointLights = m_Scene.getPointLights();
+	if (pointLights.empty()) {
+		ImGui::Text("No active point lights");
+		return;
+	}
+
+	int index = 0;
+	constexpr int bias = 5000;
+	int biasedIndex = index + bias;
+	for (auto& light: pointLights) {
+		ImGui::Text(label("Light#" + std::to_string(index), biasedIndex).c_str());
+		
+		ImGui::ColorEdit3(label("ambient", biasedIndex).c_str(), &light.ambient.x, ImGuiColorEditFlags_NoAlpha);
+		ImGui::ColorEdit3(label("diffuse", biasedIndex).c_str(),  &light.diffuse.x, ImGuiColorEditFlags_NoAlpha);
+		
+		ImGui::InputFloat3(label("position", biasedIndex).c_str(), &light.position.x, "%.2f");
+
+		float range = 0;
+		float insideRange = 0;
+		light.getRanges(range,insideRange);
+		ImGui::SliderFloat(label("range", biasedIndex).c_str(), &range, 0,1000, "%.2f");
+		ImGui::SliderFloat(label("inside range", biasedIndex).c_str(), &insideRange, 0,range, "%.2f");
+		light.setRange(range, insideRange);
+		
+		index++;
+		biasedIndex = index + bias;
+		ImGui::Dummy(ImVec2(0.0f,20.0f));
+	}
+}
+
+void modelviewer_window::drawDirectionalLightSettings() {
+	auto& directionalLight = m_Scene.getDirectionalLight();
+	ImGui::Text("Directional light");
+	ImGui::ColorEdit3("ambient", &directionalLight.ambient.x, ImGuiColorEditFlags_NoAlpha);
+	ImGui::ColorEdit3("diffuse", &directionalLight.diffuse.x, ImGuiColorEditFlags_NoAlpha);
+	ImGui::SliderFloat3("direction", &directionalLight.position.x, 0,1, "%.2f");
+}
+
+void modelviewer_window::displayLightPanel() {
+
+	const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
+	constexpr int size = 300;
+	ImGui::SetNextWindowPos(ImVec2( main_viewport->WorkSize.x - size, main_viewport->WorkPos.y), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(size, main_viewport->WorkSize.y), ImGuiCond_Always);
+
+	ImGuiWindowFlags window_flags =
+		ImGuiWindowFlags_NoCollapse
+	| ImGuiWindowFlags_NoMove
+	| ImGuiWindowFlags_NoResize
+	| ImGuiWindowFlags_MenuBar;
+	
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0,0,0,0.7f));
+	if (!ImGui::Begin("Light panel", &m_isImGUIOpen, window_flags))
+	{
+		ImGui::PopStyleColor();
+		ImGui::End();
+		return;
+	}
+
+	drawDirectionalLightSettings();
+	drawSpotLightSettings();
+	drawPointLightSettings();
+	
+	ImGui::End();
+	ImGui::PopStyleColor();
+}
+
 void modelviewer_window::updateCameraPosition() {
     auto pos = getPosition(m_PitchAngle, m_YawAngle, m_ZoomLevel);
 	m_Camera.setPosition(pos);
 }
 
 
-void modelviewer_window::onRenderImGUI() {
+void modelviewer_window::DisplayMenubar() {
+	
+	const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
+	ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x, main_viewport->WorkPos.y), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(main_viewport->Size.x, 0), ImGuiCond_Once);
 
-    const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x, main_viewport->WorkPos.y), ImGuiCond_None);
-    ImGui::SetNextWindowSize(ImVec2(main_viewport->Size.x, 0), ImGuiCond_None);
+	ImGuiWindowFlags window_flags =
+			ImGuiWindowFlags_MenuBar |
+			ImGuiWindowFlags_NoResize |
+			ImGuiWindowFlags_NoMove | 
+			ImGuiWindowFlags_NoCollapse | 
+			ImGuiWindowFlags_NoTitleBar |
+			ImGuiWindowFlags_NoBackground;
 
-    ImGuiWindowFlags window_flags = 
-            ImGuiWindowFlags_MenuBar |
-            ImGuiWindowFlags_NoResize | 
-            ImGuiWindowFlags_NoCollapse | 
-            ImGuiWindowFlags_NoTitleBar |
-            ImGuiWindowFlags_NoBackground;
+	if (!ImGui::Begin("Main window", nullptr, window_flags))
+	{
+		ImGui::End();
+		return;
+	}
 
-    if (!ImGui::Begin("Title", &m_isImGUIOpen, window_flags))
-    {
-        ImGui::End();
-        return;
-    }
-
-    //ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
-
-    // Menu Bar
-    if (ImGui::BeginMenuBar()) 
-    {
-        if (ImGui::BeginMenu("File"))
-        {
-            if(ImGui::MenuItem("Open"))
-            {
-                openModelFile();
-            }
-            ImGui::EndMenu();
-        }
+	// Menu Bar
+	if (ImGui::BeginMenuBar()) 
+	{
+		if (ImGui::BeginMenu("File"))
+		{
+			if(ImGui::MenuItem("Open"))
+			{
+				openModelFile();
+			}
+			ImGui::EndMenu();
+		}
         
 
-      if (ImGui::BeginMenu("Demo"))
-      {
+		if (ImGui::BeginMenu("Demo"))
+		{
         
-        std::string demoObjects[4] = {"cube","sphere","cylinder","plane"};
+			std::string demoObjects[4] = {"cube","sphere","cylinder","plane"};
 
-        for (auto& model : demoObjects)
-        {
-          if(ImGui::MenuItem(model.data()))
-          {
-            openDemoModel(model);
-          }
-        }
-        ImGui::EndMenu();
-      }
+			for (auto& model : demoObjects)
+			{
+				if(ImGui::MenuItem(model.data()))
+				{
+					openDemoModel(model);
+				}
+			}
+			ImGui::EndMenu();
+		}
 
-	  if (ImGui::BeginMenu("clear"))
-	  {
+		if (ImGui::BeginMenu("clear"))
+		{
 			if(ImGui::MenuItem("color"))
 			{
 				setClearMode(clear_mode::color);
 			}
-		  if(ImGui::MenuItem("skybox"))
-		  {
-			  setClearMode(clear_mode::skybox);
-		  }
+			if(ImGui::MenuItem("skybox"))
+			{
+				setClearMode(clear_mode::skybox);
+			}
 			ImGui::EndMenu();
-	  }
+		}
 	  
 		ImGui::EndMenuBar();
-    }
+	}
 
-    ImGui::End();
+	ImGui::End();
+}
+
+void modelviewer_window::onRenderImGUI() {
+	
+	//ImGui::ShowDemoWindow();
+	displayLightPanel();
+	DisplayMenubar();
 }
 
 void modelviewer_window::onSizeChanged(int height, int width)

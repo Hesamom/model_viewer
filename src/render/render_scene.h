@@ -27,7 +27,7 @@ namespace modelViewer::render {
     	
 		std::vector<light_point>& getPointLights();
         std::vector<light_spot>& getSpotLights();
-        light_directional& getLight();
+        light_directional& getDirectionalLight();
     };
 }
 #endif

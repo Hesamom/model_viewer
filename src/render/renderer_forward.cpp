@@ -31,7 +31,7 @@ void renderer_forward::renderShadows(modelViewer::render::render_scene& scene, c
 
 	float near_plane = 30.0f, far_plane = 100.0f;
 	glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-	glm::mat4 lightView = glm::lookAt(scene.getLight().position,
+	glm::mat4 lightView = glm::lookAt(scene.getDirectionalLight().position,
 		glm::vec3( 0.0f, 0.0f,  0.0f),
 		glm::vec3( 0.0f, 1.0f,  0.0f));
 	m_LightViewProjection = lightProjection * lightView;
@@ -118,7 +118,7 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 		}
 		
 		//TODO implement light culling 
-		object->setLight(scene.getLight());
+		object->setLight(scene.getDirectionalLight());
 		object->getMaterial()->setPointLights(scene.getPointLights());
 		object->getMaterial()->setSpotLights(scene.getSpotLights());
 		
