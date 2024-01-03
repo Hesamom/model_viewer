@@ -35,13 +35,14 @@ vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir);
 
 void main()
 {
-    surface surf;
-    surf.viewDir = normalize(fs_in.viewDir);
-    surf.normal = (texture(u_normalSampler, fs_in.texCoord).rgb * 2.0) - 1.0;
-    vec2 texCoords = ParallaxMapping(fs_in.texCoord, surf.viewDir);
+    vec2 texCoords = ParallaxMapping(fs_in.texCoord, fs_in.viewDir);
 
     if(texCoords.x > 1.0 || texCoords.y > 1.0 || texCoords.x < 0.0 || texCoords.y < 0.0)
         discard;
+
+    surface surf;
+    surf.viewDir = normalize(fs_in.viewDir);
+    surf.normal = (texture(u_normalSampler, texCoords).rgb * 2.0) - 1.0;
 
     //dirct
     directLight dirLight;
@@ -79,29 +80,8 @@ void main()
 
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
 {
-    // number of depth layers
-    const float numLayers = 10.0f;
-    // calculate the size of each layer
-    float layerDepth = 1.0f / numLayers;
-    // depth of current layer
-    float currentLayerDepth = 0.0f;
-    // the amount to shift the texture coordinates per layer (from vector P)
-    vec2 P = viewDir.xy * 0.1f;
-    vec2 deltaTexCoords = P / numLayers;
-
-    // get initial values
-    vec2  currentTexCoords     = texCoords;
-    float currentDepthMapValue = texture(u_depthSampler, currentTexCoords).r;
-
-    while(currentLayerDepth < currentDepthMapValue)
-    {
-        // shift texture coordinates along direction of P
-        currentTexCoords -= deltaTexCoords;
-        // get depthmap value at current texture coordinates
-        currentDepthMapValue = 1.0f - texture(u_depthSampler, currentTexCoords).r;
-        // get depth of next layer
-        currentLayerDepth += layerDepth;
-    }
-
-    return currentTexCoords;
+    float height_scale = 0.18f;
+    float height =  texture(u_depthSampler, texCoords).r;
+    vec2 p = viewDir.xy / viewDir.z * (height * height_scale);
+    return texCoords - p;
 }

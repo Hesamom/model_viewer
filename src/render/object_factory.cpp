@@ -38,6 +38,7 @@ std::shared_ptr<texture> object_factory::createTexture(const texture_asset_info&
 	texture_setup setup;
 	//TODO set wrap mode
 	setup.isMipMapActive = true;
+	setup.isHightMap = info.isHightMap;
 	setup.mipMapMaxLevel = 1000;
 	setup.mipMapMinLevel = 0;
 	setup.type = info.type;

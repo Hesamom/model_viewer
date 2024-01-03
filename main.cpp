@@ -16,20 +16,21 @@ int main()
 
     texture_asset_info diffuseTexture;
 	diffuseTexture.type = texture_asset_type::texture2D;
-	diffuseTexture.paths.emplace_back("res/textures/ParallexMapping/wood.png");
+	diffuseTexture.paths.emplace_back("res/textures/ParallexMapping/bricks2.jpg");
 	diffuseTexture.samplerName = "u_diffuseSampler";
     wallModel.material.textures.push_back(diffuseTexture);
 
 	texture_asset_info normalTexture;
 	normalTexture.type = texture_asset_type::texture2D;
-	normalTexture.paths.emplace_back("res/textures/ParallexMapping/toy_box_normal.png");
+	normalTexture.paths.emplace_back("res/textures/ParallexMapping/bricks2_normal.jpg");
 	normalTexture.samplerName = "u_normalSampler";
 	wallModel.material.textures.push_back(normalTexture);
 
 	texture_asset_info parallaxMappingTexture;
 	parallaxMappingTexture.type = texture_asset_type::texture2D;
-	parallaxMappingTexture.paths.emplace_back("res/textures/ParallexMapping/toy_box_disp.png");
+	parallaxMappingTexture.paths.emplace_back("res/textures/ParallexMapping/bricks2_disp.jpg");
 	parallaxMappingTexture.samplerName = "u_depthSampler";
+	parallaxMappingTexture.isHightMap = true;
 	wallModel.material.textures.push_back(parallaxMappingTexture);
 
     wallModel.path = "res/models/primitives/plane.fbx";

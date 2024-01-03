@@ -23,13 +23,21 @@ texture_2D::texture_2D(texture_setup& texture_setup)
 	assert(!m_Setup.assets.empty());
 	
 	auto textureAsset = m_Setup.assets[0];
-    auto optimalFormat = texture_format::getOptimalFormat(textureAsset->getChannelType(), m_Setup.compress);
 
     glGenTextures(1, &m_TextureId);
     setBind(true);
-    
-    glTexImage2D(GL_TEXTURE_2D, 0, optimalFormat, textureAsset->getWidth(), m_Setup.assets[0]->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
-		textureAsset->getContent());
+
+    if (m_Setup.isHightMap) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, textureAsset->getWidth(), m_Setup.assets[0]->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+    textureAsset->getContent());
+    }
+    else {
+        auto optimalFormat = texture_format::getOptimalFormat(textureAsset->getChannelType(), m_Setup.compress);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, optimalFormat, textureAsset->getWidth(), m_Setup.assets[0]->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+        textureAsset->getContent());
+    }
+
 
     glObjectLabel(GL_TEXTURE, m_TextureId, -1, textureAsset->getName().data());
 
