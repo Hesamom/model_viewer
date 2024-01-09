@@ -10,7 +10,7 @@ glm::mat4 transform::getMatrix() const {
     auto translation = glm::translate(identity, m_Position);
     auto rotation = m_Rotation.toMat4();
     auto scale = glm::scale(identity, m_Scale);
-    auto transform =  scale * translation * rotation;
+    auto transform =   translation * rotation * scale;
     return transform;
 }
 

@@ -169,7 +169,7 @@ void modelviewer_window::drawSpotLightSettings() {
 		ImGui::ColorEdit3(label("diffuse",biasedIndex).c_str(),  &light.diffuse.x, ImGuiColorEditFlags_NoAlpha);
 		
 		ImGui::SliderFloat3(label("direction",biasedIndex).c_str(), &light.direction.x, -1,1, "%.2f");
-		ImGui::SliderFloat3(label("position", biasedIndex).c_str(), &light.position.x, -100,100, "%.2f");
+		ImGui::SliderFloat3(label("position", biasedIndex).c_str(), &light.position.x, -10,10, "%.2f");
 
 		ImGui::SliderFloat(label("outter cutoff angle",biasedIndex).c_str(), &light.outerCutoff, 0,360, "%.2f");
 		ImGui::SliderFloat(label("inner cutoff angle", biasedIndex).c_str(), &light.innerCutoff, 0,light.outerCutoff, "%.2f");
@@ -227,7 +227,7 @@ void modelviewer_window::drawPointLightSettings() {
 		ImGui::ColorEdit3(label("ambient", biasedIndex).c_str(), &light.ambient.x, ImGuiColorEditFlags_NoAlpha);
 		ImGui::ColorEdit3(label("diffuse", biasedIndex).c_str(),  &light.diffuse.x, ImGuiColorEditFlags_NoAlpha);
 		
-		ImGui::SliderFloat3(label("position", biasedIndex).c_str(), &light.position.x, -100,100 ,"%.2f");
+		ImGui::SliderFloat3(label("position", biasedIndex).c_str(), &light.position.x, -10,10 ,"%.2f");
 
 		float range = 0;
 		float insideRange = 0;
