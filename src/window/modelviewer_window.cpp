@@ -306,7 +306,7 @@ void modelviewer_window::updateCameraPosition() {
 }
 
 
-void modelviewer_window::DisplayMenubar() {
+void modelviewer_window::displayMenubar() {
 	
 	const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
 	ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x, main_viewport->WorkPos.y), ImGuiCond_Once);
@@ -341,16 +341,40 @@ void modelviewer_window::DisplayMenubar() {
 
 		if (ImGui::BeginMenu("Demo"))
 		{
-        
-			std::string demoObjects[4] = {"cube","sphere","cylinder","plane"};
 
-			for (auto& model : demoObjects)
-			{
-				if(ImGui::MenuItem(model.data()))
+			
+			if (ImGui::BeginMenu("Simple lighting")) {
+				
+				std::string demoObjects[4] = {"cube","sphere","cylinder","plane"};
+
+				for (auto& model : demoObjects)
 				{
-					openDemoModel(model);
+					if(ImGui::MenuItem(model.data()))
+					{
+						openDemoModel(model);
+					}
 				}
+
+				ImGui::EndMenu();
 			}
+
+			if (ImGui::BeginMenu("Normal mapping")) {
+				if(ImGui::MenuItem("wall"))
+				{
+					openWallNormalMap();
+				}
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Parallax mapping")) {
+				if(ImGui::MenuItem("wall"))
+				{
+					openWallParallaxMap();
+				}
+				ImGui::EndMenu();
+			}
+			
+			
 			ImGui::EndMenu();
 		}
 
@@ -377,7 +401,7 @@ void modelviewer_window::onRenderImGUI() {
 	
 	//ImGui::ShowDemoWindow();
 	displayLightPanel();
-	DisplayMenubar();
+	displayMenubar();
 }
 
 void modelviewer_window::onSizeChanged(int height, int width)
@@ -444,6 +468,75 @@ void modelviewer_window::openModelFile() {
        
         addModel(info);
     }
+}
+
+void modelviewer_window::openWallParallaxMap() {
+
+	model_info wallModel;
+	shader_asset_info fragShader { "res/shaders/sample/phong_phong_parallex_mapping_frag.glsl", shaderType::fragment};
+	shader_asset_info vertShader { "res/shaders/sample/phong_phong_normal_map_vert.glsl", shaderType::vertex};
+	wallModel.material.shaders.push_back(fragShader);
+	wallModel.material.shaders.push_back(vertShader);
+
+	texture_asset_info diffuseTexture;
+	diffuseTexture.type = texture_asset_type::texture2D;
+	diffuseTexture.paths.emplace_back("res/textures/ParallexMapping/bricks2.jpg");
+	diffuseTexture.samplerName = "u_diffuseSampler";
+	wallModel.material.textures.push_back(diffuseTexture);
+
+	texture_asset_info normalTexture;
+	normalTexture.type = texture_asset_type::texture2D;
+	normalTexture.paths.emplace_back("res/textures/ParallexMapping/bricks2_normal.jpg");
+	normalTexture.samplerName = "u_normalSampler";
+	wallModel.material.textures.push_back(normalTexture);
+
+	texture_asset_info parallaxMappingTexture;
+	parallaxMappingTexture.type = texture_asset_type::texture2D;
+	parallaxMappingTexture.paths.emplace_back("res/textures/ParallexMapping/bricks2_disp.jpg");
+	parallaxMappingTexture.samplerName = "u_depthSampler";
+	parallaxMappingTexture.isHightMap = true;
+	wallModel.material.textures.push_back(parallaxMappingTexture);
+
+	wallModel.path = "res/models/primitives/plane.fbx";
+	wallModel.name = "wall";
+	wallModel.material.propertySet.colors.push_back({Literals::DiffuseAlbedo, glm::vec3 (1.0f)});
+	wallModel.material.propertySet.colors.push_back({Literals::AmbientAlbedo, glm::vec3 (1.0f)});
+	wallModel.material.propertySet.colors.push_back({Literals::SpecularAlbedo, glm::vec3 (0.2f)});
+	wallModel.material.propertySet.floats.push_back({Literals::Shininess, 10});
+	wallModel.material.propertySet.floats.push_back({Literals::Opacity, 1});
+	wallModel.material.propertySet.cullFaceEnabled = false;
+	addModel(wallModel);
+}
+
+void modelviewer_window::openWallNormalMap() {
+	model_info wallModel;
+	shader_asset_info fragShader { "res/shaders/sample/phong_phong_normal_map_frag.glsl", shaderType::fragment};
+	shader_asset_info vertShader { "res/shaders/sample/phong_phong_normal_map_vert.glsl", shaderType::vertex};
+	wallModel.material.shaders.push_back(fragShader);
+	wallModel.material.shaders.push_back(vertShader);
+
+	texture_asset_info diffuseTexture;
+	diffuseTexture.type = texture_asset_type::texture2D;
+	diffuseTexture.paths.emplace_back("res/textures/wall.jpg");
+	diffuseTexture.samplerName = "u_diffuseSampler";
+	wallModel.material.textures.push_back(diffuseTexture);
+
+	texture_asset_info normalTexture;
+	normalTexture.type = texture_asset_type::texture2D;
+	normalTexture.paths.emplace_back("res/textures/wall_normal.png");
+	normalTexture.samplerName = "u_normalSampler";
+	wallModel.material.textures.push_back(normalTexture);
+
+
+	wallModel.path = "res/models/primitives/plane.fbx";
+	wallModel.name = "wall";
+	wallModel.material.propertySet.colors.push_back({Literals::DiffuseAlbedo, glm::vec3 (1.0f)});
+	wallModel.material.propertySet.colors.push_back({Literals::AmbientAlbedo, glm::vec3 (1.0f)});
+	wallModel.material.propertySet.colors.push_back({Literals::SpecularAlbedo, glm::vec3 (0.2f)});
+	wallModel.material.propertySet.floats.push_back({Literals::Shininess, 10});
+	wallModel.material.propertySet.floats.push_back({Literals::Opacity, 1});
+	wallModel.material.propertySet.cullFaceEnabled = false;
+	addModel(wallModel);
 }
 
 

@@ -38,9 +38,11 @@ private:
     void openDemoModel(std::string name);
     void updateCameraPosition();
 
-	void DisplayMenubar();
-
+	
+	void displayMenubar();
 	void openModelFile();
+	void openWallParallaxMap();
+	void openWallNormalMap();
     
 protected:
     void onRender(float elapsed) override;
