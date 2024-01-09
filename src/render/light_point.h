@@ -6,6 +6,8 @@
 
 namespace modelViewer::render
 {
+	class render_object;
+
 	class light_point
 	{
 	private:
@@ -15,6 +17,8 @@ namespace modelViewer::render
 		glm::vec3 position;
 		glm::vec3 ambient;
 		glm::vec3 diffuse;
+		int id = 0;
+		std::shared_ptr<render_object> object;
 		
 		void setRange(float range, float insideRange)
 		{

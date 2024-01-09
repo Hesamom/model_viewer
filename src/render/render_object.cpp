@@ -110,5 +110,9 @@ bool render_object::getReceiveShadows()
 	return  m_ReceiveShadows;
 }
 
+std::string render_object::getName() {
+    return m_Name;
+}
+
 
 

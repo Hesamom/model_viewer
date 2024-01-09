@@ -27,7 +27,7 @@ private:
     float m_YawAngle = 0;
     float m_ZoomLevel = 10;
     bool m_isImGUIOpen = true;
-    
+    int m_LastLightId = 0;
     const glm::vec2 PitchAngleRange{-80,80};
     const float AngleChangeMul = 0.5f;
     
@@ -51,22 +51,23 @@ protected:
 	static std::string label(std::string str, int id);
 
 	void drawSpotLightSettings();
-
 	void drawPointLightSettings();
-
 	void drawDirectionalLightSettings();
-
 	void displayLightPanel();
 
     void onRenderImGUI() override;
 	void onSizeChanged(int height, int width) override;
-    
+	void addSpotLight();
+	void addPointLight();
+	void addSpotLight(modelViewer::render::light_spot spot);
+	void addPointLight(modelViewer::render::light_point point);
+	
 public:
     modelviewer_window(int width, int height, std::string title, bool fullscreen);
      ~modelviewer_window() override;
-     void addModel(modelViewer::res::model_info& info);
-     void setClearFlag(glm::vec4 color);
-
+	
+	void addModel(modelViewer::res::model_info& info);
+	void setClearFlag(glm::vec4 color);
 	void setClearMode(modelViewer::render::clear_mode mode);
 
 	modelViewer::res::model_info getDemoModel(const std::string& name) const;

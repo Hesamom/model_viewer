@@ -47,6 +47,7 @@ namespace modelViewer::render
     	common::aabb getBoundingBox();
 		bool getCastShadows();
 		bool getReceiveShadows();
+    	std::string getName();
     };
 }
 #endif

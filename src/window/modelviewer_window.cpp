@@ -11,22 +11,7 @@ using namespace modelViewer::common;
 glm::vec3 getPosition(float pitch, float yaw, float zoomLevel);
 
 void modelviewer_window::onRender(float elapsed) {
-
-	static float angle = 0;
-	angle += 0.2f * elapsed;
     addNewModels();
-
-	
-	auto pos = glm::vec3 (0, 25, cos(angle) * -75);
-	m_Scene.getSpotLights()[0].position = pos;
-	m_Scene.getObjects()[2]->getTransform().setPosition(pos);
-
-	
-	
-	/*auto pos2 = glm::vec3 (-100 * cos(angle) , 20,0);
-	m_Scene.getPointLights()[1].position = pos2;
-	m_Scene.getObjects()[3]->getTransform().setPosition(pos2);*/
-	
 	m_Renderer.render(m_Scene, m_Camera, true);
 }
 
@@ -59,66 +44,49 @@ modelviewer_window::modelviewer_window(int width, int height, std::string title,
 	auto grid = m_Platform.generateGrid(m_ObjectFactory, info);
 	m_Scene.addStaticObject(plane);
 	m_Scene.addStaticObject(grid);
-	
-	light_point point1{};
-	point1.position =  glm::vec3{100,20,0};
-	point1.ambient =  glm::vec3{0.2f,0,0};
-	point1.diffuse =  glm::vec3{1,0,0};
-	point1.setRange(100,1);
-	//m_Scene.addPointLight(point1);
-	
-	auto lightObjectModel = getDemoModel("cube");
-	lightObjectModel.transform.setPosition(point1.position);
-	lightObjectModel.transform.setScale(glm::vec3(0.1f));
-	lightObjectModel.name = "point light 1";
-	auto lightObject = m_ObjectFactory.createObject(lightObjectModel);
-	lightObject->setCastShadow(false);
-	
-	//m_Scene.addStaticObject(lightObject);
-	
-	light_point point2{};
-	point2.position =  glm::vec3{-100,20,0};
-	point2.ambient =  glm::vec3{0,0.2f,0};
-	point2.diffuse =  glm::vec3{0,1,0};
-	point2.setRange(100,1);
-	//m_Scene.addPointLight(point2);
-
-	auto lightObjectModel2 = getDemoModel("cube");
-	lightObjectModel2.transform.setPosition(point2.position);
-	lightObjectModel2.transform.setScale(glm::vec3(0.1f));
-	lightObjectModel2.name = "point light 2";
-	auto lightObject2 = m_ObjectFactory.createObject(lightObjectModel2);
-	lightObject2->setCastShadow(false);
-
-	//m_Scene.addStaticObject(lightObject2);
-
-	light_spot spot1;
-	spot1.outerCutoff = 24;
-	spot1.innerCutoff = 12;
-	spot1.position = glm::vec3{0,50,0};
-	spot1.direction = glm::vec3{0,-1,0};
-	spot1.diffuse = glm::vec3{0.8f};
-	spot1.ambient = glm::vec3{0.2f};
-	m_Scene.addSpotLight(spot1);
-
-	auto spotModel1 = getDemoModel("sphere");
-	spotModel1.transform.setPosition(spot1.position);
-	spotModel1.transform.setScale(glm::vec3(0.1f));
-	spotModel1.name = "spot light 1";
-	auto spotObject2 = m_ObjectFactory.createObject(spotModel1);
-	spotObject2->setCastShadow(false);
-	m_Scene.addStaticObject(spotObject2);
 }
 
 modelviewer_window::~modelviewer_window() {
     
 }
 
+std::string getLightObjectName(int id) {
+	return "light_object_" + std::to_string(id);
+}
+
+void modelviewer_window::addSpotLight(light_spot spot) {
+
+	auto spotModel1 = getDemoModel("sphere");
+	spotModel1.transform.setPosition(spot.position);
+	spotModel1.transform.setScale(glm::vec3(0.1f));
+	spotModel1.name = getLightObjectName(spot.id);
+	auto spotObject = m_ObjectFactory.createObject(spotModel1);
+	spotObject->setCastShadow(false);
+	m_Scene.addStaticObject(spotObject);
+	spot.object = spotObject;
+	
+	m_Scene.addSpotLight(spot);
+}
+
+void modelviewer_window::addPointLight(light_point point) {
+
+	auto lightObjectModel = getDemoModel("cube");
+	lightObjectModel.transform.setPosition(point.position);
+	lightObjectModel.transform.setScale(glm::vec3(0.1f));
+	lightObjectModel.name = getLightObjectName(point.id);
+	
+	auto lightObject = m_ObjectFactory.createObject(lightObjectModel);
+	lightObject->setCastShadow(false);
+	m_Scene.addStaticObject(lightObject);
+	point.object = lightObject;
+	
+	m_Scene.addPointLight(point);
+}
+
 void modelviewer_window::setClearFlag(glm::vec4 color) {
     
 	m_Renderer.setClearFlag(color);
 }
-
 
 glm::vec3 getPosition(float pitch, float yaw, float zoomLevel)
 {
@@ -170,36 +138,64 @@ std::string modelviewer_window::label(std::string str, int id) {
 	return str + "##" + std::to_string(id);
 }
 
+
 void modelviewer_window::drawSpotLightSettings() {
 
 	ImGui::Dummy(ImVec2(0.0f,20.0f));
 	ImGui::Text("Spot lights");
 	
 	auto& spotLights = m_Scene.getSpotLights();
+	
+	ImGui::Dummy(ImVec2(0.0f,20.0f));
+	
 	if (spotLights.empty()) {
 		ImGui::Text("No active spot lights");
-		return;
 	}
 
 	int index = 0;
 	constexpr int bias = 1000;
 	int biasedIndex = index + bias;
+	std::vector<int> removedLights;
+
+	if (spotLights.size() < 4 && ImGui::Button(label("add new", biasedIndex).c_str())) {
+		addSpotLight();
+	}
+	
 	for (auto& light: spotLights) {
 		
-		ImGui::Text(label("Light#" + std::to_string(index), biasedIndex).c_str());
+		ImGui::Text(label("Light @" + std::to_string(index), biasedIndex).c_str());
 		
 		ImGui::ColorEdit3(label("ambient", biasedIndex).c_str(), &light.ambient.x, ImGuiColorEditFlags_NoAlpha);
 		ImGui::ColorEdit3(label("diffuse",biasedIndex).c_str(),  &light.diffuse.x, ImGuiColorEditFlags_NoAlpha);
 		
-		ImGui::SliderFloat3(label("direction",biasedIndex).c_str(), &light.direction.x, 0,1, "%.2f");
-		ImGui::InputFloat3(label("position", biasedIndex).c_str(), &light.position.x, "%.2f");
+		ImGui::SliderFloat3(label("direction",biasedIndex).c_str(), &light.direction.x, -1,1, "%.2f");
+		ImGui::SliderFloat3(label("position", biasedIndex).c_str(), &light.position.x, -50,50, "%.2f");
 
 		ImGui::SliderFloat(label("outter cutoff angle",biasedIndex).c_str(), &light.outerCutoff, 0,360, "%.2f");
 		ImGui::SliderFloat(label("inner cutoff angle", biasedIndex).c_str(), &light.innerCutoff, 0,light.outerCutoff, "%.2f");
+
+		const auto object = light.object;
+		object->getTransform().setPosition(light.position);
 		
+		if (ImGui::Button(label("remove", biasedIndex).c_str())) {
+			removedLights.push_back(index);
+		}
 		index++;
 		biasedIndex = index + bias;
 		ImGui::Dummy(ImVec2(0.0f,20.0f));
+	}
+
+	for (int i = removedLights.size() - 1; i >= 0; --i) {
+		
+		const int lightIndex = removedLights[i];
+		const auto light = m_Scene.getSpotLights()[lightIndex];
+		
+		auto object = light.object;
+		if (object != nullptr) {
+			m_Scene.removeStaticObject(object);
+		}
+		
+		m_Scene.removeSpotLight(lightIndex);
 	}
 }
 
@@ -211,30 +207,59 @@ void modelviewer_window::drawPointLightSettings() {
 	auto& pointLights = m_Scene.getPointLights();
 	if (pointLights.empty()) {
 		ImGui::Text("No active point lights");
-		return;
+	
 	}
-
+	
+	
+	
 	int index = 0;
 	constexpr int bias = 5000;
 	int biasedIndex = index + bias;
+
+	if (pointLights.size() < 4 && ImGui::Button(label("add new", biasedIndex).c_str())) {
+		addPointLight();
+	}
+
+	std::vector<int> removedLights;
 	for (auto& light: pointLights) {
 		ImGui::Text(label("Light#" + std::to_string(index), biasedIndex).c_str());
 		
 		ImGui::ColorEdit3(label("ambient", biasedIndex).c_str(), &light.ambient.x, ImGuiColorEditFlags_NoAlpha);
 		ImGui::ColorEdit3(label("diffuse", biasedIndex).c_str(),  &light.diffuse.x, ImGuiColorEditFlags_NoAlpha);
 		
-		ImGui::InputFloat3(label("position", biasedIndex).c_str(), &light.position.x, "%.2f");
+		ImGui::SliderFloat3(label("position", biasedIndex).c_str(), &light.position.x, -50,50 ,"%.2f");
 
 		float range = 0;
 		float insideRange = 0;
 		light.getRanges(range,insideRange);
 		ImGui::SliderFloat(label("range", biasedIndex).c_str(), &range, 0,1000, "%.2f");
 		ImGui::SliderFloat(label("inside range", biasedIndex).c_str(), &insideRange, 0,range, "%.2f");
+		insideRange = std::clamp<float>(insideRange, 0, range);
 		light.setRange(range, insideRange);
+
+		const auto object = light.object;
+		object->getTransform().setPosition(light.position);
+
+		if (ImGui::Button(label("remove", biasedIndex).c_str())) {
+			removedLights.push_back(index);
+		}
 		
 		index++;
 		biasedIndex = index + bias;
 		ImGui::Dummy(ImVec2(0.0f,20.0f));
+	}
+
+	for (int i = removedLights.size() - 1; i >= 0; --i) {
+		
+		const int lightIndex = removedLights[i];
+		const auto light = m_Scene.getPointLights()[lightIndex];
+		
+		auto object = light.object;
+		if (object != nullptr) {
+			m_Scene.removeStaticObject(object);
+		}
+		
+		m_Scene.removePointLight(lightIndex);
 	}
 }
 
@@ -364,6 +389,33 @@ void modelviewer_window::onSizeChanged(int height, int width)
 	}
 	glViewport(0, 0, width, height);
 	m_Camera.setViewPort(width, height);
+}
+
+void modelviewer_window::addSpotLight() {
+	
+	light_spot spot;
+	spot.outerCutoff = 24;
+	spot.innerCutoff = 12;
+	spot.position = glm::vec3{0,50,0};
+	spot.direction = glm::vec3{0,-1,0};
+	spot.diffuse = glm::vec3{0.8f};
+	spot.ambient = glm::vec3{0.2f};
+	spot.id = m_LastLightId;
+	m_LastLightId++;
+
+	addSpotLight(spot);
+}
+
+void modelviewer_window::addPointLight() {
+	light_point point{};
+	point.position =  glm::vec3{0,20,0};
+	point.ambient =  glm::vec3{0.2f,0,0};
+	point.diffuse =  glm::vec3{1,0,0};
+	point.setRange(100,1);
+	point.id = m_LastLightId;
+	m_LastLightId++;
+	
+	addPointLight(point);
 }
 
 void modelviewer_window::openModelFile() {
