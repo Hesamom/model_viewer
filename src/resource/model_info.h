@@ -50,6 +50,7 @@ namespace modelViewer::res
     struct texture_asset_info
     {
         bool forceFlip = true;
+    	bool isHightMap = false;
         std::vector<std::string> paths;
         unsigned int uvIndex = 0;
         texture_asset_mapping_mode mappingMode = texture_asset_mapping_mode::uv;
