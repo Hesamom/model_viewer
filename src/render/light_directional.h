@@ -6,11 +6,9 @@
 
 namespace modelViewer::render {
     class light_directional {
-        
-    private:
       
     public:
-		glm::vec3 position {50};
+		glm::vec3 direction {1};
     	glm::vec3 rotation {1};
 		glm::vec3 ambient{0.7f};
 		glm::vec3 diffuse{0.5f};

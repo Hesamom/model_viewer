@@ -31,7 +31,7 @@ namespace modelViewer::render
 		shader_uniform<glm::mat4> m_ProjectionUniform{"m_Projection",""};
 		
 		shader_uniform<glm::mat4> m_LightViewProjectionUniform{"m_LightViewProjection",""};
-		shader_uniform<glm::vec3> m_LightPosUniform{"u_light_pos",""};
+		shader_uniform<glm::vec3> m_LightDirUniform{"u_light_dir",""};
 		shader_uniform<glm::vec3> m_LightAmbientUniform{"u_lightAmbient",""};
 		shader_uniform<glm::vec3> m_LightDiffuseUniform{"u_lightDiffuse",""};
 		
@@ -54,7 +54,7 @@ namespace modelViewer::render
         void bind();
         int getUniformLocation(std::string name) const;
         int getAttributeLocation(std::string name) const;
-        void setLight(const light_directional& light);
+        void setDirectionalLight(const light_directional& light);
 		void setPointLights(std::vector<light_point>& lights);
 		void bindTextures(const std::vector<texture_binding>& textures);
 

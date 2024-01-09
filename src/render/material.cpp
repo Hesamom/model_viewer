@@ -22,7 +22,7 @@ material::material(const material_info& info, std::vector<texture_binding>& text
 	m_LightViewProjectionUniform.getLocation(*m_Program);
 	m_LightAmbientUniform.getLocation(*m_Program);
 	m_LightDiffuseUniform.getLocation(*m_Program);
-	m_LightPosUniform.getLocation(*m_Program);
+	m_LightDirUniform.getLocation(*m_Program);
 	
 	m_ShadowMapSamplerLocation = m_Program->getUniformLocation(m_ShadowSampler);
     
@@ -161,12 +161,12 @@ int material::getAttributeLocation(std::string name) const {
     return m_Program->getAttributeLocation(name);
 }
 
-void material::setLight(const light_directional &light) {
+void material::setDirectionalLight(const light_directional &light) {
     
     m_Program->bind();
 	
-	auto pos = light.position;
-	m_LightPosUniform.setValue(pos, *m_Program);
+	auto direction = light.direction;
+	m_LightDirUniform.setValue(direction, *m_Program);
 	auto ambient = light.ambient;
     m_LightAmbientUniform.setValue(ambient, *m_Program);
 	auto diffuse = light.diffuse;

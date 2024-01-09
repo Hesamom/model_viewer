@@ -7,6 +7,7 @@ uniform sampler2D u_diffuseSampler;
 
 uniform vec3 u_lightAmbient;
 uniform vec3 u_lightDiffuse;
+uniform vec3 u_light_dir;
 
 uniform material mat;
 
@@ -22,7 +23,6 @@ in VS_OUT
 {
     vec2 texCoord;
     vec3 normal;
-    vec3 lightDir;
     vec3 viewDir;
     vec3 fragPos;
     vec4 fragPosLightSpace;
@@ -39,7 +39,7 @@ void main()
 
     //dirct
     directLight dirLight;
-    dirLight.direction = normalize(fs_in.lightDir);
+    dirLight.direction = normalize(u_light_dir);
     dirLight.ambient = u_lightAmbient;
     dirLight.diffuse = u_lightDiffuse;
     

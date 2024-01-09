@@ -54,7 +54,7 @@ render_object::render_object(std::shared_ptr<material>& material, std::shared_pt
 }
 
 void render_object::setLight(const light_directional &light) {
-    m_Material->setLight(light);
+    m_Material->setDirectionalLight(light);
 }
 
 void render_object::renderShadow()
