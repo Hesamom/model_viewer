@@ -202,6 +202,10 @@ void material::setSpotLights(std::vector<light_spot>& lights) {
 	
 	for (auto& item : lights)
 	{
+		shader_uniform<glm::mat4x4> viewTransform{"m_SpotLightViewProjection","", index};
+		viewTransform.getLocation(*m_Program);
+		viewTransform.setValue(item.viewProjection, *m_Program);
+
 		shader_uniform<glm::vec3> positionMember{"position",blockName, index};
 		positionMember.getLocation(*m_Program);
 		positionMember.setValue(item.position, *m_Program);

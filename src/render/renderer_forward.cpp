@@ -20,23 +20,17 @@ void renderer_forward::render(render_scene& scene, camera& camera, bool shadowEn
 	renderObjects(scene, camera, shadowEnabled);
 }
 
-void renderer_forward::renderShadows(modelViewer::render::render_scene& scene, camera& camera)
-{
-	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "rendering shadows");
+void renderer_forward::renderDirectionalShadows(render_scene& scene) {
 	
-	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-	m_shadowBuffer.bind();
-	glClear(GL_DEPTH_BUFFER_BIT);
-	glCullFace(GL_FRONT);
-
-	float near_plane = 30.0f, far_plane = 100.0f;
-	glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-	glm::mat4 lightView = glm::lookAt(scene.getDirectionalLight().direction,
-		glm::vec3( 0.0f, 0.0f,  0.0f),
-		glm::vec3( 0.0f, 1.0f,  0.0f));
+	constexpr float near_plane = 30.0f;
+	constexpr float far_plane = 100.0f;
+	const auto lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+	const auto lightView = glm::lookAt(scene.getDirectionalLight().direction,
+	                        glm::vec3( 0.0f, 0.0f,  0.0f),
+	                        glm::vec3( 0.0f, 1.0f,  0.0f));
 	m_LightViewProjection = lightProjection * lightView;
 	
-	m_shadowProgram->bind();
+
 	for (auto& object : scene.getObjects()) {
 
 		if (!object->getCastShadows())
@@ -44,17 +38,69 @@ void renderer_forward::renderShadows(modelViewer::render::render_scene& scene, c
 			continue;
 		}
 		
-		//currently transparent objects can not cast shadows 
 		if (object->getMaterial()->getInfo().propertySet.renderQueue >= render_queue_transparent)
 		{
 			continue;
 		}
-
-
+		
 		auto mvp = m_LightViewProjection * object->getTransform().getMatrix();
 		m_shadowProgram->setUniform(m_MVPLocation, mvp);
 		object->renderShadow();
 	}
+}
+
+glm::mat4 compute_view_matrix_for_rotation(glm::vec3 origin, glm::vec3 rot) {
+	glm::mat4 mat(1.0);
+	float rx = glm::radians(rot.x);
+	float ry = glm::radians(rot.y);
+	float rz = glm::radians(rot.z);
+	mat = glm::rotate(mat, -rx, glm::vec3(1, 0, 0));
+	mat = glm::rotate(mat, -ry, glm::vec3(0, 1, 0));
+	mat = glm::rotate(mat, -rz, glm::vec3(0, 0, 1));
+	mat = glm::translate(mat, -origin);
+	return mat;
+}
+
+void renderer_forward::renderSpotShadows(render_scene& scene) {
+	for (auto& spot : scene.getSpotLights()) {
+		constexpr float near_plane = 30.0f;
+		constexpr float far_plane = 100.0f;
+		auto lightProjection = glm::perspective(glm::radians(spot.outerCutoff), 1.0f, near_plane, far_plane);
+		auto lightView = compute_view_matrix_for_rotation(spot.position, spot.direction);
+		spot.viewProjection =  lightProjection * lightView;
+
+		for (auto& object : scene.getObjects()) {
+
+			if (!object->getCastShadows())
+			{
+				continue;
+			}
+		
+			if (object->getMaterial()->getInfo().propertySet.renderQueue >= render_queue_transparent)
+			{
+				continue;
+			}
+			
+			auto mvp = spot.viewProjection * object->getTransform().getMatrix();
+			m_shadowProgram->setUniform(m_MVPLocation, mvp);
+			object->renderShadow();
+		}
+	}
+}
+
+void renderer_forward::renderShadows(render_scene& scene, camera& camera)
+{
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "rendering shadows");
+	
+	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+	m_shadowBuffer.bind();
+	glCullFace(GL_FRONT);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	m_shadowProgram->bind();
+
+
+	renderDirectionalShadows(scene);
+	renderSpotShadows(scene);
 	
 	m_shadowBuffer.unbind();
 	

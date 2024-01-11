@@ -26,6 +26,8 @@ in VS_OUT
     vec3 viewDir;
     vec3 fragPos;
     vec4 fragPosLightSpace;
+    vec4[4] fragSpotPosLightSpace;
+
 } fs_in;
 
 out vec4 FragColor;
@@ -60,8 +62,7 @@ void main()
     //spot
     for (int i =0; i < u_spotLightCount; i++)
     {
-        //TODO add shadow here
-        float shadow = 0;
+        float shadow = getShadowValue(fs_in.fragSpotPosLightSpace[i], surf.normal , dirLight.direction , u_shadowSampler);
         vec3 lighting = getSpotLight(surf, u_spotLights[i], shadow, mat);
         pointColors += lighting;
     }

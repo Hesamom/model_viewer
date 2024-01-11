@@ -1,6 +1,7 @@
 ﻿
 #ifndef LIGHT_SPOT_H
 #define LIGHT_SPOT_H
+#include <glm/glm.hpp>
 #include <glm/vec3.hpp>
 
 namespace modelViewer::render {
@@ -16,6 +17,7 @@ namespace modelViewer::render {
         float outerCutoff = 0;
         int id = 0;
         std::shared_ptr<render_object> object;
+        glm::mat4x4 viewProjection;
     };
     
 }

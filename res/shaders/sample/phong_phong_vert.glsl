@@ -9,7 +9,8 @@ uniform mat4 m_MV;
 uniform mat4 m_Projection;
 
 uniform mat4 m_LightViewProjection;
-
+uniform mat4[4] m_SpotLightViewProjection;
+uniform int u_spotLightCount = 0;
 
 out VS_OUT
 {
@@ -18,6 +19,7 @@ out VS_OUT
 	vec3 viewDir;
 	vec3 fragPos;
 	vec4 fragPosLightSpace;
+	vec4[4] fragSpotPosLightSpace;
 } vs_out;
 
 
@@ -33,6 +35,11 @@ void main()
 	vs_out.texCoord = v_uv0;
 	vs_out.fragPosLightSpace = m_LightViewProjection * m_Model * v_position;
 	vs_out.fragPos = (m_Model * v_position).xyz;
+
+	for (int i = 0; i < u_spotLightCount; i++)
+	{
+		vs_out.fragSpotPosLightSpace[i] = m_SpotLightViewProjection[i] * m_Model * v_position;
+	}
 	
 	gl_Position = m_Projection * pos;
 }

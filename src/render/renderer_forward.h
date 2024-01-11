@@ -4,7 +4,6 @@
 #include "render_scene.h"
 #include "camera.h"
 #include "framebuffer.h"
-#include "../resource/texture_loader.h"
 #include "object_factory.h"
 
 namespace modelViewer::render
@@ -33,18 +32,22 @@ namespace modelViewer::render
 		const std::string m_DepthShaderFrag = "res/shaders/sample/simple_depth_frag.glsl";
 		const std::string m_MVPUniformName = "u_MVP";
 
-		modelViewer::render::framebuffer m_shadowBuffer;
+		framebuffer m_shadowBuffer;
 		std::unique_ptr<shader_program> m_shadowProgram;
 		std::shared_ptr<render_object> m_Skybox;
 		std::shared_ptr<texture> m_EmptyShadowmap;
 		
 		int m_MVPLocation = -1;
-		glm::mat4 m_LightViewProjection; 
-		
+		glm::mat4 m_LightViewProjection;
+
+		void renderSpotShadows(render_scene& scene);
+		void renderDirectionalShadows(render_scene& scene);
 		void renderShadows(render_scene& scene, camera& camera);
+		
 		void renderObjects(render_scene& scene, camera& camera, bool b);
 	public:
 		void render(render_scene& scene, camera& camera, bool shadowEnabled);
+		
 		void setClearFlag(glm::vec4 color);
 		void init(modelViewer::render::object_factory& objectFactory);
 
