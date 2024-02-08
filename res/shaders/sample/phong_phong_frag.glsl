@@ -1,8 +1,11 @@
 #version 330 core
 #include shadows.glsl
 #include light.glsl
+#define NR_SPOT_LIGHTS 4
+#define NR_POINT_LIGHTS 4
 
 uniform sampler2DShadow u_shadowSampler;
+uniform sampler2DArrayShadow u_spotShadowSamplers;
 uniform sampler2D u_diffuseSampler;
 
 uniform vec3 u_lightAmbient;
@@ -12,11 +15,10 @@ uniform vec3 u_light_dir;
 uniform material mat;
 
 uniform int u_pointLightCount = 0;
-#define NR_POINT_LIGHTS 4
+
 uniform pointLight u_pointLights[NR_POINT_LIGHTS];
 
 uniform int u_spotLightCount = 0;
-#define NR_SPOT_LIGHTS 4
 uniform spotLight u_spotLights[NR_SPOT_LIGHTS];
 
 in VS_OUT
@@ -62,7 +64,7 @@ void main()
     //spot
     for (int i =0; i < u_spotLightCount; i++)
     {
-        float shadow = getShadowValue(fs_in.fragSpotPosLightSpace[i], surf.normal , dirLight.direction , u_shadowSampler);
+        float shadow = getShadowValueIndexed(fs_in.fragSpotPosLightSpace[i], surf.normal , dirLight.direction , u_spotShadowSamplers, i);
         vec3 lighting = getSpotLight(surf, u_spotLights[i], shadow, mat);
         pointColors += lighting;
     }

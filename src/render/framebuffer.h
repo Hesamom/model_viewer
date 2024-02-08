@@ -9,13 +9,20 @@ namespace modelViewer::render
 	private:
 		unsigned int m_Id = -1;
 		unsigned int m_DepthTextureId = -1;
+		unsigned int m_ArrayDepthTextureId = -1;
 	public:
 		framebuffer();
 		~framebuffer();
 		void bind();
+
+		unsigned int createArrayDepthTexture(int width, int height, int layers, bool enableDepthCompare);
+		unsigned int createDepthTexture(int width, int height, bool enableDepthCompare);
+		void attachDepthTexture();
+		void attachDepthTextureArray(int layer);
+		
 		void unbind();
-		void attachDepth(int width, int height, bool enableDepthCompare);
 		void activateDepthMap(int slot);
+		void activateDepthMapArray(int slot);
 	};
 
 }

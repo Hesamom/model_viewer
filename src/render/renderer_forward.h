@@ -20,11 +20,17 @@ namespace modelViewer::render
 		glm::vec4 m_ClearFlag;
 		clear_mode m_ClearMode = clear_mode::color;
 		
-		const unsigned int SHADOW_WIDTH = 1024;
-		const unsigned int SHADOW_HEIGHT = 1024;
+		const unsigned int SHADOW_DIR_WIDTH = 2048;
+		const unsigned int SHADOW_DIR_HEIGHT = SHADOW_DIR_WIDTH;
 
-		const int shadowmapSlot = 30;
-		const int emptyShadowmapSlot = shadowmapSlot + 1;
+		const unsigned int SUPPORTTED_SPOT_LIGHTS = 4;
+		const unsigned int SHADOW_SPOT_WIDTH = 1024;
+		const unsigned int SHADOW_SPOT_HEIGHT = SHADOW_SPOT_WIDTH;
+
+		//TODO need to get max supported texture units instead of assuming we have 32 units available 
+		const int shadowmapDirSlot = 29;
+		const int shadowmapSpotSlot = shadowmapDirSlot + 1;
+		const int emptyShadowmapSlot = shadowmapSpotSlot + 1;
 
 		const std::string m_EmptyShadowmapTexture = "res/textures/default/white.png";
 		
@@ -42,14 +48,14 @@ namespace modelViewer::render
 
 		void renderSpotShadows(render_scene& scene);
 		void renderDirectionalShadows(render_scene& scene);
-		void renderShadows(render_scene& scene, camera& camera);
+		void renderShadows(render_scene& scene);
 		
 		void renderObjects(render_scene& scene, camera& camera, bool b);
 	public:
 		void render(render_scene& scene, camera& camera, bool shadowEnabled);
 		
 		void setClearFlag(glm::vec4 color);
-		void init(modelViewer::render::object_factory& objectFactory);
+		void init(object_factory& objectFactory);
 
 		void createSkybox(object_factory& objectFactory);
 

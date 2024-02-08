@@ -25,7 +25,10 @@ material::material(const material_info& info, std::vector<texture_binding>& text
 	m_LightDirUniform.getLocation(*m_Program);
 	
 	m_ShadowMapSamplerLocation = m_Program->getUniformLocation(m_ShadowSampler);
-    
+	setShadowMapSlot(getMaxSupportedTextureUnits() - 2);
+	m_SpotShadowMapSamplerLocation = m_Program->getUniformLocation(m_SpotShadowSampler);
+	setSpotShadowMapSlot(getMaxSupportedTextureUnits() - 1);
+	
     applyMaterialProperties();
     bindTextures(textures);
 }
@@ -91,6 +94,16 @@ void material::applyMaterialProperties() {
 	}
 }
 
+int material::getMaxSupportedTextureUnits() {
+	static int maxTexturesFrag = 0;
+	if (maxTexturesFrag > 0) {
+		return maxTexturesFrag;
+	}
+	
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTexturesFrag);
+	return maxTexturesFrag;
+}
+
 std::shared_ptr<texture> material::getTextureForSampler(const std::string& samplerName, shader_uniform_type type, const std::vector<texture_binding>& textures) {
 
 	for (const auto& texture : textures) {
@@ -112,23 +125,23 @@ void material::bindTextures(const std::vector<texture_binding>& textures)
 	int textureUnit = 0;
 	for (const auto & uniform : activeUniforms)
 	{
-		if (uniform.isSampler())
-		{
-			if (uniform.isShadowSampler()) {
-				continue;
-			}
-			
-			auto texture = getTextureForSampler(uniform.name, uniform.type, textures);
-			if (texture == nullptr) {
-				std::cerr << "Failed to select a texture for uniform with name: " << uniform.name << "\n";
-				continue;
-			}
-
-			const auto loc = m_Program->getUniformLocation(uniform.name);
-			m_Program->setUniform(loc, textureUnit);
-			m_ActiveTextures.push_back(texture);
-			textureUnit++;
+		if (!uniform.isSampler())
+			continue;
+		
+		if (uniform.isShadowSampler()) {
+			continue;
 		}
+		
+		auto texture = getTextureForSampler(uniform.name, uniform.type, textures);
+		if (texture == nullptr) {
+			std::cerr << "Failed to select a texture for uniform with name: " << uniform.name << "\n";
+			continue;
+		}
+
+		const auto loc = m_Program->getUniformLocation(uniform.name);
+		m_Program->setUniform(loc, textureUnit);
+		m_ActiveTextures.push_back(texture);
+		textureUnit++;
 	}
 }
 
@@ -174,8 +187,7 @@ void material::setDirectionalLight(const light_directional &light) {
 }
 
 
-void material::setShadowMapSlot(int slot)
-{
+void material::setShadowMapSlot(int slot) const {
 	if (m_ShadowMapSamplerLocation < 0)
 	{
 		return;
@@ -183,6 +195,16 @@ void material::setShadowMapSlot(int slot)
 
 	m_Program->bind();
 	m_Program->setUniform(m_ShadowMapSamplerLocation, slot);
+}
+
+void material::setSpotShadowMapSlot(int slot) const {
+	if (m_SpotShadowMapSamplerLocation < 0)
+	{
+		return;
+	}
+
+	m_Program->bind();
+	m_Program->setUniform(m_SpotShadowMapSamplerLocation, slot);
 }
 
 void material::setLightViewProjection(glm::mat4& matrix)

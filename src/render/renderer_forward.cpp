@@ -1,5 +1,4 @@
-﻿
-#include <glm/ext/matrix_clip_space.hpp>
+﻿#include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include "renderer_forward.h"
 #include "camera.h"
@@ -14,18 +13,24 @@ void renderer_forward::render(render_scene& scene, camera& camera, bool shadowEn
 {
 	if (shadowEnabled)
 	{
-		renderShadows(scene, camera);
+		renderShadows(scene);
 	}
 
 	renderObjects(scene, camera, shadowEnabled);
 }
 
 void renderer_forward::renderDirectionalShadows(render_scene& scene) {
+
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "rendering directional shadows");
+	
+	glViewport(0, 0, SHADOW_DIR_WIDTH, SHADOW_DIR_HEIGHT);
+	m_shadowBuffer.attachDepthTexture();
+	glClear(GL_DEPTH_BUFFER_BIT);
 	
 	constexpr float near_plane = 30.0f;
 	constexpr float far_plane = 100.0f;
 	const auto lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-	const auto lightView = glm::lookAt(scene.getDirectionalLight().direction,
+	const auto lightView = glm::lookAt(scene.getDirectionalLight().direction * 50.0f,
 	                        glm::vec3( 0.0f, 0.0f,  0.0f),
 	                        glm::vec3( 0.0f, 1.0f,  0.0f));
 	m_LightViewProjection = lightProjection * lightView;
@@ -47,6 +52,8 @@ void renderer_forward::renderDirectionalShadows(render_scene& scene) {
 		m_shadowProgram->setUniform(m_MVPLocation, mvp);
 		object->renderShadow();
 	}
+
+	glPopDebugGroup();
 }
 
 glm::mat4 compute_view_matrix_for_rotation(glm::vec3 origin, glm::vec3 rot) {
@@ -62,15 +69,27 @@ glm::mat4 compute_view_matrix_for_rotation(glm::vec3 origin, glm::vec3 rot) {
 }
 
 void renderer_forward::renderSpotShadows(render_scene& scene) {
+
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "rendering spot shadows");
+	glViewport(0, 0, SHADOW_SPOT_WIDTH, SHADOW_SPOT_HEIGHT);
+	
+	int layer = 0;
 	for (auto& spot : scene.getSpotLights()) {
-		constexpr float near_plane = 30.0f;
+		
+		m_shadowBuffer.attachDepthTextureArray(layer);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		layer++;
+		
+		constexpr float near_plane = 0.1f;
 		constexpr float far_plane = 100.0f;
 		auto lightProjection = glm::perspective(glm::radians(spot.outerCutoff), 1.0f, near_plane, far_plane);
-		auto lightView = compute_view_matrix_for_rotation(spot.position, spot.direction);
+		const auto lightView = glm::lookAt(spot.position,
+							spot.position + (spot.direction * 10.0f),
+							glm::vec3( 0.0f, 1.0f,  0.0f));
 		spot.viewProjection =  lightProjection * lightView;
 
 		for (auto& object : scene.getObjects()) {
-
+			
 			if (!object->getCastShadows())
 			{
 				continue;
@@ -86,25 +105,20 @@ void renderer_forward::renderSpotShadows(render_scene& scene) {
 			object->renderShadow();
 		}
 	}
+
+	glPopDebugGroup();
 }
 
-void renderer_forward::renderShadows(render_scene& scene, camera& camera)
+void renderer_forward::renderShadows(render_scene& scene)
 {
-	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "rendering shadows");
-	
-	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 	m_shadowBuffer.bind();
 	glCullFace(GL_FRONT);
-	glClear(GL_DEPTH_BUFFER_BIT);
 	m_shadowProgram->bind();
-
-
+	
 	renderDirectionalShadows(scene);
 	renderSpotShadows(scene);
 	
 	m_shadowBuffer.unbind();
-	
-	glPopDebugGroup();
 }
 
 bool compareRenderQueue(std::shared_ptr<render_object> o1, std::shared_ptr<render_object> o2)
@@ -140,7 +154,8 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 	if(shadowsEnabled)
 	{
 		//TODO consider using another approach that would not be overriden by material, this is safe by now since we dont have 31 textures yet
-		m_shadowBuffer.activateDepthMap(shadowmapSlot);
+		m_shadowBuffer.activateDepthMap(shadowmapDirSlot);
+		m_shadowBuffer.activateDepthMapArray(shadowmapSpotSlot);
 		m_EmptyShadowmap->active(emptyShadowmapSlot);
 	}
 	
@@ -154,7 +169,8 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 		{
 			if(object->getReceiveShadows())
 			{
-				object->getMaterial()->setShadowMapSlot(shadowmapSlot);
+				object->getMaterial()->setShadowMapSlot(shadowmapDirSlot);
+				object->getMaterial()->setSpotShadowMapSlot(shadowmapSpotSlot);
 				object->getMaterial()->setLightViewProjection(m_LightViewProjection);
 			}
 			else
@@ -180,7 +196,7 @@ void renderer_forward::setClearFlag(glm::vec4 color)
 	m_ClearFlag = color;
 }
 
-void renderer_forward::init(modelViewer::render::object_factory& objectFactory)
+void renderer_forward::init(object_factory& objectFactory)
 {
 	auto shaderLoader = objectFactory.getShaderLoader();
 	auto vertShaderAsset = shaderLoader.load(m_DepthShaderVert, shaderType::vertex);
@@ -202,7 +218,8 @@ void renderer_forward::init(modelViewer::render::object_factory& objectFactory)
 	m_MVPLocation = m_shadowProgram->getUniformLocation(m_MVPUniformName);
 
 	m_shadowBuffer.bind();
-	m_shadowBuffer.attachDepth(SHADOW_WIDTH, SHADOW_HEIGHT, true);
+	m_shadowBuffer.createDepthTexture(SHADOW_DIR_WIDTH, SHADOW_DIR_HEIGHT, true);
+	m_shadowBuffer.createArrayDepthTexture(SHADOW_SPOT_WIDTH, SHADOW_SPOT_HEIGHT,SUPPORTTED_SPOT_LIGHTS, true);
 	m_shadowBuffer.unbind();
 
 	auto textureLoader = objectFactory.getTextureLoader();

@@ -179,7 +179,7 @@ std::shared_ptr<modelViewer::render::render_object> model_platform_buffer::gener
 	materialInfo.propertySet.colors.push_back({Literals::SpecularAlbedo, glm::vec3 (0)});
 	materialInfo.propertySet.colors.push_back({Literals::DiffuseAlbedo, Literals::DefaultDiffuseAlbedo});
 	materialInfo.propertySet.colors.push_back({Literals::AmbientAlbedo, Literals::DefaultAmbientAlbedo});
-	materialInfo.propertySet.floats.push_back({Literals::Opacity, 0.5f});
+	materialInfo.propertySet.floats.push_back({Literals::Opacity, 1.0f});
 	materialInfo.propertySet.floats.push_back({Literals::Shininess, 1});
 	materialInfo.propertySet.renderQueue = render_queue_transparent;
 	auto defaults = objectFactory.getDefaultTextures();
