@@ -7,12 +7,12 @@
 
 using namespace modelViewer::render;
 
-render_scene::render_scene(std::vector<std::shared_ptr<render_object>> renderObjects) : m_StaticObjects{std::move(renderObjects)}
+render_scene::render_scene(std::vector<std::shared_ptr<object_renderer>> renderObjects) : m_StaticObjects{std::move(renderObjects)}
 {
     
 }
 
-std::vector<std::shared_ptr<render_object>>& render_scene::getObjects() {
+std::vector<std::shared_ptr<object_renderer>>& render_scene::getObjects() {
 
 	//TODO ineffient, optimize it later 
 	m_AllObjects.clear();
@@ -26,11 +26,11 @@ render_scene::render_scene() {
 
 }
 
-void render_scene::addStaticObject(std::shared_ptr<render_object> &object) {
+void render_scene::addStaticObject(std::shared_ptr<object_renderer> &object) {
     m_StaticObjects.push_back(object);
 }
 
-void render_scene::removeStaticObject(std::shared_ptr<render_object> &object) {
+void render_scene::removeStaticObject(std::shared_ptr<object_renderer> &object) {
 	const auto it = std::find(m_StaticObjects.begin(), m_StaticObjects.end(), object);
 	if (it == m_StaticObjects.end()) {
 		return;
@@ -43,7 +43,7 @@ light_directional &render_scene::getDirectionalLight() {
     return m_Light;
 }
 
-void render_scene::addModelObject(std::shared_ptr<render_object>& object)
+void render_scene::addModelObject(std::shared_ptr<object_renderer>& object)
 {
 	if(m_ModelObjects.size() + 1 > MaxModelObjects)
 	{

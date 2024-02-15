@@ -333,7 +333,7 @@ void modelviewer_window::displayMenubar() {
 		{
 			if(ImGui::MenuItem("Open"))
 			{
-				openModelFile();
+				displayFilePicker();
 			}
 			ImGui::EndMenu();
 		}
@@ -373,8 +373,16 @@ void modelviewer_window::displayMenubar() {
 				}
 				ImGui::EndMenu();
 			}
+
+			if (ImGui::BeginMenu("complex models")) {
+				if(ImGui::MenuItem("backpack (multi mesh)"))
+				{
+					openModel("res/models/complex/backpack/backpack.obj");
+				}
+				ImGui::EndMenu();
+			}
 			
-			
+
 			ImGui::EndMenu();
 		}
 
@@ -442,7 +450,7 @@ void modelviewer_window::addPointLight() {
 	addPointLight(point);
 }
 
-void modelviewer_window::openModelFile() {
+void modelviewer_window::displayFilePicker() {
 
 	std::vector<file_filter> filters;
 	filters.push_back({"fbx files", "fbx"});
@@ -453,20 +461,7 @@ void modelviewer_window::openModelFile() {
     path.reserve(256);
     if(m_FilePicker.tryOpenPicker(path,filters))
     {
-        model_info info;
-        info.path = path.c_str();
-        info.name = path.c_str();
-        try
-        {
-        	m_ObjectFactory.getModelLoader().load(info.path, info);
-        }
-    	catch (std::runtime_error& error)
-        {
-	        std::cerr<< error.what() << std::endl;
-    		return;
-        }
-       
-        addModel(info);
+		openModel(path.c_str());
     }
 }
 
@@ -475,36 +470,39 @@ void modelviewer_window::openWallParallaxMap() {
 	model_info wallModel;
 	shader_asset_info fragShader { "res/shaders/sample/phong_phong_parallex_mapping_frag.glsl", shaderType::fragment};
 	shader_asset_info vertShader { "res/shaders/sample/phong_phong_normal_map_vert.glsl", shaderType::vertex};
-	wallModel.material.shaders.push_back(fragShader);
-	wallModel.material.shaders.push_back(vertShader);
+
+	auto material = std::make_shared<material_asset>();
+	material->shaders.push_back(fragShader);
+	material->shaders.push_back(vertShader);
 
 	texture_asset_info diffuseTexture;
 	diffuseTexture.type = texture_asset_type::texture2D;
 	diffuseTexture.paths.emplace_back("res/textures/ParallexMapping/bricks2.jpg");
 	diffuseTexture.samplerName = "u_diffuseSampler";
-	wallModel.material.textures.push_back(diffuseTexture);
+	material->textures.push_back(diffuseTexture);
 
 	texture_asset_info normalTexture;
 	normalTexture.type = texture_asset_type::texture2D;
 	normalTexture.paths.emplace_back("res/textures/ParallexMapping/bricks2_normal.jpg");
 	normalTexture.samplerName = "u_normalSampler";
-	wallModel.material.textures.push_back(normalTexture);
+	material->textures.push_back(normalTexture);
 
 	texture_asset_info parallaxMappingTexture;
 	parallaxMappingTexture.type = texture_asset_type::texture2D;
 	parallaxMappingTexture.paths.emplace_back("res/textures/ParallexMapping/bricks2_disp.jpg");
 	parallaxMappingTexture.samplerName = "u_depthSampler";
 	parallaxMappingTexture.isHightMap = true;
-	wallModel.material.textures.push_back(parallaxMappingTexture);
-
+	material->textures.push_back(parallaxMappingTexture);
+	
+	wallModel.materials.push_back(material);
 	wallModel.path = "res/models/primitives/plane.fbx";
 	wallModel.name = "wall";
-	wallModel.material.propertySet.colors.push_back({Literals::DiffuseAlbedo, glm::vec3 (1.0f)});
-	wallModel.material.propertySet.colors.push_back({Literals::AmbientAlbedo, glm::vec3 (1.0f)});
-	wallModel.material.propertySet.colors.push_back({Literals::SpecularAlbedo, glm::vec3 (0.2f)});
-	wallModel.material.propertySet.floats.push_back({Literals::Shininess, 10});
-	wallModel.material.propertySet.floats.push_back({Literals::Opacity, 1});
-	wallModel.material.propertySet.cullFaceEnabled = false;
+	material->propertySet.colors.push_back({Literals::DiffuseAlbedo, glm::vec3 (1.0f)});
+	material->propertySet.colors.push_back({Literals::AmbientAlbedo, glm::vec3 (1.0f)});
+	material->propertySet.colors.push_back({Literals::SpecularAlbedo, glm::vec3 (0.2f)});
+	material->propertySet.floats.push_back({Literals::Shininess, 10});
+	material->propertySet.floats.push_back({Literals::Opacity, 1});
+	material->propertySet.cullFaceEnabled = false;
 	addModel(wallModel);
 }
 
@@ -512,35 +510,38 @@ void modelviewer_window::openWallNormalMap() {
 	model_info wallModel;
 	shader_asset_info fragShader { "res/shaders/sample/phong_phong_normal_map_frag.glsl", shaderType::fragment};
 	shader_asset_info vertShader { "res/shaders/sample/phong_phong_normal_map_vert.glsl", shaderType::vertex};
-	wallModel.material.shaders.push_back(fragShader);
-	wallModel.material.shaders.push_back(vertShader);
+
+	auto material = std::make_shared<material_asset>();
+	material->shaders.push_back(fragShader);
+	material->shaders.push_back(vertShader);
 
 	texture_asset_info diffuseTexture;
 	diffuseTexture.type = texture_asset_type::texture2D;
 	diffuseTexture.paths.emplace_back("res/textures/wall.jpg");
 	diffuseTexture.samplerName = "u_diffuseSampler";
-	wallModel.material.textures.push_back(diffuseTexture);
+	material->textures.push_back(diffuseTexture);
 
 	texture_asset_info normalTexture;
 	normalTexture.type = texture_asset_type::texture2D;
 	normalTexture.paths.emplace_back("res/textures/wall_normal.png");
 	normalTexture.samplerName = "u_normalSampler";
-	wallModel.material.textures.push_back(normalTexture);
+	material->textures.push_back(normalTexture);
 
 
+	wallModel.materials.push_back(material);
 	wallModel.path = "res/models/primitives/plane.fbx";
 	wallModel.name = "wall";
-	wallModel.material.propertySet.colors.push_back({Literals::DiffuseAlbedo, glm::vec3 (1.0f)});
-	wallModel.material.propertySet.colors.push_back({Literals::AmbientAlbedo, glm::vec3 (1.0f)});
-	wallModel.material.propertySet.colors.push_back({Literals::SpecularAlbedo, glm::vec3 (0.2f)});
-	wallModel.material.propertySet.floats.push_back({Literals::Shininess, 10});
-	wallModel.material.propertySet.floats.push_back({Literals::Opacity, 1});
-	wallModel.material.propertySet.cullFaceEnabled = false;
+	material->propertySet.colors.push_back({Literals::DiffuseAlbedo, glm::vec3 (1.0f)});
+	material->propertySet.colors.push_back({Literals::AmbientAlbedo, glm::vec3 (1.0f)});
+	material->propertySet.colors.push_back({Literals::SpecularAlbedo, glm::vec3 (0.2f)});
+	material->propertySet.floats.push_back({Literals::Shininess, 10});
+	material->propertySet.floats.push_back({Literals::Opacity, 1});
+	material->propertySet.cullFaceEnabled = false;
 	addModel(wallModel);
 }
 
 
-void transformModel(const std::shared_ptr<render_object>& object) {
+void transformModel(const std::shared_ptr<object_renderer>& object) {
 	object->computeBoundingBox();
 	auto box = object->getBoundingBox();
 	auto boxSize = box.getSize();
@@ -587,19 +588,41 @@ void modelviewer_window::openDemoModel(std::string name)
 	addModel(info);
 }
 
+void modelviewer_window::openModel(std::string path)
+{
+	model_info info;
+	info.path = path;
+	info.name = path;
+	
+	try
+	{
+		m_ObjectFactory.getModelLoader().load(info.path, info);
+	}
+	catch (std::runtime_error& error)
+	{
+		std::cerr<< error.what() << std::endl;
+		return;
+	}
+	
+	addModel(info);
+}
+
 model_info modelviewer_window::getDemoModel(const std::string& name) const
 {
 	model_info info;
 	shader_asset_info fragShader { "res/shaders/sample/phong_phong_frag.glsl", shaderType::fragment};
 	shader_asset_info vertShader { "res/shaders/sample/phong_phong_vert.glsl", shaderType::vertex};
-	info.material.shaders.push_back(fragShader);
-	info.material.shaders.push_back(vertShader);
-	addDefaults(info.material.propertySet);
+	
+	auto material = std::make_shared<material_asset>();
+	material->shaders.push_back(fragShader);
+	material->shaders.push_back(vertShader);
+	addDefaults(material->propertySet);
 
 	texture_asset_info textureAssetInfo;
 	textureAssetInfo.paths.emplace_back("res/textures/Transparent.png");
-	info.material.textures.push_back(textureAssetInfo);
+	material->textures.push_back(textureAssetInfo);
 
+	info.materials.push_back(material);
 	info.path = "res/models/primitives/" + name + ".fbx";
 	info.name = name;
 	return info;

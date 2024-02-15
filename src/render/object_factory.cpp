@@ -1,6 +1,7 @@
 ﻿#include "object_factory.h"
 #include "texture_cube.h"
 #include "texture_2D.h"
+#include "../common/stopwatch.h"
 
 using namespace modelViewer::res;
 using namespace modelViewer::render;
@@ -81,15 +82,16 @@ std::shared_ptr<texture> object_factory::createTexture(const texture_asset_info&
 	return texturePtr;
 }
 
-std::vector<texture_binding> object_factory::getTextures(const model_info& info) {
+std::vector<texture_binding> object_factory::getTextures(std::shared_ptr<material_asset> materialAsset) {
 
 	std::vector<texture_binding> textures;
-	for (auto& textureInfo : info.material.textures ) {
+	for (auto& textureInfo : materialAsset->textures ) {
 
 		auto texture = createTexture(textureInfo);
 		if (texture == nullptr) {
 			continue;
 		}
+		
 		texture_binding binding;
 		binding.texture = texture;
 		binding.samplerName = textureInfo.samplerName;
@@ -99,25 +101,66 @@ std::vector<texture_binding> object_factory::getTextures(const model_info& info)
 	return textures;
 }
 
-
-std::shared_ptr<mesh> object_factory::getMesh(model_info &info) {
-
-	if (info.mesh)
+std::shared_ptr<material> object_factory::getMaterial(const std::shared_ptr<material_asset>& asset)
+{
+	if (m_LoadedMaterials.contains(asset))
 	{
-		return std::make_shared<mesh>(info.mesh);
+		return m_LoadedMaterials[asset];
 	}
 
-	info.mesh = m_ModelLoader.loadMesh(info.path);
-	auto meshPtr  = std::make_shared<mesh>(info.mesh);
+	auto program = getProgram(asset);
+	auto textures = getTextures(asset);
+	auto mat = std::make_shared<material>(*asset, textures, program, m_DefaultTextures);
+	
+	m_LoadedMaterials[asset] = mat;
+	return mat;
+}
 
-	return meshPtr;
+std::vector<std::shared_ptr<material>> object_factory::getMaterials(model_info& info)
+{
+	std::vector<std::shared_ptr<material>> materials;
+
+	if (info.materials.empty())
+	{
+		throw std::runtime_error("could not find any material in model with name: " + info.name);
+	}
+
+	for (auto& materialAsset : info.materials) {
+		materials.push_back(getMaterial(materialAsset));
+	}
+	
+	return materials;
 }
 
 
-std::shared_ptr<shader_program> object_factory::getProgram(const model_info &info) {
+std::vector<std::shared_ptr<mesh>> object_factory::getMeshes(model_info & info) {
+
+	std::vector<std::shared_ptr<mesh>> meshes;
+	
+	if (!info.meshes.empty())
+	{
+		//TODO can cache already loaded meshes 
+		for (auto& meshAsset : info.meshes) {
+			
+			auto m = std::make_shared<mesh>(meshAsset);
+			meshes.push_back(m);
+		}
+		return meshes;
+	}
+
+	auto meshAsset = m_ModelLoader.loadFirstMesh(info.path);
+	info.meshes.push_back(meshAsset);
+	auto meshPtr  = std::make_shared<mesh>(meshAsset);
+	meshes.push_back(meshPtr);
+	
+	return meshes;
+}
+
+
+std::shared_ptr<shader_program> object_factory::getProgram(std::shared_ptr<material_asset> materialAsset) {
 
 	std::vector<shader> shaders;
-	for (auto& shaderInfo : info.material.shaders) {
+	for (auto& shaderInfo : materialAsset->shaders) {
 
 		auto shaderAsset = m_ShaderLoader.load(shaderInfo.path, shaderInfo.type);
 		shader shader(shaderAsset);
@@ -148,16 +191,18 @@ object_factory::object_factory() {
 	}
 }
 
-std::shared_ptr<render_object> object_factory::createObject(model_info& info)
+std::shared_ptr<object_renderer> object_factory::createObject(model_info& info)
 {
-	auto program = getProgram(info);
-	auto mesh = getMesh(info);
-	auto textures = getTextures(info);
-	auto mat = std::make_shared<material>(info.material,textures, program, m_DefaultTextures);
-	auto object = std::make_shared<render_object>(mat, mesh, info.name);
+	stopwatch stopwatch;
+	stopwatch.start();
+	auto meshes = getMeshes(info);
+	auto materials = getMaterials(info);
+	auto object = std::make_shared<object_renderer>(materials, meshes, info.name);
 
 	object->setTransform(info.transform);
 	
+	stopwatch.stop();
+	std::cout<< "created object with name: " << info.name << " took " << stopwatch.getElapsedMiliSeconds() << " ms \n";
 	return object;
 }
 
@@ -179,3 +224,5 @@ texture_loader& object_factory::getTextureLoader()
 std::unordered_map<shader_uniform_type, std::shared_ptr<texture>> object_factory::getDefaultTextures() {
 	return m_DefaultTextures;
 }
+
+

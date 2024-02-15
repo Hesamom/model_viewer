@@ -40,7 +40,7 @@ namespace modelViewer::render
 
 		framebuffer m_shadowBuffer;
 		std::unique_ptr<shader_program> m_shadowProgram;
-		std::shared_ptr<render_object> m_Skybox;
+		std::shared_ptr<object_renderer> m_Skybox;
 		std::shared_ptr<texture> m_EmptyShadowmap;
 		
 		int m_MVPLocation = -1;
@@ -51,6 +51,9 @@ namespace modelViewer::render
 		void renderShadows(render_scene& scene);
 		
 		void renderObjects(render_scene& scene, camera& camera, bool b);
+
+		std::vector<std::shared_ptr<mesh_renderer>> getSortedObjects(render_scene& scene);
+		
 	public:
 		void render(render_scene& scene, camera& camera, bool shadowEnabled);
 		
@@ -61,7 +64,7 @@ namespace modelViewer::render
 
 		void setClearMode(clear_mode mode);
 
-		std::vector<std::shared_ptr<render_object>> getSortedObjects(render_scene& scene);
+		void initShadowmap(object_factory& objectFactory, res::shader_loader& shaderLoader);
 	};
 }
 

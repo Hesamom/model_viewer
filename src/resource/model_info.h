@@ -86,17 +86,18 @@ namespace modelViewer::res
 	   bool cullFaceEnabled = true;
 	};
     
-    struct material_info
+    struct material_asset
     {
         std::vector<texture_asset_info> textures;
         std::vector<shader_asset_info> shaders;
         material_property_set propertySet;
+		int index = -1;
     };
     
     struct model_info {
-        std::shared_ptr<mesh_asset> mesh;
-        material_info material;
-        common::transform transform;
+        std::vector<std::shared_ptr<mesh_asset>> meshes;
+		std::vector<std::shared_ptr<material_asset>> materials;
+		common::transform transform;
         std::string name;
         std::string path;
     };

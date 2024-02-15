@@ -68,7 +68,8 @@ std::shared_ptr<mesh> generateGridMesh(const model_platform_info& info)
     meshAsset->positions = positions;
     meshAsset->indices = indices;
     meshAsset->colors = colors;
-    
+	meshAsset->name = "grid";
+	
     auto meshPtr = std::make_shared<mesh>(meshAsset);
     return meshPtr;
 }
@@ -106,13 +107,14 @@ std::shared_ptr<mesh> generatePlaneMesh(const model_platform_info& info)
 	meshAsset->positions = positions;
 	meshAsset->indices = indices;
 	meshAsset->normals = normals;
+	meshAsset->name = "plane";
 
 	auto meshPtr = std::make_shared<mesh>(meshAsset);
 	return meshPtr;
 }
 
 
-std::shared_ptr<modelViewer::render::render_object> model_platform_buffer::generateGrid(modelViewer::render::object_factory& objectFactory,
+std::shared_ptr<modelViewer::render::object_renderer> model_platform_buffer::generateGrid(modelViewer::render::object_factory& objectFactory,
 	const model_platform_info &info)
 {
 	auto shaderLoader = objectFactory.getShaderLoader();
@@ -130,14 +132,14 @@ std::shared_ptr<modelViewer::render::render_object> model_platform_buffer::gener
 	auto program = std::make_shared<shader_program>(std::initializer_list<shader>{fragShader, vertexShader});
     program->validateLinking();
 
-	material_info materialInfo;
+	material_asset materialInfo;
 	std::vector<texture_binding> textures;
 	materialInfo.propertySet.floats.push_back({Literals::Opacity, 0.5f});
 	materialInfo.propertySet.renderQueue = (render_queue_transparent + 1);
 
 	auto defaults = objectFactory.getDefaultTextures();
 	auto mat = std::make_shared<material>(materialInfo, textures, program, defaults);
-	auto grid = std::make_shared<render_object>(mat, mesh, "platform_grid");
+	auto grid = std::make_shared<object_renderer>(mat, mesh, "platform_grid");
 	grid->setRenderMode(render_mode::lines);
 	grid->setCastShadow(false);
 	grid->setReceiveShadows(false);
@@ -145,7 +147,7 @@ std::shared_ptr<modelViewer::render::render_object> model_platform_buffer::gener
 	return grid;
 }
 
-std::shared_ptr<modelViewer::render::render_object> model_platform_buffer::generatePlane(modelViewer::render::object_factory& objectFactory,
+std::shared_ptr<modelViewer::render::object_renderer> model_platform_buffer::generatePlane(modelViewer::render::object_factory& objectFactory,
 	const model_platform_info &info)
 {
 	auto shaderLoader = objectFactory.getShaderLoader();
@@ -175,7 +177,7 @@ std::shared_ptr<modelViewer::render::render_object> model_platform_buffer::gener
 	binding.samplerName = "u_diffuseSampler";
 	textures.push_back(binding);
 	
-	material_info materialInfo;
+	material_asset materialInfo;
 	materialInfo.propertySet.colors.push_back({Literals::SpecularAlbedo, glm::vec3 (0)});
 	materialInfo.propertySet.colors.push_back({Literals::DiffuseAlbedo, Literals::DefaultDiffuseAlbedo});
 	materialInfo.propertySet.colors.push_back({Literals::AmbientAlbedo, Literals::DefaultAmbientAlbedo});
@@ -185,8 +187,9 @@ std::shared_ptr<modelViewer::render::render_object> model_platform_buffer::gener
 	auto defaults = objectFactory.getDefaultTextures();
 	auto mat = std::make_shared<material>(materialInfo, textures, program, defaults);
 
-	auto plane = std::make_shared<render_object>(mat, mesh, "platform_plane");
+	auto plane = std::make_shared<object_renderer>(mat, mesh, "platform_plane");
 	plane->setCastShadow(false);
+	plane->setReceiveShadows(true);
 	
 	return plane;
 }

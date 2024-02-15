@@ -7,7 +7,7 @@ using namespace modelViewer::render;
 using namespace modelViewer::res;
 
 
-material::material(const material_info& info, std::vector<texture_binding>& textures, std::shared_ptr<shader_program>& program, std::unordered_map<shader_uniform_type, std::shared_ptr<texture>>& defaultTextures) {
+material::material(const material_asset& info, std::vector<texture_binding>& textures, std::shared_ptr<shader_program>& program, std::unordered_map<shader_uniform_type, std::shared_ptr<texture>>& defaultTextures) {
 
     m_Info = info;
     m_Program = program;
@@ -212,7 +212,7 @@ void material::setLightViewProjection(glm::mat4& matrix)
 	m_LightViewProjectionUniform.setValue(matrix, *m_Program);
 }
 
-material_info& material::getInfo()
+material_asset& material::getInfo()
 {
 	return m_Info;
 }

@@ -5,7 +5,7 @@
 #include <glm/vec3.hpp>
 
 namespace modelViewer::render {
-    class render_object;
+    class object_renderer;
 
     class light_spot {
     public:
@@ -16,7 +16,7 @@ namespace modelViewer::render {
         float innerCutoff = 0;
         float outerCutoff = 0;
         int id = 0;
-        std::shared_ptr<render_object> object;
+        std::shared_ptr<object_renderer> object;
         glm::mat4x4 viewProjection;
     };
     

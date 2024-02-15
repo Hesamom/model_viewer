@@ -21,7 +21,7 @@ namespace modelViewer::render
     class material
     {
     private:
-        res::material_info m_Info;
+        res::material_asset m_Info;
         std::vector<std::shared_ptr<texture>> m_ActiveTextures;
         std::shared_ptr<shader_program> m_Program;
     	
@@ -52,7 +52,7 @@ namespace modelViewer::render
 
     	int getMaxSupportedTextureUnits();
     public:
-        explicit material(const res::material_info& info, std::vector<texture_binding>& textures, std::shared_ptr<shader_program>& program, std::unordered_map<shader_uniform_type, std::shared_ptr<texture>>& defaultTextures);
+        explicit material(const res::material_asset& info, std::vector<texture_binding>& textures, std::shared_ptr<shader_program>& program, std::unordered_map<shader_uniform_type, std::shared_ptr<texture>>& defaultTextures);
         void setMVP( glm::mat4& matrix);
         void setModelView( glm::mat4& matrix);
         void setProjection( glm::mat4& projection);
@@ -69,7 +69,7 @@ namespace modelViewer::render
 
         void setLightViewProjection(glm::mat4& matrix);
 
-		res::material_info& getInfo();
+		res::material_asset& getInfo();
 
         void setSpotLights(std::vector<light_spot>& lights);
     };

@@ -37,10 +37,11 @@ private:
     void addNewModels();
     void openDemoModel(std::string name);
     void updateCameraPosition();
-
+	void displayFilePicker();
+	void openModel(std::string path);
+	modelViewer::res::model_info getDemoModel(const std::string& name) const;
 	
 	void displayMenubar();
-	void openModelFile();
 	void openWallParallaxMap();
 	void openWallNormalMap();
     
@@ -63,6 +64,7 @@ protected:
 	void addPointLight();
 	void addSpotLight(modelViewer::render::light_spot spot);
 	void addPointLight(modelViewer::render::light_point point);
+
 	
 public:
     modelviewer_window(int width, int height, std::string title, bool fullscreen);
@@ -71,8 +73,6 @@ public:
 	void addModel(modelViewer::res::model_info& info);
 	void setClearFlag(glm::vec4 color);
 	void setClearMode(modelViewer::render::clear_mode mode);
-
-	modelViewer::res::model_info getDemoModel(const std::string& name) const;
 };
 
 

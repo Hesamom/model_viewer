@@ -6,15 +6,35 @@
 #include "model_info.h"
 #include "shader_asset.h"
 #include "texture_asset.h"
+#include "../common/stopwatch.h"
+#include <assimp/Logger.hpp>
+#include <assimp/DefaultLogger.hpp>
 
 using namespace modelViewer::res;
 
+const std::string  m_PhongVertPath = "res/shaders/sample/phong_phong_vert.glsl";
+const std::string  m_PhongFragPath = "res/shaders/sample/phong_phong_frag.glsl";
+
+const std::string  m_PhongNormalVertPath = "res/shaders/sample/phong_phong_normal_map_vert.glsl";
+const std::string  m_PhongNormalFragPath = "res/shaders/sample/phong_phong_normal_map_frag.glsl";
+
+const std::string  m_GouraudVertPath = "res/shaders/sample/phong_gouraud_vert.glsl";
+const std::string  m_GouraudFragPath = "res/shaders/sample/phong_gouraud_frag.glsl";
+
+
+struct model_load_context
+{
+	const aiScene* scene = nullptr;
+	model_info* modelInfo = nullptr;
+	std::shared_ptr<material_asset> defaultMaterialAsset;
+};
 
 auto processSteps =
         aiProcess_CalcTangentSpace       |
         aiProcess_Triangulate            |
         aiProcess_JoinIdenticalVertices  |
         aiProcess_SortByPType | aiProcess_ImproveCacheLocality;
+
 
 glm::vec3 to_vec3(const aiVector3D& vec)
 {
@@ -70,7 +90,7 @@ color toColor(const aiColor3D& c)
     return {c.r, c.g, c.b};
 }
 
-void model_loader::setMaterialProperties(aiMaterial &material, material_property_set &set) {
+void setMaterialProperties(aiMaterial &material, material_property_set &set) {
 
     aiColor3D diffuse;
     if (AI_SUCCESS == material.Get(AI_MATKEY_COLOR_DIFFUSE, diffuse))
@@ -127,7 +147,7 @@ void model_loader::setMaterialProperties(aiMaterial &material, material_property
     //TODO add face culling 
 }
 
-void model_loader::setShaders(aiMaterial& material, std::vector<shader_asset_info>& shaders)
+void setShaders(aiMaterial& material, std::vector<shader_asset_info>& shaders)
 {
     aiShadingMode model;
     material.Get(AI_MATKEY_SHADING_MODEL, model);
@@ -207,7 +227,7 @@ std::shared_ptr<texture_embedded> getEmbeddedTexture(const aiScene& scene, const
 	return asset;
 }
 
-void fetchTextures(const aiMaterial& material, const aiScene& scene, model_info& info, aiTextureType type)
+void fetchTextures(const aiMaterial& material, const aiScene& scene, material_asset& materialInfo, model_info& modelInfo, aiTextureType type)
 {
     const unsigned int texturesCount = material.GetTextureCount(type);
     
@@ -219,7 +239,7 @@ void fetchTextures(const aiMaterial& material, const aiScene& scene, model_info&
         aiTextureMapMode wrapMode;
         material.GetTexture(type, i ,&path, &mapping,&uvIndex, nullptr, nullptr, &wrapMode);
     	
-    	std::string fullPath = std::filesystem::path{info.path}.parent_path().append(std::string(path.C_Str())).string();
+    	std::string fullPath = std::filesystem::path{modelInfo.path}.parent_path().append(std::string(path.C_Str())).string();
         texture_asset_info textureAssetInfo;
         textureAssetInfo.uvIndex = uvIndex;
         textureAssetInfo.paths.emplace_back(fullPath);
@@ -233,7 +253,7 @@ void fetchTextures(const aiMaterial& material, const aiScene& scene, model_info&
     		textureAssetInfo.embedded = embeddedTexture;
     	}
     	
-        info.material.textures.push_back(textureAssetInfo);
+        materialInfo.textures.push_back(textureAssetInfo);
     }
 }
 
@@ -313,69 +333,130 @@ std::shared_ptr<std::vector<glm::vec2>> getUV0(const aiMesh& mesh, const aiMatri
 	}
 	return uv0;
 }
-std::shared_ptr<mesh_asset> getMesh(const aiScene* scene, std::string& filePath)
+
+
+std::shared_ptr<mesh_asset> getMesh(const aiMesh* mesh, const aiNode* node, const aiScene* scene, int meshIndex)
 {
-    if (!scene->HasMeshes())
-    {
-        throw std::runtime_error("model in path:" + filePath + " has no mesh defined in it!");
-    }
+	if (!mesh->HasPositions())
+	{
+		throw std::runtime_error("mesh with name:" + std::string{mesh->mName.C_Str()} + " has no positions defined in it!");
+	}
 
-    if (!scene->mMeshes[0]->HasPositions())
-    {
-        throw std::runtime_error("first mesh in path:" + filePath + " has no positions defined in it!");
-    }
+	auto transform =  node->mTransformation;
+	auto vertexCount = mesh->mNumVertices;
 
-	auto firstMesh = scene->mMeshes[0];
-    auto transform =  scene->mRootNode->mTransformation;
-    auto vertexCount = scene->mMeshes[0]->mNumVertices;
-	
-	std::shared_ptr<std::vector<glm::vec3>> positions = getPositions(*firstMesh, transform, vertexCount);
-	std::shared_ptr<std::vector<unsigned int>> indices = getIndices(*firstMesh);
-	std::shared_ptr<std::vector<glm::vec3>> normals = getNormals(*firstMesh, transform, vertexCount);
-	std::shared_ptr<std::vector<glm::vec2>> uv0 = getUV0(*firstMesh, transform, vertexCount);
-	
-	std::shared_ptr<std::vector<glm::vec3>> tangents =  getTangents(*firstMesh,transform,vertexCount);
-	
+	std::shared_ptr<std::vector<glm::vec3>> positions = getPositions(*mesh, transform, vertexCount);
+	std::shared_ptr<std::vector<unsigned int>> indices = getIndices(*mesh);
+	std::shared_ptr<std::vector<glm::vec3>> normals = getNormals(*mesh, transform, vertexCount);
+	std::shared_ptr<std::vector<glm::vec2>> uv0 = getUV0(*mesh, transform, vertexCount);
 
-	auto mesh = std::make_shared<mesh_asset>();
-	mesh->positions = positions;
-	mesh->normals = normals;
-	mesh->tangents = tangents;
-	mesh->indices = indices;
-	mesh->UV0 = uv0;
-	mesh->name = filePath;
-    return mesh;
+	std::shared_ptr<std::vector<glm::vec3>> tangents =  getTangents(*mesh,transform,vertexCount);
+
+
+	auto meshAsset = std::make_shared<mesh_asset>(meshIndex);
+	meshAsset->positions = positions;
+	meshAsset->normals = normals;
+	meshAsset->tangents = tangents;
+	meshAsset->indices = indices;
+	meshAsset->UV0 = uv0;
+	meshAsset->name = mesh->mName.C_Str();
+	return meshAsset;
 }
 
+std::shared_ptr<mesh_asset> getMeshCached(int meshIndex, aiMesh* mesh, const aiNode* node, model_load_context& context)
+{
+	for(auto& cachedMesh : context.modelInfo->meshes)
+	{
+		if (cachedMesh->getSubMeshIndex() == meshIndex)
+		{
+			return cachedMesh;
+		}
+	}
+	
+	return getMesh(mesh, node, context.scene, meshIndex);
+}
+
+std::shared_ptr<material_asset> getMaterialCached(const aiMesh& mesh, model_load_context& context)
+{
+	if (mesh.mMaterialIndex >= 0)
+	{
+		//TODO can later use a map instead for O(1) time complexity 
+		for (auto& mat : context.modelInfo->materials)
+		{
+			if(mat->index == mesh.mMaterialIndex)
+			{
+				return mat;
+			}
+		}
+
+		auto materialInfo = std::make_shared<material_asset>();
+		materialInfo->index = mesh.mMaterialIndex;
+		auto& scene = *context.scene;
+		auto& modelInfo = *context.modelInfo;
+		auto const material = scene.mMaterials[mesh.mMaterialIndex];
+		fetchTextures(*material, scene, *materialInfo, modelInfo, aiTextureType_DIFFUSE);
+		fetchTextures(*material, scene, *materialInfo,modelInfo, aiTextureType_NORMALS);
+		setShaders(*material, materialInfo->shaders);
+		setMaterialProperties(*material, materialInfo->propertySet);
+		return materialInfo;
+	}
+	else
+	{
+		return context.defaultMaterialAsset;
+	}
+}
+
+void processNode(const aiNode* node, model_load_context& context)
+{
+	for (int i = 0; i < node->mNumMeshes; ++i) {
+		int meshIndex = node->mMeshes[i];
+		auto mesh = context.scene->mMeshes[meshIndex];
+		context.modelInfo->meshes.push_back(getMeshCached(meshIndex, mesh, node, context));
+		context.modelInfo->materials.push_back(getMaterialCached(*mesh, context));
+	}
+
+	for (int i = 0; i < node->mNumChildren; ++i) {
+		processNode(node->mChildren[i], context);
+	}
+}
+
+
+//TODO decouple input and output args 
 void model_loader::load(std::string filePath, model_info& info)
 {
     Assimp::Importer importer;
+	importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, aiComponent_NORMALS);
+	
+	stopwatch stopwatch;
+	stopwatch.start();
+	
     const aiScene* scene = importer.ReadFile(filePath, processSteps);
     
     if (scene == nullptr) 
     {
         throw std::runtime_error(importer.GetErrorString() );
     }
-    
-    if (scene->mNumMaterials > 0)
-    {
-        auto const material = scene->mMaterials[0];
-        fetchTextures(*material, *scene, info, aiTextureType_DIFFUSE);
-        fetchTextures(*material, *scene, info, aiTextureType_NORMALS);
-        setShaders(*material, info.material.shaders);
-        setMaterialProperties(*material, info.material.propertySet);
-    }
-    else
-    {
-        info.material.shaders.emplace_back(m_PhongVertPath, shaderType::vertex);
-        info.material.shaders.emplace_back(m_PhongFragPath, shaderType::fragment);
-    }
- 
-    
-    info.mesh = getMesh(scene, filePath);
+	
+	if (scene->mNumMeshes <= 0)
+	{
+		throw std::runtime_error("model in path:" + filePath + " has no mesh defined in it!");
+	}
+
+	stopwatch.stop();
+	std::cout<< "loading model info with name: " << info.name << " took: " << stopwatch.getElapsedMiliSeconds() << " ms\n";
+	stopwatch.start();
+	
+	model_load_context context;
+	context.scene = scene;
+	context.modelInfo = &info;
+	processNode(scene->mRootNode, context);
+
+
+	stopwatch.stop();
+	std::cout<< "extracting model with name: " << info.name << " took: " << stopwatch.getElapsedMiliSeconds() << " ms\n";
 }
 
-std::shared_ptr<mesh_asset> model_loader::loadMesh(std::string filePath) {
+std::shared_ptr<mesh_asset> model_loader::loadFirstMesh(std::string filePath) {
     
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(filePath, processSteps);
@@ -385,8 +466,25 @@ std::shared_ptr<mesh_asset> model_loader::loadMesh(std::string filePath) {
         std::cerr << importer.GetErrorString() << std::endl;
         throw std::runtime_error("could not load the file");
     }
-    
-    return getMesh(scene, filePath);
+	
+	auto firstMesh = scene->mMeshes[0];
+    return getMesh(firstMesh, scene->mRootNode, scene, 0);
+}
+
+model_loader::model_loader()
+{
+	m_DefaultMaterialAsset = std::make_shared<material_asset>();
+	m_DefaultMaterialAsset->shaders.emplace_back(m_PhongVertPath, shaderType::vertex);
+	m_DefaultMaterialAsset->shaders.emplace_back(m_PhongFragPath, shaderType::fragment);
+
+	Assimp::DefaultLogger::create("logger", Assimp::Logger::DEBUGGING);
+	auto stream = Assimp::LogStream::createDefaultStream(aiDefaultLogStream_STDOUT);
+	Assimp::DefaultLogger::get()->attachStream(stream);
+}
+
+model_loader::~model_loader()
+{
+	Assimp::DefaultLogger::kill();
 }
 
 

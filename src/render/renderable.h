@@ -4,7 +4,7 @@
 
 
 #include "glm/fwd.hpp"
-#include "render_object.h"
+#include "object_renderer.h"
 
 namespace modelViewer::render
 {

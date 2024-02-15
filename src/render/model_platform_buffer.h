@@ -5,7 +5,7 @@
 
 #include "../resource/shader_loader.h"
 #include "shader_program.h"
-#include "render_object.h"
+#include "object_renderer.h"
 #include "renderable.h"
 #include "object_factory.h"
 
@@ -31,9 +31,9 @@ namespace modelViewer::render
 		const std::string m_PlaneDiffuseTexture = "res/textures/default/white.png";
 		
     public:
-		std::shared_ptr<modelViewer::render::render_object> generateGrid(modelViewer::render::object_factory& objectFactory,
+		std::shared_ptr<modelViewer::render::object_renderer> generateGrid(modelViewer::render::object_factory& objectFactory,
 			const model_platform_info &info);
-		std::shared_ptr<modelViewer::render::render_object> generatePlane(modelViewer::render::object_factory& objectFactory,
+		std::shared_ptr<modelViewer::render::object_renderer> generatePlane(modelViewer::render::object_factory& objectFactory,
 			const model_platform_info &info);
     };
 }

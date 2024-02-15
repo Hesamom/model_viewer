@@ -64,7 +64,8 @@ void main()
     //spot
     for (int i =0; i < u_spotLightCount; i++)
     {
-        float shadow = getShadowValueIndexed(fs_in.fragSpotPosLightSpace[i], surf.normal , dirLight.direction , u_spotShadowSamplers, i);
+        vec3 lightDir = surf.fragPos - u_spotLights[i].position;
+        float shadow = getShadowValueIndexed(fs_in.fragSpotPosLightSpace[i], surf.normal , lightDir , u_spotShadowSamplers, i);
         vec3 lighting = getSpotLight(surf, u_spotLights[i], shadow, mat);
         pointColors += lighting;
     }

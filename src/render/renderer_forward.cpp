@@ -36,21 +36,25 @@ void renderer_forward::renderDirectionalShadows(render_scene& scene) {
 	m_LightViewProjection = lightProjection * lightView;
 	
 
+	//TODO do we need sorting here? 
 	for (auto& object : scene.getObjects()) {
 
 		if (!object->getCastShadows())
 		{
 			continue;
 		}
-		
-		if (object->getMaterial()->getInfo().propertySet.renderQueue >= render_queue_transparent)
-		{
-			continue;
+
+		for (auto& meshRenderer : object->getRenderers()) {
+			
+			if (meshRenderer->getMaterial()->getInfo().propertySet.renderQueue >= render_queue_transparent)
+			{
+				continue;
+			}
+
+			auto mvp = m_LightViewProjection * object->getTransform().getMatrix();
+			m_shadowProgram->setUniform(m_MVPLocation, mvp);
+			meshRenderer->renderShadow();
 		}
-		
-		auto mvp = m_LightViewProjection * object->getTransform().getMatrix();
-		m_shadowProgram->setUniform(m_MVPLocation, mvp);
-		object->renderShadow();
 	}
 
 	glPopDebugGroup();
@@ -94,15 +98,19 @@ void renderer_forward::renderSpotShadows(render_scene& scene) {
 			{
 				continue;
 			}
-		
-			if (object->getMaterial()->getInfo().propertySet.renderQueue >= render_queue_transparent)
-			{
-				continue;
+
+			//TODO remove duplication with directional light method 
+			for (auto& meshRenderer : object->getRenderers()) {
+
+				if (meshRenderer->getMaterial()->getInfo().propertySet.renderQueue >= render_queue_transparent)
+				{
+					continue;
+				}
+
+				auto mvp = spot.viewProjection * object->getTransform().getMatrix();
+				m_shadowProgram->setUniform(m_MVPLocation, mvp);
+				meshRenderer->renderShadow();
 			}
-			
-			auto mvp = spot.viewProjection * object->getTransform().getMatrix();
-			m_shadowProgram->setUniform(m_MVPLocation, mvp);
-			object->renderShadow();
 		}
 	}
 
@@ -121,22 +129,28 @@ void renderer_forward::renderShadows(render_scene& scene)
 	m_shadowBuffer.unbind();
 }
 
-bool compareRenderQueue(std::shared_ptr<render_object> o1, std::shared_ptr<render_object> o2)
+bool compareRenderQueue(std::shared_ptr<mesh_renderer> o1, std::shared_ptr<mesh_renderer> o2)
 {
 	return o1->getMaterial()->getInfo().propertySet.renderQueue < o2->getMaterial()->getInfo().propertySet.renderQueue;
 }
 
-std::vector<std::shared_ptr<render_object>> renderer_forward::getSortedObjects(render_scene& scene)
+std::vector<std::shared_ptr<mesh_renderer>> renderer_forward::getSortedObjects(render_scene& scene)
 {
-	std::vector<std::shared_ptr<render_object>> objects;
-	objects = scene.getObjects();
+	std::vector<std::shared_ptr<mesh_renderer>> renderers;
+	for (auto& object : scene.getObjects()) {
+		for (auto& mesh : object->getRenderers()) {
+			renderers.push_back(mesh);
+		}
+	}
+	
 	if(m_ClearMode == clear_mode::skybox)
 	{
-		objects.push_back(m_Skybox);
+		renderers.push_back(m_Skybox->getRenderers().at(0));
 	}
-	std::sort(objects.begin(), objects.end(), compareRenderQueue);
 	
-	return objects;
+	std::sort(renderers.begin(), renderers.end(), compareRenderQueue);
+	
+	return renderers;
 }
 
 void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool shadowsEnabled)
@@ -163,28 +177,29 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 	auto viewMatrix = camera.getView();
 	auto projection = camera.getProjection();
 	
-	for (auto& object : getSortedObjects(scene))
+	for (auto& renderer : getSortedObjects(scene))
 	{
 		if (shadowsEnabled)
 		{
-			if(object->getReceiveShadows())
+			if (renderer->getReceiveShadows())
 			{
-				object->getMaterial()->setShadowMapSlot(shadowmapDirSlot);
-				object->getMaterial()->setSpotShadowMapSlot(shadowmapSpotSlot);
-				object->getMaterial()->setLightViewProjection(m_LightViewProjection);
+				renderer->getMaterial()->setShadowMapSlot(shadowmapDirSlot);
+				renderer->getMaterial()->setSpotShadowMapSlot(shadowmapSpotSlot);
+				renderer->getMaterial()->setLightViewProjection(m_LightViewProjection);
 			}
 			else
 			{
-				object->getMaterial()->setShadowMapSlot(emptyShadowmapSlot);
+				renderer->getMaterial()->setShadowMapSlot(emptyShadowmapSlot);
+				renderer->getMaterial()->setSpotShadowMapSlot(shadowmapSpotSlot);
 			}
 		}
 		
 		//TODO implement light culling 
-		object->setLight(scene.getDirectionalLight());
-		object->getMaterial()->setPointLights(scene.getPointLights());
-		object->getMaterial()->setSpotLights(scene.getSpotLights());
+		renderer->getMaterial()->setDirectionalLight(scene.getDirectionalLight());
+		renderer->getMaterial()->setPointLights(scene.getPointLights());
+		renderer->getMaterial()->setSpotLights(scene.getSpotLights());
 		
-		object->render(viewMatrix, projection);
+		renderer->render(viewMatrix, projection);
 	}
 	
 
@@ -199,38 +214,42 @@ void renderer_forward::setClearFlag(glm::vec4 color)
 void renderer_forward::init(object_factory& objectFactory)
 {
 	auto shaderLoader = objectFactory.getShaderLoader();
+	
+	initShadowmap(objectFactory, shaderLoader);
+	createSkybox(objectFactory);
+}
+
+void renderer_forward::initShadowmap(object_factory& objectFactory, shader_loader& shaderLoader)
+{
 	auto vertShaderAsset = shaderLoader.load(m_DepthShaderVert, shaderType::vertex);
 	auto fragShaderAsset = shaderLoader.load(m_DepthShaderFrag, shaderType::fragment);
-	
+
 	shader vertShader(vertShaderAsset);
 	shader fragShader(fragShaderAsset);
-	
+
 	vertShader.compile();
 	vertShader.verify();
-	
+
 	fragShader.compile();
 	fragShader.verify();
-	
+
 	m_shadowProgram = std::make_unique<shader_program>(std::initializer_list<shader>{vertShader, fragShader});
-    m_shadowProgram->validateLinking();
-	
+	m_shadowProgram->validateLinking();
+
 	m_shadowProgram->bind();
 	m_MVPLocation = m_shadowProgram->getUniformLocation(m_MVPUniformName);
 
 	m_shadowBuffer.bind();
 	m_shadowBuffer.createDepthTexture(SHADOW_DIR_WIDTH, SHADOW_DIR_HEIGHT, true);
-	m_shadowBuffer.createArrayDepthTexture(SHADOW_SPOT_WIDTH, SHADOW_SPOT_HEIGHT,SUPPORTTED_SPOT_LIGHTS, true);
+	m_shadowBuffer.createArrayDepthTexture(SHADOW_SPOT_WIDTH, SHADOW_SPOT_HEIGHT, SUPPORTTED_SPOT_LIGHTS, true);
 	m_shadowBuffer.unbind();
 
 	auto textureLoader = objectFactory.getTextureLoader();
 	auto textureAsset = textureLoader.load(m_EmptyShadowmapTexture,3);
 	texture_setup setup;
 	setup.assets.push_back(textureAsset);
-	
+
 	m_EmptyShadowmap = std::make_shared<texture_2D>(setup);
-
-
-	createSkybox(objectFactory);
 }
 
 void renderer_forward::createSkybox(object_factory& objectFactory)
@@ -238,8 +257,11 @@ void renderer_forward::createSkybox(object_factory& objectFactory)
 	model_info skyboxModel;
 	shader_asset_info fragShader1 { "res/shaders/sample/skybox_frag.glsl", shaderType::fragment};
 	shader_asset_info vertShader1 { "res/shaders/sample/skybox_vert.glsl", shaderType::vertex};
-	skyboxModel.material.shaders.push_back(fragShader1);
-	skyboxModel.material.shaders.push_back(vertShader1);
+	
+	auto material = std::make_shared<material_asset>();
+
+	material->shaders.push_back(fragShader1);
+	material->shaders.push_back(vertShader1);
 
 
 	texture_asset_info skyboxTexture;
@@ -252,13 +274,17 @@ void renderer_forward::createSkybox(object_factory& objectFactory)
     skyboxTexture.paths.emplace_back("res/textures/skybox/sample/front.jpg");
 	skyboxTexture.paths.emplace_back("res/textures/skybox/sample/back.jpg");
     skyboxTexture.forceFlip = false;
-	skyboxModel.material.textures.push_back(skyboxTexture);
+	material->textures.push_back(skyboxTexture);
 	skyboxModel.path = "res/models/primitives/cube.obj";
 	skyboxModel.name = "skybox";
 	skyboxModel.transform.setScale(glm::vec3(100.0));
-	skyboxModel.material.propertySet.renderQueue = render_queue_transparent - 1;
-	skyboxModel.material.propertySet.cullFaceEnabled = false;
+	material->propertySet.renderQueue = render_queue_transparent - 1;
+	material->propertySet.cullFaceEnabled = false;
 
+	std::vector<std::shared_ptr<material_asset>> materials;
+	materials.push_back(material);
+
+	skyboxModel.materials = materials;
 	m_Skybox = objectFactory.createObject(skyboxModel);
 }
 
