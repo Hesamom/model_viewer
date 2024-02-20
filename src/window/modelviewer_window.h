@@ -49,8 +49,8 @@ protected:
     void onRender(float elapsed) override;
     void onScrollChanged(double yOffset) override;
     void onMouseButtonChanged(int button, int action, int mods) override;
+	void onKeyboardCallback(int key, int scancode, int action, int mods) override;
     void onMousePositionChanged(double xpos, double ypos) override;
-
 	static std::string label(std::string str, int id);
 
 	void drawSpotLightSettings();

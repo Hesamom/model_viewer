@@ -1,6 +1,8 @@
 ﻿#ifndef MODEL_VIEWER_WINDOW_H
 #define MODEL_VIEWER_WINDOW_H
 
+#include "renderdoc.h"
+
 class GLFWwindow;
 class GLFWmonitor;
 
@@ -14,7 +16,10 @@ private:
     int m_TargetFrameRate = -1;
     long double m_elapsedTimeSinceStart = 0;
     bool m_Paused = false;
-
+	bool m_RequestedCapture = false;
+	
+	renderdoc m_RenderDoc;
+	
     void initContext(bool vSync);
     void subscribeEvents();
     
@@ -23,8 +28,11 @@ protected:
     virtual void onScrollChanged(double yOffset);
     virtual void onMouseButtonChanged(int button, int action, int mods);
     virtual void onMousePositionChanged(double xpos, double ypos);
+	virtual void onKeyboardCallback(int key, int scancode, int action, int mods);
     virtual void onSizeChanged(int height, int width);
     virtual void onRenderImGUI();
+	virtual void beforeInitContext();
+	void requestCapture();
     
 public:
     window(int width, int height, const std::string& title, bool fullscreen, bool vSync = true, int mssaLevel = 8);
@@ -42,7 +50,7 @@ public:
     bool isOpen();
     long double getTimeSinceStart();
 
-    
+	
 };
 
 #endif

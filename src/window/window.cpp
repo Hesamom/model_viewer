@@ -33,7 +33,7 @@ window::window(int width, int height, const std::string& title, bool fullscreen,
         m_Monitor = glfwGetPrimaryMonitor();
     }
     
-    //BUG fullscreen mode casues exception 
+    //BUG fullscreen mode causes exception 
     m_Window = glfwCreateWindow(width, height, title.c_str(), m_Monitor, nullptr);
     glViewport(0, 0, width, height);
     
@@ -103,6 +103,11 @@ void window::draw()
         double elapsed = watch.getSeconds();
         watch.start();
 
+		if (m_RequestedCapture)
+		{
+			m_RenderDoc.startCapture();
+		}
+
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -114,6 +119,12 @@ void window::draw()
         
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		if (m_RequestedCapture)
+		{
+			m_RenderDoc.EndCapture();
+			m_RequestedCapture = false;
+		}
         
         glfwSwapBuffers(m_Window);
         watch.stop();
@@ -165,6 +176,7 @@ void APIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severi
 
 void window::initContext(bool vSync) {
     
+	beforeInitContext();
     glfwMakeContextCurrent(m_Window);
     glewExperimental = GL_TRUE; // Enable experimental features
     glewInit();
@@ -296,6 +308,16 @@ void window::subscribeEvents() {
                                    callback_static_4(window, width, height);
                                }
     );
+
+	static auto callback_static_5 = [this](GLFWwindow* window, int key, int scancode, int action, int mods){
+		onKeyboardCallback(key, scancode, action, mods);
+	};
+
+	glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
+		{
+			callback_static_5(window, key, scancode, action, mods);
+		}
+	);
 }
 
 void window::onMouseButtonChanged(int button, int action, int mods) {
@@ -316,5 +338,20 @@ void window::onSizeChanged(int height, int width) {
 
 void window::onRenderImGUI() {
 
+}
+
+void window::onKeyboardCallback(int key, int scancode, int action, int mods)
+{
+
+}
+
+void window::beforeInitContext()
+{
+	m_RenderDoc.init();
+}
+
+void window::requestCapture()
+{
+	m_RequestedCapture = true;
 }
 

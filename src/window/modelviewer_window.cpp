@@ -674,3 +674,11 @@ void modelviewer_window::openSpecularMapModel()
 	material->propertySet.cullFaceEnabled = false;
 	addModel(wallModel);
 }
+
+void modelviewer_window::onKeyboardCallback(int key, int scancode, int action, int mods)
+{
+	if (key == GLFW_KEY_F6 && action == GLFW_RELEASE)
+	{
+		requestCapture();
+	}
+}
