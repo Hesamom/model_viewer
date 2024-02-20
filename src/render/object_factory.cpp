@@ -177,15 +177,28 @@ std::shared_ptr<shader_program> object_factory::getProgram(std::shared_ptr<mater
 
 object_factory::object_factory() {
 	
-	std::unordered_map<shader_uniform_type, std::string> assets;
-	assets[shader_uniform_type::sampler2D] = "res/textures/default/white.png";
+	std::vector<std::pair<shader_uniform_texture_pair, std::string>> assets;
+	shader_uniform_texture_pair diffuseSampler { shader_uniform_type::sampler2D, shader_texture_usage::diffuse};
+	assets.emplace_back(diffuseSampler, "res/textures/default/white.png");
+
+	shader_uniform_texture_pair specularSampler { shader_uniform_type::sampler2D, shader_texture_usage::specular};
+	assets.emplace_back(specularSampler, "res/textures/default/white.png");
+
+	shader_uniform_texture_pair normalSampler { shader_uniform_type::sampler2D, shader_texture_usage::normal};
+	assets.emplace_back(normalSampler, "res/textures/default/normal.png");
 
 	for (const auto & asset : assets) {
 		texture_asset_info info;
 		info.paths.push_back(asset.second);
-		//TODO set asset type to support cube and texture3D
-		info.type = texture_asset_type::texture2D;
-
+		switch (asset.first.type) {
+			
+			case shader_uniform_type::sampler2D:
+				info.type = texture_asset_type::texture2D;
+				break;
+			default:
+				throw std::runtime_error("not implemented yet!");
+		}
+		
 		const auto texture = createTexture(info);
 		m_DefaultTextures[asset.first] = texture;
 	}
@@ -221,7 +234,7 @@ texture_loader& object_factory::getTextureLoader()
 	return m_TextureLoader;
 }
 
-std::unordered_map<shader_uniform_type, std::shared_ptr<texture>> object_factory::getDefaultTextures() {
+std::map<shader_uniform_texture_pair, std::shared_ptr<texture>> object_factory::getDefaultTextures() {
 	return m_DefaultTextures;
 }
 

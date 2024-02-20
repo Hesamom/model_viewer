@@ -7,11 +7,11 @@ using namespace modelViewer::render;
 using namespace modelViewer::res;
 
 
-material::material(const material_asset& info, std::vector<texture_binding>& textures, std::shared_ptr<shader_program>& program, std::unordered_map<shader_uniform_type, std::shared_ptr<texture>>& defaultTextures) {
+material::material(const material_asset& info, std::vector<texture_binding>& textures, std::shared_ptr<shader_program>& program, std::map<shader_uniform_texture_pair, std::shared_ptr<texture>>& defaultTextures) {
 
     m_Info = info;
     m_Program = program;
-	m_DefaultTetxures = defaultTextures;
+	m_DefaultTextures = defaultTextures;
 
     m_Program->bind();
 	m_ModelUniform.getLocation(*m_Program);
@@ -22,6 +22,7 @@ material::material(const material_asset& info, std::vector<texture_binding>& tex
 	m_LightViewProjectionUniform.getLocation(*m_Program);
 	m_LightAmbientUniform.getLocation(*m_Program);
 	m_LightDiffuseUniform.getLocation(*m_Program);
+	m_CameraPositionUniform.getLocation(*m_Program);
 	m_LightDirUniform.getLocation(*m_Program);
 	
 	m_ShadowMapSamplerLocation = m_Program->getUniformLocation(m_ShadowSampler);
@@ -104,16 +105,19 @@ int material::getMaxSupportedTextureUnits() {
 	return maxTexturesFrag;
 }
 
-std::shared_ptr<texture> material::getTextureForSampler(const std::string& samplerName, shader_uniform_type type, const std::vector<texture_binding>& textures) {
+std::shared_ptr<texture> material::getTextureForSampler(const shader_uniform_info& info, const std::vector<texture_binding>& textures) {
 
 	for (const auto& texture : textures) {
-		if (texture.samplerName == samplerName) {
+		//current convention has ".mat" prefix 
+		if (texture.samplerName == info.name || "u_mat." + texture.samplerName == info.name) {
 			return texture.texture;
 		}
 	}
 
-	if (m_DefaultTetxures.contains(type)) {
-		return m_DefaultTetxures[type];
+	
+	shader_uniform_texture_pair pair = {info.type, info.textureUsage};
+	if (m_DefaultTextures.contains(pair)) {
+		return m_DefaultTextures[pair];
 	}
 
 	return nullptr;
@@ -132,7 +136,7 @@ void material::bindTextures(const std::vector<texture_binding>& textures)
 			continue;
 		}
 		
-		auto texture = getTextureForSampler(uniform.name, uniform.type, textures);
+		auto texture = getTextureForSampler(uniform, textures);
 		if (texture == nullptr) {
 			std::cerr << "Failed to select a texture for uniform with name: " << uniform.name << "\n";
 			continue;
@@ -172,6 +176,10 @@ int material::getUniformLocation(std::string name) const {
 
 int material::getAttributeLocation(std::string name) const {
     return m_Program->getAttributeLocation(name);
+}
+
+void material::setCameraPosition(glm::vec3 position) {
+	 m_CameraPositionUniform.setValue(position, *m_Program);
 }
 
 void material::setDirectionalLight(const light_directional &light) {

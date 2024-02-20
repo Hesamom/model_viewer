@@ -195,6 +195,7 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 		}
 		
 		//TODO implement light culling 
+		renderer->getMaterial()->setCameraPosition(camera.getPosition());
 		renderer->getMaterial()->setDirectionalLight(scene.getDirectionalLight());
 		renderer->getMaterial()->setPointLights(scene.getPointLights());
 		renderer->getMaterial()->setSpotLights(scene.getSpotLights());

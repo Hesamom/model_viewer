@@ -104,16 +104,16 @@ namespace modelViewer::res
 
 	namespace Literals
 	{
-		const std::string  AmbientAlbedo = "mat.ambient";
-		const std::string  DiffuseAlbedo = "mat.diffuseAlbedo";
-		const std::string  SpecularAlbedo = "mat.specularAlbedo";
-		const std::string  Shininess = "mat.shininess";
-		const std::string  Opacity = "mat.opacity";
+		const std::string  AmbientAlbedo = "u_mat.ambient";
+		const std::string  DiffuseAlbedo = "u_mat.diffuseAlbedo";
+		const std::string  SpecularAlbedo = "u_mat.specularAlbedo";
+		const std::string  Shininess = "u_mat.shininess";
+		const std::string  Opacity = "u_mat.opacity";
 
 		const color DefaultAmbientAlbedo{0.5f};
 		const color DefaultDiffuseAlbedo{0.2f};
 		const color DefaultSpecularAlbedo{0.5f};
-		const float DefaultShininess = 128;
+		const float DefaultShininess = 16;
 		const float DefaultOpacity = 1;
 	}
 }

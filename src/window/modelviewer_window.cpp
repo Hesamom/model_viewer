@@ -374,7 +374,15 @@ void modelviewer_window::displayMenubar() {
 				ImGui::EndMenu();
 			}
 
-			if (ImGui::BeginMenu("complex models")) {
+			if (ImGui::BeginMenu("Specular mapping")) {
+				if(ImGui::MenuItem("wall"))
+				{
+					openSpecularMapModel();
+				}
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Complex models")) {
 				if(ImGui::MenuItem("backpack (multi mesh)"))
 				{
 					openModel("res/models/complex/backpack/backpack.obj");
@@ -478,13 +486,13 @@ void modelviewer_window::openWallParallaxMap() {
 	texture_asset_info diffuseTexture;
 	diffuseTexture.type = texture_asset_type::texture2D;
 	diffuseTexture.paths.emplace_back("res/textures/ParallexMapping/bricks2.jpg");
-	diffuseTexture.samplerName = "u_diffuseSampler";
+	diffuseTexture.samplerName = "diffuseSampler";
 	material->textures.push_back(diffuseTexture);
 
 	texture_asset_info normalTexture;
 	normalTexture.type = texture_asset_type::texture2D;
 	normalTexture.paths.emplace_back("res/textures/ParallexMapping/bricks2_normal.jpg");
-	normalTexture.samplerName = "u_normalSampler";
+	normalTexture.samplerName = "normalSampler";
 	material->textures.push_back(normalTexture);
 
 	texture_asset_info parallaxMappingTexture;
@@ -518,13 +526,13 @@ void modelviewer_window::openWallNormalMap() {
 	texture_asset_info diffuseTexture;
 	diffuseTexture.type = texture_asset_type::texture2D;
 	diffuseTexture.paths.emplace_back("res/textures/wall.jpg");
-	diffuseTexture.samplerName = "u_diffuseSampler";
+	diffuseTexture.samplerName = "diffuseSampler";
 	material->textures.push_back(diffuseTexture);
 
 	texture_asset_info normalTexture;
 	normalTexture.type = texture_asset_type::texture2D;
-	normalTexture.paths.emplace_back("res/textures/wall_normal.png");
-	normalTexture.samplerName = "u_normalSampler";
+	normalTexture.paths.emplace_back("res/textures/wall_normal.jpg");
+	normalTexture.samplerName = "normalSampler";
 	material->textures.push_back(normalTexture);
 
 
@@ -534,7 +542,7 @@ void modelviewer_window::openWallNormalMap() {
 	material->propertySet.colors.push_back({Literals::DiffuseAlbedo, glm::vec3 (1.0f)});
 	material->propertySet.colors.push_back({Literals::AmbientAlbedo, glm::vec3 (1.0f)});
 	material->propertySet.colors.push_back({Literals::SpecularAlbedo, glm::vec3 (0.2f)});
-	material->propertySet.floats.push_back({Literals::Shininess, 10});
+	material->propertySet.floats.push_back({Literals::Shininess, 32});
 	material->propertySet.floats.push_back({Literals::Opacity, 1});
 	material->propertySet.cullFaceEnabled = false;
 	addModel(wallModel);
@@ -631,4 +639,38 @@ model_info modelviewer_window::getDemoModel(const std::string& name) const
 void modelviewer_window::setClearMode(clear_mode mode)
 {
 	m_Renderer.setClearMode(mode);
+}
+
+void modelviewer_window::openSpecularMapModel()
+{
+	model_info wallModel;
+	shader_asset_info fragShader { "res/shaders/sample/phong_phong_frag.glsl", shaderType::fragment};
+	shader_asset_info vertShader { "res/shaders/sample/phong_phong_vert.glsl", shaderType::vertex};
+
+	auto material = std::make_shared<material_asset>();
+	material->shaders.push_back(fragShader);
+	material->shaders.push_back(vertShader);
+
+	texture_asset_info diffuseTexture;
+	diffuseTexture.type = texture_asset_type::texture2D;
+	diffuseTexture.paths.emplace_back("res/textures/spec/container_diffuse.png");
+	diffuseTexture.samplerName = "diffuseSampler";
+	material->textures.push_back(diffuseTexture);
+
+	texture_asset_info specTexture;
+	specTexture.type = texture_asset_type::texture2D;
+	specTexture.paths.emplace_back("res/textures/spec/container_spec.png");
+	specTexture.samplerName = "specularSampler";
+	material->textures.push_back(specTexture);
+
+	wallModel.materials.push_back(material);
+	wallModel.path = "res/models/primitives/plane.fbx";
+	wallModel.name = "wall_spec";
+	material->propertySet.colors.push_back({Literals::DiffuseAlbedo, glm::vec3 (1.0f)});
+	material->propertySet.colors.push_back({Literals::AmbientAlbedo, glm::vec3 (1.0f)});
+	material->propertySet.colors.push_back({Literals::SpecularAlbedo, glm::vec3 (1.0f)});
+	material->propertySet.floats.push_back({Literals::Shininess, 256});
+	material->propertySet.floats.push_back({Literals::Opacity, 1});
+	material->propertySet.cullFaceEnabled = false;
+	addModel(wallModel);
 }

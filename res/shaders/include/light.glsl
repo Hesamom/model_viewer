@@ -1,3 +1,7 @@
+#define NR_SPOT_LIGHTS 4
+#define NR_POINT_LIGHTS 4
+
+
 struct material
 {
     vec3 ambient;
@@ -5,6 +9,10 @@ struct material
     vec3 specularAlbedo;
     float shininess;
     float opacity;
+
+    sampler2D diffuseSampler;
+    sampler2D specularSampler;
+    sampler2D normalSampler;
 };
 
 struct surface
@@ -12,6 +20,9 @@ struct surface
     vec3 viewDir;
     vec3 normal;
     vec3 fragPos;
+    
+    vec3 specTexel;
+    vec3 diffuseTexel;
 };
 
 struct directLight
@@ -43,52 +54,97 @@ struct spotLight
     vec3 diffuse;
 };
 
-
-
-vec3 getPointLight(surface surf, pointLight light, float shadow, material mat)
+struct baseLight
 {
-    vec3 lightDir = light.position - surf.fragPos;
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 toSourceDirection;
+    float intensity;
+};
+
+
+vec3 computeLight(surface surf, float shadow, material mat, baseLight light)
+{
+    //make sure light.toSourceDirection is from frag to a light source 
+    vec3 lightReflection = reflect(-light.toSourceDirection, surf.normal);
+
+    vec3 diffuse = max(dot(surf.normal, light.toSourceDirection), 0.0) * mat.diffuseAlbedo * light.diffuse * light.intensity * surf.diffuseTexel;
+    
+    
+    vec3 specular = pow(max(dot(lightReflection, surf.viewDir), 0.0), mat.shininess) * mat.specularAlbedo * light.diffuse * light.intensity * surf.specTexel;
+    //do we really need a different ambient color both per light and object?
+    vec3 ambient = mat.ambient * light.ambient * light.intensity * surf.diffuseTexel;
+
+    vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular));
+    return lighting;
+}
+
+vec3 getPointLight(surface surf, pointLight pLight, float shadow, material mat)
+{
+    vec3 lightDir = pLight.position - surf.fragPos;
     vec3 lightDirNormalized = normalize(lightDir);
     float range = length(lightDir);
-    
-    vec3 lightReflection = reflect(-lightDirNormalized, surf.normal);
-    float attenuation = 1 - pow(max(range, light.insideRange),2)/(light.range * light.range);
-    
-    vec3 diffuse = max(dot(surf.normal, lightDirNormalized), 0.0) * mat.diffuseAlbedo * light.diffuse * attenuation;
-    vec3 specular = pow(max(dot(lightReflection, surf.viewDir), 0.0), mat.shininess) * mat.specularAlbedo * attenuation;
-    vec3 ambient = (mat.ambient * light.ambient) * attenuation;
+    float attenuation = 1 - pow(max(range, pLight.insideRange),2)/(pLight.range * pLight.range);
 
-    vec3 lighting = (ambient + (1.0 - shadow) * (diffuse));
-    return lighting;
+    baseLight light;
+    light.intensity = attenuation;
+    light.toSourceDirection = lightDirNormalized;
+    light.ambient = pLight.ambient;
+    light.diffuse = pLight.diffuse;
+    
+    return computeLight(surf, shadow, mat, light);
 }
 
-vec3 getDirLight(surface surf, directLight light, float shadow, material mat)
+vec3 getDirLight(surface surf, directLight directlight, float shadow, material mat)
 {
-    vec3 lightReflection = reflect(-light.direction, surf.normal);
+    baseLight light;
+    light.intensity = 1;
+    light.toSourceDirection = directlight.direction;
+    light.ambient = directlight.ambient;
+    light.diffuse = directlight.diffuse;
 
-    //calculate light components
-    vec3 diffuse = max(dot(surf.normal, light.direction), 0.0) * mat.diffuseAlbedo * light.diffuse;
-    vec3 specular = pow(max(dot(lightReflection, surf.viewDir), 0.0), mat.shininess) * mat.specularAlbedo * light.diffuse;
-    vec3 ambient = (mat.ambient * light.ambient);
-
-    vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular));
-    return lighting;
+    return computeLight(surf, shadow, mat, light);
 }
 
-vec3 getSpotLight(surface surf, spotLight light, float shadow, material mat)
+vec3 getSpotLight(surface surf, spotLight sLight, float shadow, material mat)
 {
-    vec3 lightDir = normalize(light.position - surf.fragPos);
-    float theta     = dot(lightDir, normalize(-light.direction));
-    float epsilon   = light.innerCutoff - light.outerCutoff;
-    float intensity = clamp((theta - light.outerCutoff) / epsilon, 0.0, 1.0);
+    vec3 lightDir = normalize(sLight.position - surf.fragPos);
+    float theta     = dot(lightDir, normalize(-sLight.direction));
+    float epsilon   = sLight.innerCutoff - sLight.outerCutoff;
+    float intensity = clamp((theta - sLight.outerCutoff) / epsilon, 0.0, 1.0);
     
-    vec3 lightReflection = reflect(-lightDir, surf.normal);
-    
-    //calculate light components
-    vec3 diffuse =  max(dot(surf.normal, lightDir), 0.0) * mat.diffuseAlbedo * light.diffuse * intensity;
-    vec3 specular = pow(max(dot(lightReflection, surf.viewDir), 0.0), mat.shininess) * mat.specularAlbedo * light.diffuse * intensity;
-    vec3 ambient = (mat.ambient * light.ambient);
+    baseLight light;
+    light.intensity = intensity;
+    light.toSourceDirection = lightDir;
+    light.ambient = sLight.ambient;
+    light.diffuse = sLight.diffuse;
 
-    vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular));
-    return lighting;
+    return computeLight(surf, shadow, mat, light);
+}
+
+vec3 computePointLights(surface surf, int lightCount, pointLight lights[NR_POINT_LIGHTS], material mat)
+{
+    vec3 color;
+    for (int i =0; i < lightCount; i++)
+    {
+        //TODO add shadow here
+        float shadow = 0;
+        vec3 lighting = getPointLight(surf, lights[i], shadow, mat);
+        color += lighting;
+    }
+    
+    return color;
+}
+
+vec3 computeSpotLights(surface surf, int lightCount, spotLight lights[NR_SPOT_LIGHTS], vec4 lightSpace[NR_SPOT_LIGHTS], sampler2DArrayShadow sampler, material mat)
+{
+    vec3 color;
+    for (int i =0; i < lightCount; i++)
+    {
+        vec3 lightDir = surf.fragPos - lights[i].position;
+        float shadow = getShadowValueIndexed(lightSpace[i], surf.normal , lightDir , sampler, i);
+        vec3 lighting = getSpotLight(surf, lights[i], shadow, mat);
+        color += lighting;
+    }
+    return color;
 }

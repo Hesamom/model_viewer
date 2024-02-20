@@ -10,8 +10,8 @@ namespace modelViewer::render {
     public:
 		glm::vec3 direction {1};
     	glm::vec3 rotation {1};
-		glm::vec3 ambient{0.7f};
-		glm::vec3 diffuse{0.5f};
+		glm::vec3 ambient{0.3f};
+		glm::vec3 diffuse{1.0f};
     };
 }
 

@@ -107,6 +107,24 @@ shader_uniform_type getUniformType(GLenum internalType) {
     }
 }
 
+shader_texture_usage getSamplerUsage(std::string& name) {
+	
+	if(name.starts_with("u_mat.diffuse"))
+	{
+		return shader_texture_usage::diffuse;
+	}
+	if(name.starts_with("u_mat.specular"))
+	{
+		return shader_texture_usage::specular;
+	}
+	if(name.starts_with("u_mat.normal"))
+	{
+		return shader_texture_usage::normal;
+	}
+	
+	return shader_texture_usage::none;
+}
+
 std::vector<shader_uniform_info> shader_program::getActiveUniforms() {
     
 
@@ -120,7 +138,8 @@ std::vector<shader_uniform_info> shader_program::getActiveUniforms() {
     std::vector<shader_uniform_info> uniforms;
     for (int i = 0; i < uniformsCount; ++i) {
         glGetActiveUniform(m_ProgramId, i, bufSize, &length, &size, &type, nameBuffer);
-        uniforms.push_back({std::string(nameBuffer),getUniformType(type) });
+		auto name = std::string(nameBuffer);
+        uniforms.push_back({name,getUniformType(type), getSamplerUsage(name)});
     }
 
     return uniforms;

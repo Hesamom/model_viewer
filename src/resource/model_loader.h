@@ -16,13 +16,6 @@ namespace modelViewer::res {
 		
 		std::shared_ptr<material_asset> m_DefaultMaterialAsset;
 		
-		void ProcessNodeMaterial(aiNode& node,
-			const aiScene& scene,
-			model_info& modelInfo,
-			std::vector<std::shared_ptr<material_asset>>& materials);
-		std::shared_ptr<material_asset> getMaterial(const aiMesh& mesh, const aiScene& scene,  model_info& modelInfo);
-        void setShaders(aiMaterial& material, std::vector<shader_asset_info>& shaders);
-        void setMaterialProperties(aiMaterial& material, material_property_set& set);
     public:
         void load(std::string filePath, model_info& info);
         std::shared_ptr<mesh_asset> loadFirstMesh(std::string filePath);

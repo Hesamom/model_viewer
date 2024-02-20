@@ -31,7 +31,7 @@ namespace modelViewer::render
 
 		std::vector<texture_binding> getTextures(std::shared_ptr<res::material_asset> materialAsset);
 		
-		std::unordered_map<shader_uniform_type, std::shared_ptr<texture>> m_DefaultTextures;
+		std::map<shader_uniform_texture_pair, std::shared_ptr<texture>> m_DefaultTextures;
 		
 	public:
 		object_factory();
@@ -39,7 +39,7 @@ namespace modelViewer::render
 		res::shader_loader& getShaderLoader();
 		res::model_loader& getModelLoader();
 		res::texture_loader& getTextureLoader();
-		std::unordered_map<shader_uniform_type, std::shared_ptr<texture>> getDefaultTextures();
+		std::map<shader_uniform_texture_pair, std::shared_ptr<texture>> getDefaultTextures();
 
 		std::vector<std::shared_ptr<material>> getMaterials(res::model_info& info);
 		std::shared_ptr<material> getMaterial(const std::shared_ptr<res::material_asset>& asset);

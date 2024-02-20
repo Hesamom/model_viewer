@@ -38,21 +38,21 @@ namespace modelViewer::render
 		shader_uniform<glm::vec3> m_LightDirUniform{"u_light_dir",""};
 		shader_uniform<glm::vec3> m_LightAmbientUniform{"u_lightAmbient",""};
 		shader_uniform<glm::vec3> m_LightDiffuseUniform{"u_lightDiffuse",""};
+		shader_uniform<glm::vec3> m_CameraPositionUniform{"u_camera_pos",""};
 		
 		int m_ShadowMapSamplerLocation = -1;
     	int m_SpotShadowMapSamplerLocation = -1;
-		std::unordered_map<shader_uniform_type, std::shared_ptr<texture>> m_DefaultTetxures;
+		std::map<shader_uniform_texture_pair, std::shared_ptr<texture>> m_DefaultTextures;
 
 		const std::set<int> m_AssignedTextureLocations;
 
         void applyMaterialProperties();
 
-        std::shared_ptr<texture> getTextureForSampler(const std::string& samplerName,
-                                                      shader_uniform_type type, const std::vector<texture_binding>& textures);
+        std::shared_ptr<texture> getTextureForSampler(const shader_uniform_info& info, const std::vector<texture_binding>& textures);
 
     	int getMaxSupportedTextureUnits();
     public:
-        explicit material(const res::material_asset& info, std::vector<texture_binding>& textures, std::shared_ptr<shader_program>& program, std::unordered_map<shader_uniform_type, std::shared_ptr<texture>>& defaultTextures);
+        explicit material(const res::material_asset& info, std::vector<texture_binding>& textures, std::shared_ptr<shader_program>& program, std::map<shader_uniform_texture_pair, std::shared_ptr<texture>>& defaultTextures);
         void setMVP( glm::mat4& matrix);
         void setModelView( glm::mat4& matrix);
         void setProjection( glm::mat4& projection);
@@ -72,7 +72,9 @@ namespace modelViewer::render
 		res::material_asset& getInfo();
 
         void setSpotLights(std::vector<light_spot>& lights);
-    };
+
+		void setCameraPosition(glm::vec3 position);
+	};
 }
 
 

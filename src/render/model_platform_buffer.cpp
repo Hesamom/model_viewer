@@ -174,7 +174,7 @@ std::shared_ptr<modelViewer::render::object_renderer> model_platform_buffer::gen
 	std::vector<texture_binding> textures;
 	texture_binding binding;
 	binding.texture =  diffuseTexture;
-	binding.samplerName = "u_diffuseSampler";
+	binding.samplerName = "diffuseSampler";
 	textures.push_back(binding);
 	
 	material_asset materialInfo;

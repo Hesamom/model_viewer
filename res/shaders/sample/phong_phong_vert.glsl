@@ -16,7 +16,6 @@ out VS_OUT
 {
 	vec2 texCoord;
 	vec3 normal;
-	vec3 viewDir;
 	vec3 fragPos;
 	vec4 fragPosLightSpace;
 	vec4[4] fragSpotPosLightSpace;
@@ -27,11 +26,9 @@ void main()
 {
 	//position and normal in view space
 	vec4 pos = m_MV * v_position;
-	vec3 normal = normalize(mat3(m_Model) * v_normal);
-	vec3 viewDir = -pos.xyz;
+	vec3 normal = normalize(mat3(transpose(inverse(m_Model))) * v_normal);
 
 	vs_out.normal = normal;
-	vs_out.viewDir = viewDir;
 	vs_out.texCoord = v_uv0;
 	vs_out.fragPosLightSpace = m_LightViewProjection * m_Model * v_position;
 	vs_out.fragPos = (m_Model * v_position).xyz;

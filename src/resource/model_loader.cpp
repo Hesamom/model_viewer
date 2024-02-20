@@ -77,9 +77,11 @@ std::string getSamplerName(aiTextureType type)
     switch (type) {
 
         case aiTextureType_DIFFUSE:
-            return "u_diffuseSampler";
+            return "diffuseSampler";
         case aiTextureType_NORMALS:
-             return "u_normalSampler";
+             return "normalSampler";
+		case aiTextureType_SPECULAR:
+			return "specularSampler";
     	default:
             return {};
     }
@@ -396,6 +398,7 @@ std::shared_ptr<material_asset> getMaterialCached(const aiMesh& mesh, model_load
 		auto const material = scene.mMaterials[mesh.mMaterialIndex];
 		fetchTextures(*material, scene, *materialInfo, modelInfo, aiTextureType_DIFFUSE);
 		fetchTextures(*material, scene, *materialInfo,modelInfo, aiTextureType_NORMALS);
+		fetchTextures(*material, scene, *materialInfo,modelInfo, aiTextureType_SPECULAR);
 		setShaders(*material, materialInfo->shaders);
 		setMaterialProperties(*material, materialInfo->propertySet);
 		return materialInfo;
