@@ -1,6 +1,6 @@
 #define NR_SPOT_LIGHTS 4
 #define NR_POINT_LIGHTS 4
-
+#define SPEC_BLIN;
 
 struct material
 {
@@ -63,15 +63,25 @@ struct baseLight
 };
 
 
+float getSpecular(surface surf, baseLight light)
+{
+    #ifdef SPEC_BLIN
+        vec3 halfVec = normalize(surf.viewDir + light.toSourceDirection);
+        float spec = max(dot(surf.normal, halfVec), 0.0);
+        return spec;
+    #else
+        vec3 lightReflection = reflect(-light.toSourceDirection, surf.normal);
+        float spec = max(dot(lightReflection, surf.viewDir), 0.0);
+        return spec;
+    #endif
+}
+
 vec3 computeLight(surface surf, float shadow, material mat, baseLight light)
 {
-    //make sure light.toSourceDirection is from frag to a light source 
-    vec3 lightReflection = reflect(-light.toSourceDirection, surf.normal);
-
     vec3 diffuse = max(dot(surf.normal, light.toSourceDirection), 0.0) * mat.diffuseAlbedo * light.diffuse * light.intensity * surf.diffuseTexel;
     
-    
-    vec3 specular = pow(max(dot(lightReflection, surf.viewDir), 0.0), mat.shininess) * mat.specularAlbedo * light.diffuse * light.intensity * surf.specTexel;
+    float spec = getSpecular(surf, light);
+    vec3 specular = pow(spec, mat.shininess) * mat.specularAlbedo * light.diffuse * light.intensity * surf.specTexel;
     //do we really need a different ambient color both per light and object?
     vec3 ambient = mat.ambient * light.ambient * light.intensity * surf.diffuseTexel;
 
