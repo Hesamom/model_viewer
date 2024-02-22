@@ -1,7 +1,7 @@
 ﻿#include "src/resource/shader_asset.h"
 #include "src/window/modelviewer_window.h"
 
-int main()
+/*int main()
 {
     using namespace modelViewer::res;
     modelviewer_window window(1024, 1024, "Playground", false);
@@ -9,4 +9,4 @@ int main()
 	
     window.draw();
     return 0;
-}
+}*/
