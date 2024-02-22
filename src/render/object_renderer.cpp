@@ -56,7 +56,8 @@ object_renderer::object_renderer(std::vector<std::shared_ptr<material>>& materia
 	assert(materials.size() == meshes.size());
 
 	for (int i = 0; i < meshes.size(); ++i) {
-		auto meshRender = std::make_shared<mesh_renderer>(materials[i], meshes[i], m_Transform);
+		std::string meshName = m_Name + "_" + std::to_string(i);
+		auto meshRender = std::make_shared<mesh_renderer>(materials[i], meshes[i], m_Transform, meshName);
 		m_MeshRenders.push_back(meshRender);
 	}
 
@@ -69,8 +70,8 @@ object_renderer::object_renderer(std::shared_ptr<material>& material,
 	const std::string& name)
 {
 	m_Name = name;
-	
-	auto meshRender = std::make_shared<mesh_renderer>(material, mesh_1, m_Transform);
+	std::string meshName = m_Name + "_0";
+	auto meshRender = std::make_shared<mesh_renderer>(material, mesh_1, m_Transform, meshName);
 	m_MeshRenders.push_back(meshRender);
 
 	std::vector<std::shared_ptr<mesh>> meshes;

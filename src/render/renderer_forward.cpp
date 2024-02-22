@@ -199,8 +199,10 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 		renderer->getMaterial()->setDirectionalLight(scene.getDirectionalLight());
 		renderer->getMaterial()->setPointLights(scene.getPointLights());
 		renderer->getMaterial()->setSpotLights(scene.getSpotLights());
-		
+
+		glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, renderer->getName().c_str());
 		renderer->render(viewMatrix, projection);
+		glPopDebugGroup();
 	}
 	
 

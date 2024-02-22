@@ -3,10 +3,11 @@
 
 using namespace modelViewer::render;
 
-mesh_renderer::mesh_renderer(std::shared_ptr <material>& material, std::shared_ptr <mesh>& mesh, common::transform& transform) : m_Transform{transform}
+mesh_renderer::mesh_renderer(std::shared_ptr <material>& material, std::shared_ptr <mesh>& mesh, common::transform& transform, std::string& name) : m_Transform{transform}
 {
 	m_Mesh = mesh;
 	m_Material = material;
+	m_Name = name;
 	
 	m_Mesh->bindAttributes(*m_Material);
 }
@@ -58,3 +59,9 @@ void mesh_renderer::setReceiveShadows(bool enabled)
 {
 	m_ReceivesShadow = enabled;
 }
+
+const std::string& mesh_renderer::getName() const
+{
+	return m_Name;
+}
+
