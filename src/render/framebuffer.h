@@ -9,7 +9,9 @@ namespace modelViewer::render
 	private:
 		unsigned int m_Id = -1;
 		unsigned int m_DepthTextureId = -1;
+		unsigned int m_ColorTextureId = -1;
 		unsigned int m_ArrayDepthTextureId = -1;
+		unsigned int m_ArrayColorTextureId = -1;
 	public:
 		framebuffer();
 		~framebuffer();
@@ -23,6 +25,14 @@ namespace modelViewer::render
 		void unbind();
 		void activateDepthMap(int slot);
 		void activateDepthMapArray(int slot);
+
+		unsigned int createColorTexture(int width, int height);
+
+		void attachColorTexture();
+
+		void attachColorTextureArray(int layer);
+
+		unsigned int createArrayColorTexture(int width, int height, int layers);
 	};
 
 }

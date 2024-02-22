@@ -44,6 +44,46 @@ unsigned int modelViewer::render::framebuffer::createArrayDepthTexture(int width
 	return m_ArrayDepthTextureId;
 }
 
+unsigned int modelViewer::render::framebuffer::createArrayColorTexture(int width, int height, int layers)
+{
+	glGenTextures(1, &m_ArrayColorTextureId);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, m_ArrayColorTextureId);
+
+	glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, width, height, layers, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+	glBindTexture(GL_TEXTURE_2D_ARRAY,0);
+	return m_ArrayColorTextureId;
+}
+
+
+unsigned int modelViewer::render::framebuffer::createColorTexture(int width, int height)
+{
+	glGenTextures(1, &m_ColorTextureId);
+	glBindTexture(GL_TEXTURE_2D, m_ColorTextureId);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+		width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
+
+	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+
+	glBindTexture(GL_TEXTURE_2D,0);
+	return m_ColorTextureId;
+}
 
 unsigned int modelViewer::render::framebuffer::createDepthTexture(int width, int height, bool enableDepthCompare)
 {
@@ -83,10 +123,23 @@ void modelViewer::render::framebuffer::attachDepthTexture() {
 	glReadBuffer(GL_NONE);
 }
 
+
+void modelViewer::render::framebuffer::attachColorTexture() {
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_ColorTextureId, 0);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+	glReadBuffer(GL_COLOR_ATTACHMENT0);
+}
+
 void modelViewer::render::framebuffer::attachDepthTextureArray(int layer) {
 	glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_ArrayDepthTextureId, 0, layer);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
+}
+
+void modelViewer::render::framebuffer::attachColorTextureArray(int layer) {
+	glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + layer, m_ArrayColorTextureId, 0, layer);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0 + layer);
+	glReadBuffer(GL_COLOR_ATTACHMENT0 + layer);
 }
 
 void modelViewer::render::framebuffer::unbind()
@@ -101,6 +154,11 @@ modelViewer::render::framebuffer::~framebuffer()
 	{
 		glDeleteTextures(1, &m_DepthTextureId);
 	}
+	if (m_ColorTextureId > -1)
+	{
+		glDeleteTextures(1, &m_ColorTextureId);
+	}
+	
 	if (m_ArrayDepthTextureId > -1)
 	{
 		glDeleteTextures(1, &m_ArrayDepthTextureId);

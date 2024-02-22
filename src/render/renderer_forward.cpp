@@ -25,7 +25,9 @@ void renderer_forward::renderDirectionalShadows(render_scene& scene) {
 	
 	glViewport(0, 0, SHADOW_DIR_WIDTH, SHADOW_DIR_HEIGHT);
 	m_shadowBuffer.attachDepthTexture();
+	m_shadowBuffer.attachColorTexture();
 	glClear(GL_DEPTH_BUFFER_BIT);
+	glClearBufferfv(GL_COLOR, 0, &m_ClearFlag.x);
 	
 	constexpr float near_plane = 30.0f;
 	constexpr float far_plane = 100.0f;
@@ -81,14 +83,16 @@ void renderer_forward::renderSpotShadows(render_scene& scene) {
 	for (auto& spot : scene.getSpotLights()) {
 		
 		m_shadowBuffer.attachDepthTextureArray(layer);
-		glClear(GL_DEPTH_BUFFER_BIT);
+		m_shadowBuffer.attachColorTextureArray(layer);
+		glClear(GL_DEPTH_BUFFER_BIT );
+		glClearBufferfv(GL_COLOR, 0, &m_ClearFlag.x);
 		layer++;
 		
-		constexpr float near_plane = 0.1f;
-		constexpr float far_plane = 100.0f;
-		auto lightProjection = glm::perspective(glm::radians(spot.outerCutoff), 1.0f, near_plane, far_plane);
+		constexpr float near_plane = 2.0f;
+		constexpr float far_plane = 50.0f;
+		auto lightProjection = glm::perspective(glm::radians(45.0f), 1.0f, near_plane, far_plane);
 		const auto lightView = glm::lookAt(spot.position,
-							spot.position + (spot.direction * 10.0f),
+							spot.position + spot.direction,
 							glm::vec3( 0.0f, 1.0f,  0.0f));
 		spot.viewProjection =  lightProjection * lightView;
 
@@ -244,7 +248,9 @@ void renderer_forward::initShadowmap(object_factory& objectFactory, shader_loade
 
 	m_shadowBuffer.bind();
 	m_shadowBuffer.createDepthTexture(SHADOW_DIR_WIDTH, SHADOW_DIR_HEIGHT, true);
+	m_shadowBuffer.createColorTexture(SHADOW_DIR_WIDTH, SHADOW_DIR_HEIGHT);
 	m_shadowBuffer.createArrayDepthTexture(SHADOW_SPOT_WIDTH, SHADOW_SPOT_HEIGHT, SUPPORTTED_SPOT_LIGHTS, true);
+	m_shadowBuffer.createArrayColorTexture(SHADOW_SPOT_WIDTH, SHADOW_SPOT_HEIGHT, SUPPORTTED_SPOT_LIGHTS);
 	m_shadowBuffer.unbind();
 
 	auto textureLoader = objectFactory.getTextureLoader();
