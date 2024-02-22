@@ -20,7 +20,7 @@ std::string shader_loader::readFile(const std::filesystem::path &path) {
 		{
 			//TODO consider trimming 
 			auto includeFile = line.substr(9);
-			auto filePath = m_IncludePath + includeFile;
+			auto filePath = res::literals::shaders::include_path + includeFile;
 			auto includedContent = readFile(filePath);
 			content += includedContent;
 			content += "\n";

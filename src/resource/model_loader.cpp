@@ -5,21 +5,11 @@
 #include "model_loader.h"
 #include "model_info.h"
 #include "shader_asset.h"
-#include "texture_asset.h"
 #include "../common/stopwatch.h"
 #include <assimp/Logger.hpp>
 #include <assimp/DefaultLogger.hpp>
 
 using namespace modelViewer::res;
-
-const std::string  m_PhongVertPath = "res/shaders/sample/phong_phong_vert.glsl";
-const std::string  m_PhongFragPath = "res/shaders/sample/phong_phong_frag.glsl";
-
-const std::string  m_PhongNormalVertPath = "res/shaders/sample/phong_phong_normal_map_vert.glsl";
-const std::string  m_PhongNormalFragPath = "res/shaders/sample/phong_phong_normal_map_frag.glsl";
-
-const std::string  m_GouraudVertPath = "res/shaders/sample/phong_gouraud_vert.glsl";
-const std::string  m_GouraudFragPath = "res/shaders/sample/phong_gouraud_frag.glsl";
 
 
 struct model_load_context
@@ -158,19 +148,19 @@ void setShaders(aiMaterial& material, std::vector<shader_asset_info>& shaders)
     switch (model) {
         
         case aiShadingMode_Gouraud:
-            shaders.emplace_back(m_GouraudVertPath, shaderType::vertex);
-            shaders.emplace_back(m_GouraudFragPath, shaderType::fragment);
+            shaders.emplace_back(literals::shaders::lit_vertex_vert, shaderType::vertex);
+            shaders.emplace_back(literals::shaders::lit_vertex_frag, shaderType::fragment);
             return;
         default:
 			if (hasNormalMap)
 			{
-				shaders.emplace_back(m_PhongNormalVertPath, shaderType::vertex);
-				shaders.emplace_back(m_PhongNormalFragPath, shaderType::fragment);
+				shaders.emplace_back(literals::shaders::normal_map_vert, shaderType::vertex);
+				shaders.emplace_back(literals::shaders::normal_map_frag, shaderType::fragment);
 			}
 			else
 			{
-				shaders.emplace_back(m_PhongVertPath, shaderType::vertex);
-				shaders.emplace_back(m_PhongFragPath, shaderType::fragment);
+				shaders.emplace_back(literals::shaders::lit_vert, shaderType::vertex);
+				shaders.emplace_back(literals::shaders::lit_frag, shaderType::fragment);
 			}
     }
 }
@@ -477,8 +467,8 @@ std::shared_ptr<mesh_asset> model_loader::loadFirstMesh(std::string filePath) {
 model_loader::model_loader()
 {
 	m_DefaultMaterialAsset = std::make_shared<material_asset>();
-	m_DefaultMaterialAsset->shaders.emplace_back(m_PhongVertPath, shaderType::vertex);
-	m_DefaultMaterialAsset->shaders.emplace_back(m_PhongFragPath, shaderType::fragment);
+	m_DefaultMaterialAsset->shaders.emplace_back(literals::shaders::lit_vert, shaderType::vertex);
+	m_DefaultMaterialAsset->shaders.emplace_back(literals::shaders::lit_frag, shaderType::fragment);
 
 	Assimp::DefaultLogger::create("logger", Assimp::Logger::DEBUGGING);
 	auto stream = Assimp::LogStream::createDefaultStream(aiDefaultLogStream_STDOUT);

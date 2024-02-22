@@ -179,13 +179,13 @@ object_factory::object_factory() {
 	
 	std::vector<std::pair<shader_uniform_texture_pair, std::string>> assets;
 	shader_uniform_texture_pair diffuseSampler { shader_uniform_type::sampler2D, shader_texture_usage::diffuse};
-	assets.emplace_back(diffuseSampler, "res/textures/default/white.png");
+	assets.emplace_back(diffuseSampler, res::literals::textures::default_white);
 
 	shader_uniform_texture_pair specularSampler { shader_uniform_type::sampler2D, shader_texture_usage::specular};
-	assets.emplace_back(specularSampler, "res/textures/default/white.png");
+	assets.emplace_back(specularSampler, res::literals::textures::default_white);
 
 	shader_uniform_texture_pair normalSampler { shader_uniform_type::sampler2D, shader_texture_usage::normal};
-	assets.emplace_back(normalSampler, "res/textures/default/normal.png");
+	assets.emplace_back(normalSampler, res::literals::textures::default_normal);
 
 	for (const auto & asset : assets) {
 		texture_asset_info info;

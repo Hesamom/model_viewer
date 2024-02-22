@@ -22,13 +22,13 @@ namespace modelViewer::render
 
     private:
 		
-        const std::string m_GridFragShaderPath = "res/shaders/sample/lines_frag.glsl";
-        const std::string m_GridVertShaderPath = "res/shaders/sample/lines_vert.glsl";
+		const std::string m_GridVertShaderPath = modelViewer::res::literals::shaders::line_vert;
+        const std::string m_GridFragShaderPath = modelViewer::res::literals::shaders::line_frag;
 
-		const std::string m_PlaneFragShaderPath = "res/shaders/sample/phong_phong_frag.glsl";
-		const std::string m_PlaneVertShaderPath = "res/shaders/sample/phong_phong_vert.glsl";
+		const std::string m_PlaneVertShaderPath = modelViewer::res::literals::shaders::lit_vert;
+		const std::string m_PlaneFragShaderPath = modelViewer::res::literals::shaders::lit_frag;
 
-		const std::string m_PlaneDiffuseTexture = "res/textures/default/white.png";
+		const std::string m_PlaneDiffuseTexture = modelViewer::res::literals::textures::default_white;
 		
     public:
 		std::shared_ptr<modelViewer::render::object_renderer> generateGrid(modelViewer::render::object_factory& objectFactory,

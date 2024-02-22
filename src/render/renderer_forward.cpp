@@ -256,8 +256,8 @@ void renderer_forward::initShadowmap(object_factory& objectFactory, shader_loade
 void renderer_forward::createSkybox(object_factory& objectFactory)
 {
 	model_info skyboxModel;
-	shader_asset_info fragShader1 { "res/shaders/sample/skybox_frag.glsl", shaderType::fragment};
-	shader_asset_info vertShader1 { "res/shaders/sample/skybox_vert.glsl", shaderType::vertex};
+	shader_asset_info fragShader1 { res::literals::shaders::skybox_frag, shaderType::fragment};
+	shader_asset_info vertShader1 {  res::literals::shaders::skybox_vert, shaderType::vertex};
 	
 	auto material = std::make_shared<material_asset>();
 
@@ -268,15 +268,15 @@ void renderer_forward::createSkybox(object_factory& objectFactory)
 	texture_asset_info skyboxTexture;
 	skyboxTexture.samplerName = "u_skybox";
 	skyboxTexture.type = texture_asset_type::textureCube;
-	skyboxTexture.paths.emplace_back("res/textures/skybox/sample/right.jpg");
-	skyboxTexture.paths.emplace_back("res/textures/skybox/sample/left.jpg");
-    skyboxTexture.paths.emplace_back("res/textures/skybox/sample/top.jpg");
-    skyboxTexture.paths.emplace_back("res/textures/skybox/sample/bottom.jpg");
-    skyboxTexture.paths.emplace_back("res/textures/skybox/sample/front.jpg");
-	skyboxTexture.paths.emplace_back("res/textures/skybox/sample/back.jpg");
+	skyboxTexture.paths.emplace_back(res::literals::textures::skybox_right);
+	skyboxTexture.paths.emplace_back(res::literals::textures::skybox_left);
+    skyboxTexture.paths.emplace_back(res::literals::textures::skybox_top);
+    skyboxTexture.paths.emplace_back(res::literals::textures::skybox_bottom);
+    skyboxTexture.paths.emplace_back(res::literals::textures::skybox_front);
+	skyboxTexture.paths.emplace_back(res::literals::textures::skybox_back);
     skyboxTexture.forceFlip = false;
 	material->textures.push_back(skyboxTexture);
-	skyboxModel.path = "res/models/primitives/cube.obj";
+	skyboxModel.path =  res::literals::models::primitive_cube;
 	skyboxModel.name = "skybox";
 	skyboxModel.transform.setScale(glm::vec3(100.0));
 	material->propertySet.renderQueue = render_queue_transparent - 1;

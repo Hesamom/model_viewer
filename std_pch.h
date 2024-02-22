@@ -3,6 +3,7 @@
 
 //TODO add more std headers here when needed 
 
+
 //streams
 #include <iostream>
 #include <filesystem>
@@ -32,6 +33,8 @@
 #include <ranges>
 #include <assert.h>
 
+//literals
+#include "src/resource/literals.h"
 
 
 #endif //MODEL_VIEWER_STD_PCH_H

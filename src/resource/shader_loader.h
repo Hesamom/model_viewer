@@ -13,7 +13,6 @@ namespace modelViewer::res {
     private:
         std::unordered_map<std::string , std::shared_ptr<shader_asset>> m_LoadedAssets;
 		std::string readFile(const std::filesystem::path& path);
-		const std::string m_IncludePath = "res/shaders/include/";
     public:
         std::shared_ptr<shader_asset> load(const std::string& filePath, shaderType type);
 
