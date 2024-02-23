@@ -11,18 +11,15 @@ namespace modelViewer::render
 		unsigned int m_CubeMapId = -1;
 		unsigned int m_DepthTextureId = -1;
 		unsigned int m_ArrayDepthTextureId = -1;
-
-		unsigned int m_CubeMapColorFaces[6];
-
-		const int m_CubeFacesCount = 6;
+		
 	public:
 		framebuffer();
 		~framebuffer();
 		void bind();
 
 		unsigned int createArrayDepthTexture(int width, int height, int layers, bool enableDepthCompare);
-		unsigned int createDepthTexture(int width, int height, bool enableDepthCompare);
-		unsigned int createCubeMap(int size);
+		unsigned int createDepthTexture(int width, int height, bool enableDepthCompare, std::string& name);
+		unsigned int createCubeMap(int size, std::string& name);
 		void attachCubeMapFace(int index);
 		void attachDepthTexture();
 		void attachDepthTextureArray(int layer);

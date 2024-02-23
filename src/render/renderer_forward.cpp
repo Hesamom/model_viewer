@@ -9,16 +9,33 @@
 using namespace modelViewer::res;
 using namespace modelViewer::render;
 
-void renderer_forward::render(render_scene& scene, camera& camera, bool shadowEnabled)
+const glm::vec3 m_CubeMapFacesDirection[] = {
+	glm::vec3(1.0f, 0.0f, 0.0f),  // Positive X
+	glm::vec3(-1.0f, 0.0f, 0.0f), // Negative X
+	glm::vec3(0.0f, 1.0f, 0.0f),  // Positive Y
+	glm::vec3(0.0f, -1.0f, 0.0f), // Negative Y
+	glm::vec3(0.0f, 0.0f, 1.0f),  // Positive Z
+	glm::vec3(0.0f, 0.0f, -1.0f)  // Negative Z
+};
+
+const std::string m_SideNames[]
+	{
+		"x+", "x-","y+","y-","z+","z-"
+	};
+
+void renderer_forward::render(render_scene& scene, camera& camera, bool shadowEnabled, bool reflectionEnabled)
 {
 	if (shadowEnabled)
 	{
 		renderShadows(scene);
 	}
 
-	renderReflectionProbs(scene, camera);
+	if (reflectionEnabled)
+	{
+		renderReflectionMap(scene, camera);
+	}
 
-	renderObjects(scene, camera, shadowEnabled);
+	renderObjects(scene, camera, shadowEnabled, reflectionEnabled);
 }
 
 void renderer_forward::renderDirectionalShadows(render_scene& scene) {
@@ -123,48 +140,38 @@ void renderer_forward::renderShadows(render_scene& scene)
 	m_shadowBuffer.unbind();
 }
 
-const glm::vec3 cube_Map_Faces_Direction[] = {
-	glm::vec3(1.0f, 0.0f, 0.0f),  // Positive X
-	glm::vec3(-1.0f, 0.0f, 0.0f), // Negative X
-	glm::vec3(0.0f, 1.0f, 0.0f),  // Positive Y
-	glm::vec3(0.0f, -1.0f, 0.0f), // Negative Y
-	glm::vec3(0.0f, 0.0f, 1.0f),  // Positive Z
-	glm::vec3(0.0f, 0.0f, -1.0f)  // Negative Z
-};
 
-const glm::vec4 reflection_Debug_Colors[6] = {
-	glm::vec4(1.0f, 0.0f, 0.0f, 1.0f),
-	glm::vec4(0.0f, 1.0f, 0.0f, 1.0f),
-	glm::vec4(0.0f, 0.0f, 1.0f, 1.0f),
-	glm::vec4(1.0f, 1.0f, 0.0f, 1.0f),
-	glm::vec4(1.0f, 0.0f, 1.0f, 1.0f),
-	glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
-};
 
-void renderer_forward::renderReflectionProbs(render_scene& scene , camera& camera){
-	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "rendering reflection probs");
+void renderer_forward::renderReflectionMap(render_scene& scene , camera& camera){
+	
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "rendering reflection map");
 
-	m_reflectionBuffer.bind();
+	m_ReflectionBuffer.bind();
 	glCullFace(GL_FRONT);
 	glViewport(0, 0, REFLECTION_SIZE, REFLECTION_SIZE);
+	m_ReflectionBuffer.attachDepthTexture();
+	
+	const glm::vec3  up (0.0f, 1.0f, 0.0f);
+	for (int index = 0; index < 6; ++index) {
 
-	for (unsigned int index = 0; index < 6; ++index) {
-		m_reflectionBuffer.attachCubeMapFace(index);
-
+		glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, ("side: " + m_SideNames[index]).c_str());
+		m_ReflectionBuffer.attachCubeMapFace(index);
+		
+		glClearBufferfv(GL_COLOR, 0, &m_ReflectionClearFlag.x);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(reflection_Debug_Colors[index].x, reflection_Debug_Colors[index].y, reflection_Debug_Colors[index].z, reflection_Debug_Colors[index].a);
-
-
-		glm::mat4 viewMatrix = glm::lookAt(camera.getPosition(), camera.getPosition() + cube_Map_Faces_Direction[index], glm::vec3(0.0f, 1.0f, 0.0f));
-
+		
+		glm::mat4 viewMatrix = glm::lookAt(m_ReflectionPosition, m_ReflectionPosition + m_CubeMapFacesDirection[index], up);
 		glm::mat4 projectionMatrix = glm::perspective(glm::radians(60.0f), 1.0f, 0.1f, 100.0f);
 
 		for (auto& object : scene.getObjects()) {
+			//TODO should not render reflective objects!
 			object->render(viewMatrix, projectionMatrix);
 		}
+		
+		glPopDebugGroup();
 	}
 
-	m_reflectionBuffer.unbind();
+	m_ReflectionBuffer.unbind();
 
 	glPopDebugGroup();
 }
@@ -187,7 +194,7 @@ std::vector<std::shared_ptr<render_object>> renderer_forward::getSortedObjects(r
 	return objects;
 }
 
-void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool shadowsEnabled)
+void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool shadowsEnabled, bool reflectionEnabled)
 {
 	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "rendering objects");
 	
@@ -207,6 +214,11 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 		m_EmptyShadowmap->active(emptyShadowmapSlot);
 	}
 	
+	//TODO 
+	if (reflectionEnabled)
+	{
+		
+	}
 
 	auto viewMatrix = camera.getView();
 	auto projection = camera.getProjection();
@@ -225,6 +237,10 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 			{
 				object->getMaterial()->setShadowMapSlot(emptyShadowmapSlot);
 			}
+		}
+		if (reflectionEnabled)
+		{
+			//TODO 
 		}
 		
 		//TODO implement light culling 
@@ -265,8 +281,9 @@ void renderer_forward::init(object_factory& objectFactory)
 	m_shadowProgram->bind();
 	m_MVPLocation = m_shadowProgram->getUniformLocation(m_MVPUniformName);
 
+	auto shadowDirName = std::string("shadowmap_dir");
 	m_shadowBuffer.bind();
-	m_shadowBuffer.createDepthTexture(SHADOW_DIR_WIDTH, SHADOW_DIR_HEIGHT, true);
+	m_shadowBuffer.createDepthTexture(SHADOW_DIR_WIDTH, SHADOW_DIR_HEIGHT, true, shadowDirName);
 	m_shadowBuffer.createArrayDepthTexture(SHADOW_SPOT_WIDTH, SHADOW_SPOT_HEIGHT,SUPPORTTED_SPOT_LIGHTS, true);
 	m_shadowBuffer.unbind();
 
@@ -277,9 +294,12 @@ void renderer_forward::init(object_factory& objectFactory)
 
 	m_EmptyShadowmap = std::make_shared<texture_2D>(setup);
 
-	m_reflectionBuffer.bind();
-	m_reflectionBuffer.createCubeMap(REFLECTION_SIZE);
-	m_reflectionBuffer.unbind();
+	auto reflectionMapName = std::string("reflection_cubeMap");
+	auto reflectionMapDepthName = std::string("reflection_depth");
+	m_ReflectionBuffer.bind();
+	m_ReflectionBuffer.createCubeMap(REFLECTION_SIZE, reflectionMapName);
+	m_ReflectionBuffer.createDepthTexture(REFLECTION_SIZE, REFLECTION_SIZE, false, reflectionMapDepthName);
+	m_ReflectionBuffer.unbind();
 
 
 	createSkybox(objectFactory);
@@ -317,4 +337,14 @@ void renderer_forward::createSkybox(object_factory& objectFactory)
 void renderer_forward::setClearMode(clear_mode mode)
 {
 	m_ClearMode = mode;
+}
+
+void renderer_forward::setReflectionPosition(const glm::vec3& pos)
+{
+	m_ReflectionPosition = pos;
+}
+
+void renderer_forward::setReflectionClearFlag(const glm::vec4& color)
+{
+	m_ReflectionClearFlag = color;
 }

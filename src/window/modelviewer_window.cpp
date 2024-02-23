@@ -12,7 +12,7 @@ glm::vec3 getPosition(float pitch, float yaw, float zoomLevel);
 
 void modelviewer_window::onRender(float elapsed) {
     addNewModels();
-	m_Renderer.render(m_Scene, m_Camera, true);
+	m_Renderer.render(m_Scene, m_Camera, true, true);
 }
 
 
@@ -34,6 +34,7 @@ modelviewer_window::modelviewer_window(int width, int height, std::string title,
 	//TODO set viewport when the window size changes too
 	m_Camera.setViewPort(getWidth(), getHeight());
 	m_Renderer.init(m_ObjectFactory);
+	m_Renderer.setReflectionPosition({0,2,0});
     
     model_platform_info info;
     info.sizeZ = 12;
@@ -86,6 +87,7 @@ void modelviewer_window::addPointLight(light_point point) {
 void modelviewer_window::setClearFlag(glm::vec4 color) {
     
 	m_Renderer.setClearFlag(color);
+	m_Renderer.setReflectionClearFlag(color);
 }
 
 glm::vec3 getPosition(float pitch, float yaw, float zoomLevel)

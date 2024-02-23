@@ -18,6 +18,7 @@ namespace modelViewer::render
 		
 	private:
 		glm::vec4 m_ClearFlag;
+		glm::vec4 m_ReflectionClearFlag;
 		clear_mode m_ClearMode = clear_mode::color;
 		
 		const unsigned int SHADOW_DIR_WIDTH = 2048;
@@ -44,7 +45,7 @@ namespace modelViewer::render
 		const std::string m_VPUniformName = "u_VP";
 
 		framebuffer m_shadowBuffer;
-		framebuffer m_reflectionBuffer;
+		framebuffer m_ReflectionBuffer;
 		std::unique_ptr<shader_program> m_shadowProgram;
 		std::unique_ptr<shader_program> m_reflectionProgram;
 		std::shared_ptr<render_object> m_Skybox;
@@ -52,18 +53,19 @@ namespace modelViewer::render
 		
 		int m_MVPLocation = -1;
 		glm::mat4 m_LightViewProjection;
+		glm::vec3  m_ReflectionPosition;
 
 		void renderSpotShadows(render_scene& scene);
 		void renderDirectionalShadows(render_scene& scene);
 		void renderShadows(render_scene& scene);
-		void renderReflectionProbs(render_scene& scene, camera& camera);
+		void renderReflectionMap(render_scene& scene, camera& camera);
 		
-		void renderObjects(render_scene& scene, camera& camera, bool shadowsEnabled);
+		void renderObjects(render_scene& scene, camera& camera, bool shadowsEnabled, bool reflectionEnabled);
 	public:
-		void render(render_scene& scene, camera& camera, bool shadowEnabled);
+		void render(render_scene& scene, camera& camera, bool shadowEnabled, bool reflectionEnabled);
 		
 		void setClearFlag(glm::vec4 color);
-
+		void setReflectionPosition(const glm::vec3& pos);
 
 		void init(object_factory& objectFactory);
 
@@ -72,6 +74,8 @@ namespace modelViewer::render
 		void setClearMode(clear_mode mode);
 
 		std::vector<std::shared_ptr<render_object>> getSortedObjects(render_scene& scene);
+
+		void setReflectionClearFlag(const glm::vec4& color);
 	};
 }
 

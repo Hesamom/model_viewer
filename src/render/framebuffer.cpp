@@ -45,7 +45,7 @@ unsigned int modelViewer::render::framebuffer::createArrayDepthTexture(int width
 }
 
 
-unsigned int modelViewer::render::framebuffer::createDepthTexture(int width, int height, bool enableDepthCompare)
+unsigned int modelViewer::render::framebuffer::createDepthTexture(int width, int height, bool enableDepthCompare, std::string& name)
 {
 	glGenTextures(1, &m_DepthTextureId);
 	glBindTexture(GL_TEXTURE_2D, m_DepthTextureId);
@@ -71,13 +71,13 @@ unsigned int modelViewer::render::framebuffer::createDepthTexture(int width, int
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-	
 
+	glObjectLabel(GL_TEXTURE, m_DepthTextureId, -1, name.data());
 	glBindTexture(GL_TEXTURE_2D,0);
 	return m_DepthTextureId;
 }
 
-unsigned int modelViewer::render::framebuffer::createCubeMap(int size){
+unsigned int modelViewer::render::framebuffer::createCubeMap(int size, std::string& name){
 	if (size < 1) {
 		throw std::length_error("size is smaller than 1");
 	}
@@ -96,6 +96,7 @@ unsigned int modelViewer::render::framebuffer::createCubeMap(int size){
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, size,
 			size, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 	}
+	glObjectLabel(GL_TEXTURE, m_CubeMapId, -1, name.c_str());
 	return m_CubeMapId;
 }
 
