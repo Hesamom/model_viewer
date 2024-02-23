@@ -6,6 +6,16 @@
 
 namespace modelViewer::render {
     class texture;
+	
+	enum texture_cube_face
+	{
+		x_positive,
+		x_negative,
+		y_positive,
+		y_negative,
+		z_positive,
+		z_negative
+	};
 
     struct texture_binding {
         std::shared_ptr<texture> texture;

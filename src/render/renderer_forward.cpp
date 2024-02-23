@@ -9,14 +9,33 @@
 using namespace modelViewer::res;
 using namespace modelViewer::render;
 
-void renderer_forward::render(render_scene& scene, camera& camera, bool shadowEnabled)
+const glm::vec3 m_CubeMapFacesDirection[] = {
+	glm::vec3(1.0f, 0.0f, 0.0f),  // Positive X
+	glm::vec3(-1.0f, 0.0f, 0.0f), // Negative X
+	glm::vec3(0.0f, 1.0f, 0.0f),  // Positive Y
+	glm::vec3(0.0f, -1.0f, 0.0f), // Negative Y
+	glm::vec3(0.0f, 0.0f, 1.0f),  // Positive Z
+	glm::vec3(0.0f, 0.0f, -1.0f)  // Negative Z
+};
+
+const std::string m_SideNames[]
+	{
+		"x+", "x-","y+","y-","z+","z-"
+	};
+
+void renderer_forward::render(render_scene& scene, camera& camera, bool shadowEnabled, bool reflectionEnabled)
 {
 	if (shadowEnabled)
 	{
 		renderShadows(scene);
 	}
 
-	renderObjects(scene, camera, shadowEnabled);
+	if (reflectionEnabled)
+	{
+		renderReflectionMap(scene, camera);
+	}
+
+	renderObjects(scene, camera, shadowEnabled, reflectionEnabled);
 }
 
 void renderer_forward::renderDirectionalShadows(render_scene& scene) {
@@ -153,7 +172,7 @@ std::vector<std::shared_ptr<mesh_renderer>> renderer_forward::getSortedObjects(r
 	return renderers;
 }
 
-void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool shadowsEnabled)
+void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool shadowsEnabled, bool reflectionEnabled)
 {
 	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "rendering objects");
 	
@@ -192,6 +211,10 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 				renderer->getMaterial()->setShadowMapSlot(emptyShadowmapSlot);
 				renderer->getMaterial()->setSpotShadowMapSlot(shadowmapSpotSlot);
 			}
+		}
+		if (reflectionEnabled)
+		{
+			//TODO 
 		}
 		
 		//TODO implement light culling 
@@ -242,17 +265,28 @@ void renderer_forward::initShadowmap(object_factory& objectFactory, shader_loade
 	m_shadowProgram->bind();
 	m_MVPLocation = m_shadowProgram->getUniformLocation(m_MVPUniformName);
 
+	auto shadowDirName = std::string("shadowmap_dir");
 	m_shadowBuffer.bind();
-	m_shadowBuffer.createDepthTexture(SHADOW_DIR_WIDTH, SHADOW_DIR_HEIGHT, true);
-	m_shadowBuffer.createArrayDepthTexture(SHADOW_SPOT_WIDTH, SHADOW_SPOT_HEIGHT, SUPPORTTED_SPOT_LIGHTS, true);
+	m_shadowBuffer.createDepthTexture(SHADOW_DIR_WIDTH, SHADOW_DIR_HEIGHT, true, shadowDirName);
+	m_shadowBuffer.createArrayDepthTexture(SHADOW_SPOT_WIDTH, SHADOW_SPOT_HEIGHT,SUPPORTTED_SPOT_LIGHTS, true);
 	m_shadowBuffer.unbind();
 
 	auto textureLoader = objectFactory.getTextureLoader();
 	auto textureAsset = textureLoader.load(m_EmptyShadowmapTexture,3);
 	texture_setup setup;
 	setup.assets.push_back(textureAsset);
-
+	
 	m_EmptyShadowmap = std::make_shared<texture_2D>(setup);
+
+	auto reflectionMapName = std::string("reflection_cubeMap");
+	auto reflectionMapDepthName = std::string("reflection_depth");
+	m_ReflectionBuffer.bind();
+	m_ReflectionBuffer.createCubeMap(REFLECTION_SIZE, reflectionMapName);
+	m_ReflectionBuffer.createDepthTexture(REFLECTION_SIZE, REFLECTION_SIZE, false, reflectionMapDepthName);
+	m_ReflectionBuffer.unbind();
+
+
+	createSkybox(objectFactory);
 }
 
 void renderer_forward::createSkybox(object_factory& objectFactory)
@@ -294,4 +328,14 @@ void renderer_forward::createSkybox(object_factory& objectFactory)
 void renderer_forward::setClearMode(clear_mode mode)
 {
 	m_ClearMode = mode;
+}
+
+void renderer_forward::setReflectionPosition(const glm::vec3& pos)
+{
+	m_ReflectionPosition = pos;
+}
+
+void renderer_forward::setReflectionClearFlag(const glm::vec4& color)
+{
+	m_ReflectionClearFlag = color;
 }

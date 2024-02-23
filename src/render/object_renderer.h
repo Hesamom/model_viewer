@@ -23,6 +23,7 @@ namespace modelViewer::render
 		
 		bool m_CastShadows = true;
 		bool m_ReceiveShadows = true;
+    	bool m_IsReflective = false;
         
     public:
         object_renderer(std::vector<std::shared_ptr<material>>& materials,
@@ -39,10 +40,12 @@ namespace modelViewer::render
 		void setRenderMode(render_mode mode);
 		void setCastShadow(bool enabled);
 		void setReceiveShadows(bool enabled);
+    	void setReflective(bool enabled);
     	void computeBoundingBox();
     	common::aabb getBoundingBox();
 		bool getCastShadows();
 		bool getReceiveShadows();
+    	bool getReflective();
     	std::string getName();
     };
 }
