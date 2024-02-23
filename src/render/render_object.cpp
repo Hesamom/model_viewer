@@ -83,6 +83,14 @@ void render_object::setReceiveShadows(bool enabled)
 	m_ReceiveShadows = enabled;
 }
 
+void render_object::setReflective(bool enabled) {
+    m_IsReflective = enabled;
+}
+
+bool render_object::getReflective() {
+    return m_IsReflective;
+}
+
 void render_object::computeBoundingBox() {
     if (!m_Transform.dirty) {
         return;

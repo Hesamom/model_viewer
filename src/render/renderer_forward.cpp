@@ -16,6 +16,8 @@ void renderer_forward::render(render_scene& scene, camera& camera, bool shadowEn
 		renderShadows(scene);
 	}
 
+	renderReflectionProbs(scene, camera);
+
 	renderObjects(scene, camera, shadowEnabled);
 }
 
@@ -121,6 +123,52 @@ void renderer_forward::renderShadows(render_scene& scene)
 	m_shadowBuffer.unbind();
 }
 
+const glm::vec3 cube_Map_Faces_Direction[] = {
+	glm::vec3(1.0f, 0.0f, 0.0f),  // Positive X
+	glm::vec3(-1.0f, 0.0f, 0.0f), // Negative X
+	glm::vec3(0.0f, 1.0f, 0.0f),  // Positive Y
+	glm::vec3(0.0f, -1.0f, 0.0f), // Negative Y
+	glm::vec3(0.0f, 0.0f, 1.0f),  // Positive Z
+	glm::vec3(0.0f, 0.0f, -1.0f)  // Negative Z
+};
+
+const glm::vec4 reflection_Debug_Colors[6] = {
+	glm::vec4(1.0f, 0.0f, 0.0f, 1.0f),
+	glm::vec4(0.0f, 1.0f, 0.0f, 1.0f),
+	glm::vec4(0.0f, 0.0f, 1.0f, 1.0f),
+	glm::vec4(1.0f, 1.0f, 0.0f, 1.0f),
+	glm::vec4(1.0f, 0.0f, 1.0f, 1.0f),
+	glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
+};
+
+void renderer_forward::renderReflectionProbs(render_scene& scene , camera& camera){
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "rendering reflection probs");
+
+	m_reflectionBuffer.bind();
+	glCullFace(GL_FRONT);
+	glViewport(0, 0, REFLECTION_SIZE, REFLECTION_SIZE);
+
+	for (unsigned int index = 0; index < 6; ++index) {
+		m_reflectionBuffer.attachCubeMapFace(index);
+
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(reflection_Debug_Colors[index].x, reflection_Debug_Colors[index].y, reflection_Debug_Colors[index].z, reflection_Debug_Colors[index].a);
+
+
+		glm::mat4 viewMatrix = glm::lookAt(camera.getPosition(), camera.getPosition() + cube_Map_Faces_Direction[index], glm::vec3(0.0f, 1.0f, 0.0f));
+
+		glm::mat4 projectionMatrix = glm::perspective(glm::radians(60.0f), 1.0f, 0.1f, 100.0f);
+
+		for (auto& object : scene.getObjects()) {
+			object->render(viewMatrix, projectionMatrix);
+		}
+	}
+
+	m_reflectionBuffer.unbind();
+
+	glPopDebugGroup();
+}
+
 bool compareRenderQueue(std::shared_ptr<render_object> o1, std::shared_ptr<render_object> o2)
 {
 	return o1->getMaterial()->getInfo().propertySet.renderQueue < o2->getMaterial()->getInfo().propertySet.renderQueue;
@@ -201,19 +249,19 @@ void renderer_forward::init(object_factory& objectFactory)
 	auto shaderLoader = objectFactory.getShaderLoader();
 	auto vertShaderAsset = shaderLoader.load(m_DepthShaderVert, shaderType::vertex);
 	auto fragShaderAsset = shaderLoader.load(m_DepthShaderFrag, shaderType::fragment);
-	
-	shader vertShader(vertShaderAsset);
-	shader fragShader(fragShaderAsset);
-	
-	vertShader.compile();
-	vertShader.verify();
-	
-	fragShader.compile();
-	fragShader.verify();
-	
-	m_shadowProgram = std::make_unique<shader_program>(std::initializer_list<shader>{vertShader, fragShader});
-    m_shadowProgram->validateLinking();
-	
+
+	shader vertShadowShader(vertShaderAsset);
+	shader fragShadowShader(fragShaderAsset);
+
+	vertShadowShader.compile();
+	vertShadowShader.verify();
+
+	fragShadowShader.compile();
+	fragShadowShader.verify();
+
+	m_shadowProgram = std::make_unique<shader_program>(std::initializer_list<shader>{vertShadowShader, fragShadowShader});
+	m_shadowProgram->validateLinking();
+
 	m_shadowProgram->bind();
 	m_MVPLocation = m_shadowProgram->getUniformLocation(m_MVPUniformName);
 
@@ -226,8 +274,12 @@ void renderer_forward::init(object_factory& objectFactory)
 	auto textureAsset = textureLoader.load(m_EmptyShadowmapTexture,3);
 	texture_setup setup;
 	setup.assets.push_back(textureAsset);
-	
+
 	m_EmptyShadowmap = std::make_shared<texture_2D>(setup);
+
+	m_reflectionBuffer.bind();
+	m_reflectionBuffer.createCubeMap(REFLECTION_SIZE);
+	m_reflectionBuffer.unbind();
 
 
 	createSkybox(objectFactory);
