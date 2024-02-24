@@ -21,7 +21,6 @@ void renderdoc::init(){
 
 void renderdoc::startCapture(){
 	if (rdoc_api){
-		rdoc_api->SetActiveWindow();
 		rdoc_api->StartFrameCapture(NULL, NULL);
 	}
 }
