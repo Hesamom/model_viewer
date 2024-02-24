@@ -109,12 +109,14 @@ namespace modelViewer::res
 		const std::string  SpecularAlbedo = "u_mat.specularAlbedo";
 		const std::string  Shininess = "u_mat.shininess";
 		const std::string  Opacity = "u_mat.opacity";
+		const std::string  Reflectivity = "u_mat.reflectivity";
 
 		const color DefaultAmbientAlbedo{0.5f};
 		const color DefaultDiffuseAlbedo{0.2f};
 		const color DefaultSpecularAlbedo{0.5f};
 		const float DefaultShininess = 16;
 		const float DefaultOpacity = 1;
+		const float DefaultReflectivity = 0;
 	}
 }
 

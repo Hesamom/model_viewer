@@ -53,6 +53,7 @@ protected:
 
 	static std::string label(std::string str, int id);
 
+	void drawReflectionSettings();
 	void drawSpotLightSettings();
 	void drawPointLightSettings();
 	void drawDirectionalLightSettings();

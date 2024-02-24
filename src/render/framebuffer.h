@@ -27,6 +27,7 @@ namespace modelViewer::render
 		void unbind();
 		void activateDepthMap(int slot);
 		void activateDepthMapArray(int slot);
+		void activateCubeMap(int slot) const;
 	};
 
 }

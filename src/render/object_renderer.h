@@ -11,7 +11,6 @@
 
 namespace modelViewer::render
 {
-   
     class object_renderer : public renderable {
         
     private:
@@ -23,7 +22,9 @@ namespace modelViewer::render
 		
 		bool m_CastShadows = true;
 		bool m_ReceiveShadows = true;
-    	bool m_IsReflective = false;
+		
+		bool m_CastReflection = true;
+		reflection_mode m_ReflectionMode = reflection_mode::disabled;
         
     public:
         object_renderer(std::vector<std::shared_ptr<material>>& materials,
@@ -38,14 +39,20 @@ namespace modelViewer::render
 		
         void render(glm::mat4 view, glm::mat4 projection) override;
 		void setRenderMode(render_mode mode);
+		
 		void setCastShadow(bool enabled);
 		void setReceiveShadows(bool enabled);
-    	void setReflective(bool enabled);
+		bool getReceiveShadows();
+		bool getCastShadows();
+		
+		bool getCastReflection() const;
+		reflection_mode getReflectionMode() const;
+		void setCastReflection(bool enabled);
+		void setReflectionMode(reflection_mode mode);
+		
     	void computeBoundingBox();
     	common::aabb getBoundingBox();
-		bool getCastShadows();
-		bool getReceiveShadows();
-    	bool getReflective();
+		
     	std::string getName();
     };
 }

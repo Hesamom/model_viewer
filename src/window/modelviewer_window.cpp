@@ -34,7 +34,8 @@ modelviewer_window::modelviewer_window(int width, int height, std::string title,
 	//TODO set viewport when the window size changes too
 	m_Camera.setViewPort(getWidth(), getHeight());
 	m_Renderer.init(m_ObjectFactory);
-	m_Renderer.setReflectionPosition({0,2,0});
+	m_Renderer.setReflectionPosition({0,0,0});
+	m_Renderer.setReflectionClearFlag({0,0,0,0});
     
     model_platform_info info;
     info.sizeZ = 12;
@@ -87,7 +88,6 @@ void modelviewer_window::addPointLight(light_point point) {
 void modelviewer_window::setClearFlag(glm::vec4 color) {
     
 	m_Renderer.setClearFlag(color);
-	m_Renderer.setReflectionClearFlag(color);
 }
 
 glm::vec3 getPosition(float pitch, float yaw, float zoomLevel)
@@ -138,6 +138,14 @@ void modelviewer_window::onMousePositionChanged(double xpos, double ypos) {
 
 std::string modelviewer_window::label(std::string str, int id) {
 	return str + "##" + std::to_string(id);
+}
+
+void modelviewer_window::drawReflectionSettings()
+{
+	int biasedIndex = 2567;
+	ImGui::Text("Reflection");
+	auto& reflectionPos = m_Renderer.getReflectionPosition();
+	ImGui::SliderFloat3(label("position", biasedIndex).c_str(), &reflectionPos.x, -10,10, "%.2f");
 }
 
 
@@ -294,6 +302,7 @@ void modelviewer_window::displayLightPanel() {
 		return;
 	}
 
+	drawReflectionSettings();
 	drawDirectionalLightSettings();
 	drawSpotLightSettings();
 	drawPointLightSettings();
@@ -632,7 +641,7 @@ model_info modelviewer_window::getDemoModel(const std::string& name) const
 	textureAssetInfo.samplerName = "diffuseSampler";
 	textureAssetInfo.paths.emplace_back(modelViewer::res::literals::textures::uv_checker);
 	material->textures.push_back(textureAssetInfo);
-
+	//material->propertySet.floats.push_back({Literals::Reflectivity, 1.0f});
 	info.materials.push_back(material);
 	info.path =  modelViewer::res::literals::models::primitive_path + name + ".fbx";
 	info.name = name;
@@ -677,3 +686,5 @@ void modelviewer_window::openSpecularMapModel()
 	material->propertySet.cullFaceEnabled = false;
 	addModel(wallModel);
 }
+
+

@@ -1,5 +1,6 @@
 ﻿
 #include "mesh_renderer.h"
+#include "object_renderer.h"
 
 using namespace modelViewer::render;
 
@@ -50,7 +51,7 @@ std::shared_ptr<material> mesh_renderer::getMaterial()
 	return m_Material;
 }
 
-bool mesh_renderer::getReceiveShadows()
+bool mesh_renderer::getReceiveShadows() const
 {
 	return m_ReceivesShadow;
 }
@@ -65,3 +66,22 @@ const std::string& mesh_renderer::getName() const
 	return m_Name;
 }
 
+bool mesh_renderer::getCastReflection() const
+{
+	return m_CastReflection;
+}
+
+void mesh_renderer::setCastReflection(bool enabled)
+{
+	m_CastReflection = enabled;
+}
+
+reflection_mode mesh_renderer::getReflectionMode() const
+{
+	return m_ReflectionMode;
+}
+
+void mesh_renderer::setReflectionMode(reflection_mode mode)
+{
+	m_ReflectionMode = mode;
+}

@@ -165,3 +165,16 @@ void modelViewer::render::framebuffer::activateDepthMapArray(int slot)
 	glBindTexture(GL_TEXTURE_2D_ARRAY, m_ArrayDepthTextureId);
 }
 
+void modelViewer::render::framebuffer::activateCubeMap(int slot) const
+{
+	if (m_CubeMapId < 0)
+	{
+		throw std::runtime_error("no cube map to activate!");
+	}
+
+	int firstIndex = GL_TEXTURE0;
+	int slotIndex = firstIndex + slot;
+	glActiveTexture(slotIndex);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_CubeMapId);
+}
+

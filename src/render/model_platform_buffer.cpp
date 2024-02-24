@@ -140,9 +140,11 @@ std::shared_ptr<modelViewer::render::object_renderer> model_platform_buffer::gen
 	auto defaults = objectFactory.getDefaultTextures();
 	auto mat = std::make_shared<material>(materialInfo, textures, program, defaults);
 	auto grid = std::make_shared<object_renderer>(mat, mesh, "platform_grid");
+	
 	grid->setRenderMode(render_mode::lines);
 	grid->setCastShadow(false);
 	grid->setReceiveShadows(false);
+	grid->setCastReflection(false);
 	
 	return grid;
 }
@@ -183,6 +185,7 @@ std::shared_ptr<modelViewer::render::object_renderer> model_platform_buffer::gen
 	materialInfo.propertySet.colors.push_back({Literals::AmbientAlbedo, Literals::DefaultAmbientAlbedo});
 	materialInfo.propertySet.floats.push_back({Literals::Opacity, 1.0f});
 	materialInfo.propertySet.floats.push_back({Literals::Shininess, 1});
+	materialInfo.propertySet.floats.push_back({Literals::Reflectivity, 0.3f});
 	materialInfo.propertySet.renderQueue = render_queue_transparent;
 	auto defaults = objectFactory.getDefaultTextures();
 	auto mat = std::make_shared<material>(materialInfo, textures, program, defaults);
@@ -190,6 +193,8 @@ std::shared_ptr<modelViewer::render::object_renderer> model_platform_buffer::gen
 	auto plane = std::make_shared<object_renderer>(mat, mesh, "platform_plane");
 	plane->setCastShadow(false);
 	plane->setReceiveShadows(true);
+	plane->setCastReflection(false);
+	plane->setReflectionMode(reflection_mode::environment);
 	
 	return plane;
 }

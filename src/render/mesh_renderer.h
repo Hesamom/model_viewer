@@ -21,6 +21,8 @@ namespace modelViewer::render
 		std::shared_ptr <mesh> m_Mesh;
 		render_mode m_Mode = render_mode::triangles;
 		bool m_ReceivesShadow = true;
+		bool m_CastReflection = true;
+		reflection_mode m_ReflectionMode = reflection_mode::disabled;
 		std::string m_Name;
 		
 	public:
@@ -29,8 +31,13 @@ namespace modelViewer::render
 		void render(glm::mat4 view, glm::mat4 projection);
 		void renderShadow();
 		std::shared_ptr<material> getMaterial();
-		bool getReceiveShadows();
+		bool getReceiveShadows() const;
 		void setReceiveShadows(bool enabled);
+
+		bool getCastReflection() const;
+		reflection_mode getReflectionMode() const;
+		void setCastReflection(bool enabled);
+		void setReflectionMode(reflection_mode mode);
 		const std::string&  getName() const;
 	};
 }

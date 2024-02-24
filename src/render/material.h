@@ -16,6 +16,13 @@
 
 namespace modelViewer::render
 {
+	enum class reflection_mode
+	{
+		disabled,
+		environment,
+		skybox
+	};
+	
     class texture_2D;
     class shader_program;
     class material
@@ -27,6 +34,7 @@ namespace modelViewer::render
     	
         //TODO consider using a uniform block
     	const std::string  m_ShadowSampler = "u_shadowSampler";
+		const std::string  m_ReflectionSampler = "u_reflectionSampler";
     	const std::string  m_SpotShadowSampler = "u_spotShadowSamplers";
     	
 		shader_uniform<glm::mat4> m_MVPUniform{"m_MVP", ""};
@@ -42,6 +50,7 @@ namespace modelViewer::render
 		
 		int m_ShadowMapSamplerLocation = -1;
     	int m_SpotShadowMapSamplerLocation = -1;
+		int m_ReflectionMapSamplerLocation = -1;
 		std::map<shader_uniform_texture_pair, std::shared_ptr<texture>> m_DefaultTextures;
 
 		const std::set<int> m_AssignedTextureLocations;
@@ -74,6 +83,10 @@ namespace modelViewer::render
         void setSpotLights(std::vector<light_spot>& lights);
 
 		void setCameraPosition(glm::vec3 position);
+		bool isReflective() const;
+		
+		void setReflectionMapSlot(int slot) const;
+		const std::vector<std::shared_ptr<texture>>& getBoundTextures() const;
 	};
 }
 
