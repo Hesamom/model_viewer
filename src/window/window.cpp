@@ -103,6 +103,8 @@ void window::draw()
         double elapsed = watch.getSeconds();
         watch.start();
 
+        glfwPollEvents();
+
 		if (m_RequestedCapture)
 		{
 			m_RenderDoc.startCapture();
@@ -113,8 +115,6 @@ void window::draw()
         ImGui::NewFrame();
         onRenderImGUI();
         //ImGui::ShowDemoWindow();
-        
-        glfwPollEvents();
         onRender((float)elapsed);
         
         ImGui::Render();
