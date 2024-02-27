@@ -3,7 +3,7 @@
 
 
 void renderdoc::init(){
-	if(HMODULE mod = LoadLibrary("C:\\Program Files\\RenderDoc\\renderdoc.dll")){
+	if(HMODULE mod = LoadLibrary("res/libs/renderdoc.dll")){
 		pRENDERDOC_GetAPI RENDERDOC_GetAPI =
 			(pRENDERDOC_GetAPI)GetProcAddress(mod, "RENDERDOC_GetAPI");
 		int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_1_2, (void **)&rdoc_api);
