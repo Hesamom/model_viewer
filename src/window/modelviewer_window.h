@@ -1,7 +1,7 @@
 ﻿
 #ifndef MODEL_VIEWER_MODELVIEWER_WINDOW_H
 #define MODEL_VIEWER_MODELVIEWER_WINDOW_H
-#include "window.h"
+#include "window_gl.h"
 #include "../resource/model_info.h"
 #include "../render/render_scene.h"
 #include "glm/glm.hpp"
@@ -10,7 +10,7 @@
 #include "../render/object_factory.h"
 #include "../render/renderer_forward.h"
 
-class modelviewer_window : public window {
+class modelviewer_window : public window_gl {
     
 private:
     

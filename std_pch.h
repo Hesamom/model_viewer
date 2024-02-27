@@ -31,10 +31,14 @@
 #include <algorithm>
 #include <iterator>
 #include <ranges>
-#include <assert.h>
+#include <cassert>
 
 //literals
 #include "src/resource/literals.h"
 
+//dx
+#include <cstdint>
+#include <fstream>
+#include <sstream>
 
 #endif //MODEL_VIEWER_STD_PCH_H

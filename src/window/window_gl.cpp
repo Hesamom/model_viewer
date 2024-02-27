@@ -1,12 +1,12 @@
 ﻿#include <GL/glew.h>
 #include "GLFW/glfw3.h"
-#include "window.h"
+#include "window_gl.h"
 #include "../common/stopwatch.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
-window::window(int width, int height, const std::string& title, bool fullscreen, bool vSync,  int mssaLevel ) 
+window_gl::window_gl(int width, int height, const std::string& title, bool fullscreen, bool vSync,  int mssaLevel ) 
 {
     if (title.empty())
     {
@@ -52,14 +52,14 @@ window::window(int width, int height, const std::string& title, bool fullscreen,
 }
 
 
-window::~window() {
+window_gl::~window_gl() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
     glfwDestroyWindow(m_Window);
 }
 
-bool window::isOpen() {
+bool window_gl::isOpen() {
     //TODO implement this 
     return true;
 }
@@ -87,7 +87,7 @@ void capTargetFrameRate(double elapsed, int targetFps)
     }
 }
 
-void window::draw()
+void window_gl::draw()
 {
     stopwatch watch;
     watch.start();
@@ -122,11 +122,11 @@ void window::draw()
     }
 }
 
-void window::onRender(float elapsedTime) {
+void window_gl::onRender(float elapsedTime) {
 
 }
 
-void window::setSize(int width, int height) {
+void window_gl::setSize(int width, int height) {
     
     if (width <= 0)
     {
@@ -143,12 +143,12 @@ void window::setSize(int width, int height) {
     m_Width = width;
 }
 
-int window::getHeight() {
+int window_gl::getHeight() {
     glfwGetWindowSize(m_Window, &m_Width, &m_Height);
     return m_Height;
 }
 
-int window::getWidth() {
+int window_gl::getWidth() {
      glfwGetWindowSize(m_Window, &m_Width, &m_Height);
      return m_Width;
 }
@@ -163,7 +163,7 @@ void APIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severi
     }
 }
 
-void window::initContext(bool vSync) {
+void window_gl::initContext(bool vSync) {
     
     glfwMakeContextCurrent(m_Window);
     glewExperimental = GL_TRUE; // Enable experimental features
@@ -214,36 +214,36 @@ void window::initContext(bool vSync) {
          ",max texture units in vert: " << maxTexturesVert << "\n";
 }
 
-void window::setTitle(std::string title) {
+void window_gl::setTitle(std::string title) {
     glfwSetWindowTitle(m_Window, title.c_str());
     m_Title = title;
 }
 
-std::string window::getTitle() {
+std::string window_gl::getTitle() {
     return m_Title;
 }
 
-int window::getTargetFrameRate() {
+int window_gl::getTargetFrameRate() {
     return m_TargetFrameRate;
 }
 
-void window::setTargetFrameRate(int fps) {
+void window_gl::setTargetFrameRate(int fps) {
     m_TargetFrameRate = std::clamp(fps,-1,std::numeric_limits<int>::max());
 }
 
-long double window::getTimeSinceStart() {
+long double window_gl::getTimeSinceStart() {
     return m_elapsedTimeSinceStart;
 }
 
-void window::setVsync(bool enabled) {
+void window_gl::setVsync(bool enabled) {
     glfwSwapInterval(enabled ? 1 : 0);
 }
 
-void window::onScrollChanged(double yOffset) {
+void window_gl::onScrollChanged(double yOffset) {
 
 }
 
-void window::subscribeEvents() {
+void window_gl::subscribeEvents() {
     
     static auto callback_static = [this](GLFWwindow* window, double xoffset, double yoffset){
         onScrollChanged(yoffset);
@@ -298,23 +298,23 @@ void window::subscribeEvents() {
     );
 }
 
-void window::onMouseButtonChanged(int button, int action, int mods) {
+void window_gl::onMouseButtonChanged(int button, int action, int mods) {
     
 
 }
 
-void window::onMousePositionChanged(double xpos, double ypos) {
+void window_gl::onMousePositionChanged(double xpos, double ypos) {
     
 }
 
-void window::onSizeChanged(int height, int width) {
+void window_gl::onSizeChanged(int height, int width) {
     m_Height = height;
     m_Width = width;
 
     m_Paused = m_Height == 0 || m_Width == 0;
 }
 
-void window::onRenderImGUI() {
+void window_gl::onRenderImGUI() {
 
 }
 

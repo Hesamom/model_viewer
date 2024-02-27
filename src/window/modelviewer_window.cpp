@@ -22,7 +22,7 @@ void modelviewer_window::addModel(modelViewer::res::model_info& info) {
 }
 
 
-modelviewer_window::modelviewer_window(int width, int height, std::string title, bool fullscreen) : window(width,
+modelviewer_window::modelviewer_window(int width, int height, std::string title, bool fullscreen) : window_gl(width,
                                                                                                            height,
                                                                                                            title,
                                                                                                            fullscreen)
@@ -422,7 +422,7 @@ void modelviewer_window::onRenderImGUI() {
 
 void modelviewer_window::onSizeChanged(int height, int width)
 {
-	window::onSizeChanged(height, width);
+	window_gl::onSizeChanged(height, width);
 	
 	if(height == 0 || width == 0) {
 		return;

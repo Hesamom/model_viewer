@@ -19,7 +19,7 @@ set(CMAKE_COMPILE_WARNING_AS_ERROR OFF)
 file(GLOB_RECURSE SRC_FILES src/*)
 
 if (DX_12)
-    add_executable(model_viewer WIN32 main.cpp ${SRC_FILES})
+    add_executable(model_viewer main.cpp ${SRC_FILES})
 else ()
     add_executable(model_viewer main.cpp ${SRC_FILES})
 endif ()
