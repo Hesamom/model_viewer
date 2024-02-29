@@ -1,5 +1,5 @@
 ﻿#include "texture_2D.h"
-#include "texture_format.h"
+#include "../texture_format.h"
 #include <GL/glew.h>
 
 using namespace modelViewer::render;

@@ -2,12 +2,12 @@
 #define MODEL_VIEWER_TEXTURE_2D_H
 
 
-#include "../resource/texture_asset.h"
-#include "texture_setup.h"
-#include "texture.h"
+#include "../../resource/texture_asset.h"
+#include "../texture_setup.h"
+#include "texture_gl.h"
 
 namespace modelViewer::render {
-    class texture_2D : public texture{
+    class texture_2D : public texture_gl{
     private:
         texture_setup m_Setup;
         

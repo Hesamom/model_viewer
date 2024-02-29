@@ -5,9 +5,9 @@
 #include "../resource/shader_loader.h"
 #include "../resource/texture_loader.h"
 #include "../resource/model_loader.h"
-#include "shader_program.h"
-#include "mesh.h"
-#include "texture.h"
+#include "gl/shader_program.h"
+#include "gl/mesh.h"
+#include "gl/texture_gl.h"
 #include "object_renderer.h"
 #include "texture_setup.h"
 
@@ -25,13 +25,13 @@ namespace modelViewer::render
 		std::shared_ptr<shader_program> getProgram(std::shared_ptr<res::material_asset> materialAsset);
 		std::vector<std::shared_ptr<mesh>> getMeshes(res::model_info& info);
 
-		std::shared_ptr<texture> createEmbeddedTexture(std::shared_ptr<res::texture_embedded> embedded, texture_setup setup);
+		std::shared_ptr<texture_gl> createEmbeddedTexture(std::shared_ptr<res::texture_embedded> embedded, texture_setup setup);
 
-		std::shared_ptr<texture> createTexture(const res::texture_asset_info& info);
+		std::shared_ptr<texture_gl> createTexture(const res::texture_asset_info& info);
 
 		std::vector<texture_binding> getTextures(std::shared_ptr<res::material_asset> materialAsset);
 		
-		std::map<shader_uniform_texture_pair, std::shared_ptr<texture>> m_DefaultTextures;
+		std::map<shader_uniform_texture_pair, std::shared_ptr<texture_gl>> m_DefaultTextures;
 		
 	public:
 		object_factory();
@@ -39,7 +39,7 @@ namespace modelViewer::render
 		res::shader_loader& getShaderLoader();
 		res::model_loader& getModelLoader();
 		res::texture_loader& getTextureLoader();
-		std::map<shader_uniform_texture_pair, std::shared_ptr<texture>> getDefaultTextures();
+		std::map<shader_uniform_texture_pair, std::shared_ptr<texture_gl>> getDefaultTextures();
 
 		std::vector<std::shared_ptr<material>> getMaterials(res::model_info& info);
 		std::shared_ptr<material> getMaterial(const std::shared_ptr<res::material_asset>& asset);

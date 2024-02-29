@@ -1,5 +1,5 @@
 ﻿#include "mesh.h"
-#include "material.h"
+#include "../material.h"
 
 void modelViewer::render::mesh::bind() {
     m_VertexArray.bind();

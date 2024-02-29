@@ -2,11 +2,11 @@
 #define MODEL_VIEWER_TEXTURE_CUBE_H
 
 #include "GL/glew.h"
-#include "texture.h"
-#include "texture_setup.h"
+#include "texture_gl.h"
+#include "../texture_setup.h"
 
 namespace modelViewer::render {
-    class texture_cube: public texture {
+    class texture_cube: public texture_gl {
     public:
         explicit texture_cube(texture_setup& textureSetup);
         virtual unsigned int GetTextureType() override{return GL_TEXTURE_CUBE_MAP;};

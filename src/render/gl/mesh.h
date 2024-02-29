@@ -2,12 +2,12 @@
 #ifndef MODEL_VIEWER_MESH_H
 #define MODEL_VIEWER_MESH_H
 
-#include "../resource/mesh_asset.h"
+#include "../../resource/mesh_asset.h"
 #include "shader_program.h"
 #include "vertex_buffer.h"
 #include "index_buffer.h"
 #include "vertex_array.h"
-#include "material.h"
+#include "../material.h"
 
 namespace modelViewer::render {
     class mesh {

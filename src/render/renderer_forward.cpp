@@ -4,7 +4,7 @@
 #include "camera.h"
 #include "object_factory.h"
 #include "texture_setup.h"
-#include "texture_2D.h"
+#include "gl/texture_2D.h"
 
 using namespace modelViewer::res;
 using namespace modelViewer::render;

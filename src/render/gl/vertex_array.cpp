@@ -1,5 +1,5 @@
 ﻿#include "vertex_array.h"
-#include "gl/glew.h"
+#include "glew/include/GL/glew.h"
 
 modelViewer::render::vertex_array::vertex_array() {
     glGenVertexArrays(1, &m_arrayId);

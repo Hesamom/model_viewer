@@ -4,7 +4,7 @@
 #include "glm/glm.hpp"
 #include "../common/transform.h"
 #include "../common/aabb.h"
-#include "mesh.h"
+#include "gl/mesh.h"
 #include "material.h"
 #include "renderable.h"
 #include "mesh_renderer.h"

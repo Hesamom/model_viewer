@@ -1,6 +1,6 @@
 ﻿#include "object_factory.h"
-#include "texture_cube.h"
-#include "texture_2D.h"
+#include "gl/texture_cube.h"
+#include "gl/texture_2D.h"
 #include "../common/stopwatch.h"
 
 using namespace modelViewer::res;
@@ -8,7 +8,7 @@ using namespace modelViewer::render;
 using namespace modelViewer::common;
 
 
-std::shared_ptr<texture> object_factory::createEmbeddedTexture(std::shared_ptr<texture_embedded> embedded, texture_setup setup) {
+std::shared_ptr<texture_gl> object_factory::createEmbeddedTexture(std::shared_ptr<texture_embedded> embedded, texture_setup setup) {
 
 	
 	if (embedded == nullptr) {
@@ -34,7 +34,7 @@ std::shared_ptr<texture> object_factory::createEmbeddedTexture(std::shared_ptr<t
 		
 }
 
-std::shared_ptr<texture> object_factory::createTexture(const texture_asset_info& info) {
+std::shared_ptr<texture_gl> object_factory::createTexture(const texture_asset_info& info) {
 	
 	texture_setup setup;
 	//TODO set wrap mode
@@ -69,7 +69,7 @@ std::shared_ptr<texture> object_factory::createTexture(const texture_asset_info&
 		return nullptr;
 	}
 
-	std::shared_ptr<texture> texturePtr = nullptr;
+	std::shared_ptr<texture_gl> texturePtr = nullptr;
 	if (info.type == texture_asset_type::textureCube)
 	{
 		texturePtr = std::make_shared<texture_cube>(setup);
@@ -234,7 +234,7 @@ texture_loader& object_factory::getTextureLoader()
 	return m_TextureLoader;
 }
 
-std::map<shader_uniform_texture_pair, std::shared_ptr<texture>> object_factory::getDefaultTextures() {
+std::map<shader_uniform_texture_pair, std::shared_ptr<texture_gl>> object_factory::getDefaultTextures() {
 	return m_DefaultTextures;
 }
 

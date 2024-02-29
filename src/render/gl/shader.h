@@ -2,7 +2,7 @@
 #ifndef MODEL_VIEWER_SHADER_H
 #define MODEL_VIEWER_SHADER_H
 
-#include "../resource/shader_asset.h"
+#include "../../resource/shader_asset.h"
 
 namespace modelViewer::render {
 

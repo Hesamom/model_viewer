@@ -1,8 +1,8 @@
 ﻿#include <imgui/imgui.h>
 #include "glm/glm.hpp"
-#include "modelviewer_window.h"
-#include "glfw/glfw3.h"
+#include "modelviewer_app.h"
 #include "regex"
+#include "../common/stopwatch.h"
 
 using namespace modelViewer::res;
 using namespace modelViewer::render;
@@ -10,29 +10,29 @@ using namespace modelViewer::common;
 
 glm::vec3 getPosition(float pitch, float yaw, float zoomLevel);
 
-void modelviewer_window::onRender(float elapsed) {
+void modelviewer_app::onRender(float elapsed) {
     addNewModels();
 	m_Renderer.render(m_Scene, m_Camera, true);
 }
 
 
-void modelviewer_window::addModel(modelViewer::res::model_info& info) {
+void modelviewer_app::addModel(modelViewer::res::model_info& info) {
     
     m_NewModelsQueue.push_back(info);
 }
 
 
-modelviewer_window::modelviewer_window(int width, int height, std::string title, bool fullscreen) : window_gl(width,
-                                                                                                           height,
-                                                                                                           title,
-                                                                                                           fullscreen)
-    {
-    
-    setVsync(false);
-    setTargetFrameRate(360);
+modelviewer_app::modelviewer_app(std::shared_ptr<window>& window, std::shared_ptr<gfx_device>& device)
+{
+	m_Window = window;
+	m_Device = device;
+	
+	m_Window->setOnSizeChangedCallback(std::bind(&modelviewer_app::onSizeChanged, this, std::placeholders::_1, std::placeholders::_2));
+	setTargetFrameRate(360);
+	
     updateCameraPosition();
 	//TODO set viewport when the window size changes too
-	m_Camera.setViewPort(getWidth(), getHeight());
+	m_Camera.setViewPort(m_Window->getWidth(), m_Window->getHeight());
 	m_Renderer.init(m_ObjectFactory);
     
     model_platform_info info;
@@ -46,7 +46,7 @@ modelviewer_window::modelviewer_window(int width, int height, std::string title,
 	m_Scene.addStaticObject(grid);
 }
 
-modelviewer_window::~modelviewer_window() {
+modelviewer_app::~modelviewer_app() {
     
 }
 
@@ -54,7 +54,7 @@ std::string getLightObjectName(int id) {
 	return "light_object_" + std::to_string(id);
 }
 
-void modelviewer_window::addSpotLight(light_spot spot) {
+void modelviewer_app::addSpotLight(light_spot spot) {
 
 	auto spotModel1 = getDemoModel("sphere");
 	spotModel1.transform.setPosition(spot.position);
@@ -68,7 +68,7 @@ void modelviewer_window::addSpotLight(light_spot spot) {
 	m_Scene.addSpotLight(spot);
 }
 
-void modelviewer_window::addPointLight(light_point point) {
+void modelviewer_app::addPointLight(light_point point) {
 
 	auto lightObjectModel = getDemoModel("cube");
 	lightObjectModel.transform.setPosition(point.position);
@@ -83,10 +83,6 @@ void modelviewer_window::addPointLight(light_point point) {
 	m_Scene.addPointLight(point);
 }
 
-void modelviewer_window::setClearFlag(glm::vec4 color) {
-    
-	m_Renderer.setClearFlag(color);
-}
 
 glm::vec3 getPosition(float pitch, float yaw, float zoomLevel)
 {
@@ -96,7 +92,7 @@ glm::vec3 getPosition(float pitch, float yaw, float zoomLevel)
     return {xPos,yPos, zPos};
 }
 
-void modelviewer_window::onScrollChanged(double yOffset) {
+void modelviewer_app::onScrollChanged(double yOffset) {
     
     //down -1, up 1
     m_ZoomLevel += yOffset * -1 * 3;
@@ -105,7 +101,7 @@ void modelviewer_window::onScrollChanged(double yOffset) {
     updateCameraPosition();
 }
 
-void modelviewer_window::onMouseButtonChanged(int button, int action, int mods) {
+/*void modelviewer_app::onMouseButtonChanged(int button, int action, int mods) {
     
     if (button !=  GLFW_MOUSE_BUTTON_MIDDLE)
     {
@@ -116,7 +112,7 @@ void modelviewer_window::onMouseButtonChanged(int button, int action, int mods) 
 }
 
 
-void modelviewer_window::onMousePositionChanged(double xpos, double ypos) {
+void modelviewer_app::onMousePositionChanged(double xpos, double ypos) {
     
     if (m_IsMouseButtonDown)
     {
@@ -132,14 +128,14 @@ void modelviewer_window::onMousePositionChanged(double xpos, double ypos) {
 
     m_LastMousePosition.x = xpos;
     m_LastMousePosition.y = ypos;
-}
+}*/
 
-std::string modelviewer_window::label(std::string str, int id) {
+std::string modelviewer_app::label(std::string str, int id) {
 	return str + "##" + std::to_string(id);
 }
 
 
-void modelviewer_window::drawSpotLightSettings() {
+void modelviewer_app::drawSpotLightSettings() {
 
 	ImGui::Dummy(ImVec2(0.0f,20.0f));
 	ImGui::Text("Spot lights");
@@ -199,7 +195,7 @@ void modelviewer_window::drawSpotLightSettings() {
 	}
 }
 
-void modelviewer_window::drawPointLightSettings() {
+void modelviewer_app::drawPointLightSettings() {
 	
 	ImGui::Dummy(ImVec2(0.0f,20.0f));
 	ImGui::Text("Point lights");
@@ -263,7 +259,7 @@ void modelviewer_window::drawPointLightSettings() {
 	}
 }
 
-void modelviewer_window::drawDirectionalLightSettings() {
+void modelviewer_app::drawDirectionalLightSettings() {
 	auto& directionalLight = m_Scene.getDirectionalLight();
 	ImGui::Text("Directional light");
 	ImGui::ColorEdit3("ambient", &directionalLight.ambient.x, ImGuiColorEditFlags_NoAlpha);
@@ -271,7 +267,7 @@ void modelviewer_window::drawDirectionalLightSettings() {
 	ImGui::SliderFloat3("direction", &directionalLight.direction.x, -1,1, "%.2f");
 }
 
-void modelviewer_window::displayLightPanel() {
+void modelviewer_app::displayLightPanel() {
 
 	const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
 	constexpr int size = 300;
@@ -300,13 +296,13 @@ void modelviewer_window::displayLightPanel() {
 	ImGui::PopStyleColor();
 }
 
-void modelviewer_window::updateCameraPosition() {
+void modelviewer_app::updateCameraPosition() {
     auto pos = getPosition(m_PitchAngle, m_YawAngle, m_ZoomLevel);
 	m_Camera.setPosition(pos);
 }
 
 
-void modelviewer_window::displayMenubar() {
+void modelviewer_app::displayMenubar() {
 	
 	const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
 	ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x, main_viewport->WorkPos.y), ImGuiCond_Once);
@@ -413,25 +409,24 @@ void modelviewer_window::displayMenubar() {
 	ImGui::End();
 }
 
-void modelviewer_window::onRenderImGUI() {
+void modelviewer_app::onRenderImGUI() {
 	
 	//ImGui::ShowDemoWindow();
 	displayLightPanel();
 	displayMenubar();
 }
 
-void modelviewer_window::onSizeChanged(int height, int width)
+void modelviewer_app::onSizeChanged(int height, int width)
 {
-	window_gl::onSizeChanged(height, width);
-	
 	if(height == 0 || width == 0) {
 		return;
 	}
-	glViewport(0, 0, width, height);
+	
+	m_Device->setViewport(width, height);
 	m_Camera.setViewPort(width, height);
 }
 
-void modelviewer_window::addSpotLight() {
+void modelviewer_app::addSpotLight() {
 	
 	light_spot spot;
 	spot.outerCutoff = 24;
@@ -446,7 +441,7 @@ void modelviewer_window::addSpotLight() {
 	addSpotLight(spot);
 }
 
-void modelviewer_window::addPointLight() {
+void modelviewer_app::addPointLight() {
 	light_point point{};
 	point.position =  glm::vec3{0,20,0};
 	point.ambient =  glm::vec3{0.2f,0,0};
@@ -458,7 +453,7 @@ void modelviewer_window::addPointLight() {
 	addPointLight(point);
 }
 
-void modelviewer_window::displayFilePicker() {
+void modelviewer_app::displayFilePicker() {
 
 	std::vector<file_filter> filters;
 	filters.push_back({"fbx files", "fbx"});
@@ -473,7 +468,7 @@ void modelviewer_window::displayFilePicker() {
     }
 }
 
-void modelviewer_window::openWallParallaxMap() {
+void modelviewer_app::openWallParallaxMap() {
 
 	model_info wallModel;
 	shader_asset_info fragShader { modelViewer::res::literals::shaders::parallax_frag, shaderType::fragment};
@@ -514,7 +509,7 @@ void modelviewer_window::openWallParallaxMap() {
 	addModel(wallModel);
 }
 
-void modelviewer_window::openWallNormalMap() {
+void modelviewer_app::openWallNormalMap() {
 	model_info wallModel;
 	shader_asset_info fragShader { modelViewer::res::literals::shaders::normal_map_frag, shaderType::fragment};
 	shader_asset_info vertShader { modelViewer::res::literals::shaders::normal_map_vert, shaderType::vertex};
@@ -567,7 +562,7 @@ void transformModel(const std::shared_ptr<object_renderer>& object) {
 	object->computeBoundingBox();
 }
 
-void modelviewer_window::addNewModels()
+void modelviewer_app::addNewModels()
 {
     //TODO the current imp is not efficient since it first loads the objects then applies limit, a better one should apply the limit when adding objects 
     for (auto& info: m_NewModelsQueue)
@@ -590,13 +585,13 @@ void addDefaults(material_property_set& set)
 	set.colors.push_back({Literals::SpecularAlbedo, Literals::DefaultSpecularAlbedo});
 }
 
-void modelviewer_window::openDemoModel(std::string name)
+void modelviewer_app::openDemoModel(std::string name)
 {
 	model_info info = getDemoModel(name);
 	addModel(info);
 }
 
-void modelviewer_window::openModel(std::string path)
+void modelviewer_app::openModel(std::string path)
 {
 	model_info info;
 	info.path = path;
@@ -615,7 +610,7 @@ void modelviewer_window::openModel(std::string path)
 	addModel(info);
 }
 
-model_info modelviewer_window::getDemoModel(const std::string& name) const
+model_info modelviewer_app::getDemoModel(const std::string& name) const
 {
 	model_info info;
 	shader_asset_info fragShader { modelViewer::res::literals::shaders::lit_frag, shaderType::fragment};
@@ -637,12 +632,12 @@ model_info modelviewer_window::getDemoModel(const std::string& name) const
 	return info;
 }
 
-void modelviewer_window::setClearMode(clear_mode mode)
+void modelviewer_app::setClearMode(clear_mode mode)
 {
 	m_Renderer.setClearMode(mode);
 }
 
-void modelviewer_window::openSpecularMapModel()
+void modelviewer_app::openSpecularMapModel()
 {
 	model_info wallModel;
 	shader_asset_info fragShader { modelViewer::res::literals::shaders::lit_frag, shaderType::fragment};
@@ -674,4 +669,74 @@ void modelviewer_window::openSpecularMapModel()
 	material->propertySet.floats.push_back({Literals::Opacity, 1});
 	material->propertySet.cullFaceEnabled = false;
 	addModel(wallModel);
+}
+
+void capTargetFrameRate(double elapsed, int targetFps)
+{
+	if(targetFps == -1)
+	{
+		return;
+	}
+
+	int fps = 1/elapsed;
+	if (fps > targetFps)
+	{
+		double targetElapsedTime = 1.0/targetFps ;
+		double remaining = (targetElapsedTime - elapsed);
+		stopwatch stopwatch;
+		stopwatch.start();
+		do{
+			stopwatch.stop();
+		}
+		while(stopwatch.getSeconds() < remaining);
+
+		stopwatch.stop();
+	}
+}
+
+void modelviewer_app::loop()
+{
+	stopwatch watch;
+	watch.start();
+	while (!m_Window->shouldClose())
+	{
+		if (m_Window->isPaused())
+		{
+			m_Window->pollEvents();
+			//TODO fix this 
+			//std::this_thread::sleep_for(100);
+			continue;
+		}
+
+		watch.stop();
+		double elapsed = watch.getSeconds();
+		watch.start();
+
+		//ImGui_ImplOpenGL3_NewFrame();
+		//ImGui_ImplGlfw_NewFrame();
+		//ImGui::NewFrame();
+		//onRenderImGUI();
+		//ImGui::ShowDemoWindow();
+
+		m_Window->pollEvents();
+		onRender((float)elapsed);
+
+		//ImGui::Render();
+		//ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		m_Device->swapBuffers();
+		watch.stop();
+		m_elapsedTimeSinceStart += watch.getSeconds();
+		capTargetFrameRate(watch.getSeconds(), m_TargetFrameRate);
+	}
+}
+
+void modelviewer_app::setTargetFrameRate(int fps)
+{
+	m_TargetFrameRate = fps;
+}
+
+int modelviewer_app::getTargetFrameRate()
+{
+	return m_TargetFrameRate;
 }

@@ -3,7 +3,7 @@
 
 #include "render_scene.h"
 #include "camera.h"
-#include "framebuffer.h"
+#include "gl/framebuffer.h"
 #include "object_factory.h"
 
 namespace modelViewer::render
@@ -41,7 +41,7 @@ namespace modelViewer::render
 		framebuffer m_shadowBuffer;
 		std::unique_ptr<shader_program> m_shadowProgram;
 		std::shared_ptr<object_renderer> m_Skybox;
-		std::shared_ptr<texture> m_EmptyShadowmap;
+		std::shared_ptr<texture_gl> m_EmptyShadowmap;
 		
 		int m_MVPLocation = -1;
 		glm::mat4 m_LightViewProjection;

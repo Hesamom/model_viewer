@@ -4,7 +4,7 @@
 
 
 #include "../resource/shader_loader.h"
-#include "shader_program.h"
+#include "gl/shader_program.h"
 #include "object_renderer.h"
 #include "renderable.h"
 #include "object_factory.h"

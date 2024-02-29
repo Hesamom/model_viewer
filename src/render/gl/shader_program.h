@@ -1,7 +1,7 @@
 ﻿#ifndef MODEL_VIEWER_SHADER_PROGRAM_H
 #define MODEL_VIEWER_SHADER_PROGRAM_H
 
-#include "../resource/shader_loader.h"
+#include "../../resource/shader_loader.h"
 #include "shader.h"
 #include "glm/glm.hpp"
 

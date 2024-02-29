@@ -2,7 +2,7 @@
 #ifndef MESH_RENDERER_H
 #define MESH_RENDERER_H
 
-#include "mesh.h"
+#include "gl/mesh.h"
 #include "material.h"
 
 namespace modelViewer::render
