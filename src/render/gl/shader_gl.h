@@ -6,12 +6,9 @@
 
 namespace modelViewer::render {
 
-    class shader {
-    private:
-        unsigned int m_ShaderId = 0;
-        std::shared_ptr<modelViewer::res::shader_asset> m_Asset;
+    class shader_gl {
     public:
-        explicit shader(std::shared_ptr<modelViewer::res::shader_asset>& asset);
+        explicit shader_gl(std::shared_ptr<res::shader_asset>& asset);
         
         void compile();
         void destroy() const;
@@ -20,6 +17,10 @@ namespace modelViewer::render {
 		void verify();
         res::shaderType getType();
         unsigned int getId() const;
+
+    private:
+        unsigned int m_ShaderId = 0;
+        std::shared_ptr<res::shader_asset> m_Asset;
     };
 }
 #endif //MODEL_VIEWER_SHADER_H

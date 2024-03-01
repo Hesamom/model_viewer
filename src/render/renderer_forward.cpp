@@ -227,8 +227,8 @@ void renderer_forward::initShadowmap(object_factory& objectFactory, shader_loade
 	auto vertShaderAsset = shaderLoader.load(m_DepthShaderVert, shaderType::vertex);
 	auto fragShaderAsset = shaderLoader.load(m_DepthShaderFrag, shaderType::fragment);
 
-	shader vertShader(vertShaderAsset);
-	shader fragShader(fragShaderAsset);
+	shader_gl vertShader(vertShaderAsset);
+	shader_gl fragShader(fragShaderAsset);
 
 	vertShader.compile();
 	vertShader.verify();
@@ -236,7 +236,7 @@ void renderer_forward::initShadowmap(object_factory& objectFactory, shader_loade
 	fragShader.compile();
 	fragShader.verify();
 
-	m_shadowProgram = std::make_unique<shader_program>(std::initializer_list<shader>{vertShader, fragShader});
+	m_shadowProgram = std::make_unique<shader_program_gl>(std::initializer_list<shader_gl>{vertShader, fragShader});
 	m_shadowProgram->validateLinking();
 
 	m_shadowProgram->bind();

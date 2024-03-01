@@ -1,11 +1,11 @@
-﻿#include "mesh.h"
+﻿#include "mesh_gl.h"
 #include "../material.h"
 
-void modelViewer::render::mesh::bind() {
+void modelViewer::render::mesh_gl::bind() {
     m_VertexArray.bind();
 }
 
-modelViewer::render::mesh::mesh(std::shared_ptr<modelViewer::res::mesh_asset>& asset)
+modelViewer::render::mesh_gl::mesh_gl(std::shared_ptr<res::mesh_asset>& asset)
     : m_Asset{asset}
       {
           m_VertexArray.bind();
@@ -42,9 +42,11 @@ modelViewer::render::mesh::mesh(std::shared_ptr<modelViewer::res::mesh_asset>& a
    
 }
 
-modelViewer::render::mesh::~mesh() = default;
+modelViewer::render::mesh_gl::~mesh_gl() {
+    
+}
 
-void modelViewer::render::mesh::bindAttributes(const modelViewer::render::material &material) {
+void modelViewer::render::mesh_gl::bindAttributes(const modelViewer::render::material &material) {
     
     m_VertexArray.bind();
     
@@ -79,16 +81,16 @@ void modelViewer::render::mesh::bindAttributes(const modelViewer::render::materi
     }
 }
 
-void modelViewer::render::mesh::draw()
+void modelViewer::render::mesh_gl::draw()
 {
     m_IndexBuffer->drawShaded();
 }
 
-void modelViewer::render::mesh::drawLines() {
+void modelViewer::render::mesh_gl::drawLines() {
     m_IndexBuffer->drawLines();
 }
 
-std::shared_ptr<modelViewer::res::mesh_asset> modelViewer::render::mesh::getAsset() {
+std::shared_ptr<modelViewer::res::mesh_asset> modelViewer::render::mesh_gl::getAsset() {
     return m_Asset;
 }
 

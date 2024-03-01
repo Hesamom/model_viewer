@@ -11,19 +11,19 @@
 #include "shader_uniform.h"
 #include "light_point.h"
 #include "light_spot.h"
-#include "gl/shader_program.h"
+#include "gl/shader_program_gl.h"
 
 
 namespace modelViewer::render
 {
     class texture_2D;
-    class shader_program;
+    class shader_program_gl;
     class material
     {
     private:
         res::material_asset m_Info;
         std::vector<std::shared_ptr<texture>> m_ActiveTextures;
-        std::shared_ptr<shader_program> m_Program;
+        std::shared_ptr<shader_program_gl> m_Program;
     	
         //TODO consider using a uniform block
     	const std::string  m_ShadowSampler = "u_shadowSampler";
@@ -52,7 +52,7 @@ namespace modelViewer::render
 
     	int getMaxSupportedTextureUnits();
     public:
-        explicit material(const res::material_asset& info, std::vector<texture_binding>& textures, std::shared_ptr<shader_program>& program, std::map<shader_uniform_texture_pair, std::shared_ptr<texture>>& defaultTextures);
+        explicit material(const res::material_asset& info, std::vector<texture_binding>& textures, std::shared_ptr<shader_program_gl>& program, std::map<shader_uniform_texture_pair, std::shared_ptr<texture>>& defaultTextures);
         void setMVP( glm::mat4& matrix);
         void setModelView( glm::mat4& matrix);
         void setProjection( glm::mat4& projection);

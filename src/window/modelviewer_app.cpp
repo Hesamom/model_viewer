@@ -40,8 +40,9 @@ modelviewer_app::modelviewer_app(std::shared_ptr<window>& window, std::shared_pt
     info.sizeX = 12;
     info.lineSpace = 1;
 	
-	auto plane = m_Platform.generatePlane(m_ObjectFactory, info);
-	auto grid = m_Platform.generateGrid(m_ObjectFactory, info);
+	auto plane = m_Platform.generatePlane(m_ObjectFactory, info, *m_Device);
+	auto grid = m_Platform.generateGrid(m_ObjectFactory, info, *m_Device);
+	
 	m_Scene.addStaticObject(plane);
 	m_Scene.addStaticObject(grid);
 

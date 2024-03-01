@@ -7,7 +7,7 @@
 using namespace modelViewer::render;
 using namespace modelViewer::res;
 
-std::shared_ptr<mesh> generateGridMesh(const model_platform_info& info)
+std::shared_ptr<mesh> generateGridMesh(const model_platform_info& info, gfx_device& device)
 {
     auto positions = std::make_shared<std::vector<glm::vec3>>();
     auto colors = std::make_shared<std::vector<glm::vec4>>();
@@ -70,11 +70,11 @@ std::shared_ptr<mesh> generateGridMesh(const model_platform_info& info)
     meshAsset->colors = colors;
 	meshAsset->name = "grid";
 	
-    auto meshPtr = std::make_shared<mesh>(meshAsset);
+    auto meshPtr = device.createMesh(meshAsset);
     return meshPtr;
 }
 
-std::shared_ptr<mesh> generatePlaneMesh(const model_platform_info& info)
+std::shared_ptr<mesh> generatePlaneMesh(const model_platform_info& info, gfx_device& device)
 {
 	auto positions = std::make_shared<std::vector<glm::vec3>>();
 	auto normals = std::make_shared<std::vector<glm::vec3>>();
@@ -109,27 +109,27 @@ std::shared_ptr<mesh> generatePlaneMesh(const model_platform_info& info)
 	meshAsset->normals = normals;
 	meshAsset->name = "plane";
 
-	auto meshPtr = std::make_shared<mesh>(meshAsset);
+	auto meshPtr = device.createMesh(meshAsset);
 	return meshPtr;
 }
 
 
-std::shared_ptr<modelViewer::render::object_renderer> model_platform_buffer::generateGrid(modelViewer::render::object_factory& objectFactory,
-	const model_platform_info &info)
+std::shared_ptr<object_renderer> model_platform_buffer::generateGrid(object_factory& objectFactory,
+                                                                     const model_platform_info &info, gfx_device& device)
 {
 	auto shaderLoader = objectFactory.getShaderLoader();
-	auto mesh = generateGridMesh(info);
+	auto mesh = generateGridMesh(info, device);
 	auto fragShaderAsset = shaderLoader.load(m_GridFragShaderPath, shaderType::fragment);
 	auto vertexShaderAsset = shaderLoader.load(m_GridVertShaderPath, shaderType::vertex);
-	shader fragShader (fragShaderAsset);
+	shader_gl fragShader (fragShaderAsset);
 	fragShader.compile();
 	fragShader.verify();
 	
-	shader vertexShader (vertexShaderAsset);
+	shader_gl vertexShader (vertexShaderAsset);
 	vertexShader.compile();
 	vertexShader.verify();
 	
-	auto program = std::make_shared<shader_program>(std::initializer_list<shader>{fragShader, vertexShader});
+	auto program = std::make_shared<shader_program_gl>(std::initializer_list<shader_gl>{fragShader, vertexShader});
     program->validateLinking();
 
 	material_asset materialInfo;
@@ -147,22 +147,22 @@ std::shared_ptr<modelViewer::render::object_renderer> model_platform_buffer::gen
 	return grid;
 }
 
-std::shared_ptr<modelViewer::render::object_renderer> model_platform_buffer::generatePlane(modelViewer::render::object_factory& objectFactory,
-	const model_platform_info &info)
+std::shared_ptr<object_renderer> model_platform_buffer::generatePlane(object_factory& objectFactory,
+                                                                      const model_platform_info &info, gfx_device& device)
 {
 	auto shaderLoader = objectFactory.getShaderLoader();
-	auto mesh = generatePlaneMesh(info);
+	auto mesh = generatePlaneMesh(info, device);
 	auto fragShaderAsset = shaderLoader.load(m_PlaneFragShaderPath, shaderType::fragment);
 	auto vertexShaderAsset = shaderLoader.load(m_PlaneVertShaderPath, shaderType::vertex);
-	shader fragShader (fragShaderAsset);
+	shader_gl fragShader (fragShaderAsset);
 	fragShader.compile();
 	fragShader.verify();
 	
-	shader vertexShader (vertexShaderAsset);
+	shader_gl vertexShader (vertexShaderAsset);
 	vertexShader.compile();
 	vertexShader.verify();
 	
-	auto program = std::make_shared<shader_program>(std::initializer_list<shader>{fragShader, vertexShader});
+	auto program = std::make_shared<shader_program_gl>(std::initializer_list<shader_gl>{fragShader, vertexShader});
     program->validateLinking();
 
 

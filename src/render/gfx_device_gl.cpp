@@ -1,6 +1,7 @@
 ﻿#include "gfx_device_gl.h"
 #include <GL/glew.h>
 #include "texture_setup.h"
+#include "gl/mesh_gl.h"
 #include "gl/texture_gl.h"
 #include "gl/texture_cube.h"
 #include "gl/texture_2D.h"
@@ -96,6 +97,13 @@ std::shared_ptr<texture> gfx_device_gl::createTexture2D(texture_setup& setup)
 {
 	std::shared_ptr<texture_gl> texturePtr = std::make_shared<texture_2D>(setup);;
 	return texturePtr;
+}
+
+std::shared_ptr<mesh> gfx_device_gl::createMesh(
+	std::shared_ptr<mesh_asset>& asset) {
+	
+	std::shared_ptr<mesh_gl> m = std::make_shared<mesh_gl>(asset);
+	return m;
 }
 
 std::shared_ptr<texture> gfx_device_gl::createTextureCube(texture_setup& setup)

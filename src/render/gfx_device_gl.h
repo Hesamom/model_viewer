@@ -15,6 +15,8 @@ public:
 
 	std::shared_ptr<texture> createTextureCube(modelViewer::render::texture_setup &setup) override ;
 	std::shared_ptr<texture> createTexture2D(modelViewer::render::texture_setup &setup) override ;
+
+	std::shared_ptr<modelViewer::render::mesh> createMesh(std::shared_ptr<modelViewer::res::mesh_asset>& asset) override;
 	
 private:
 

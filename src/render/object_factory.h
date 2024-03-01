@@ -5,8 +5,8 @@
 #include "../resource/shader_loader.h"
 #include "../resource/texture_loader.h"
 #include "../resource/model_loader.h"
-#include "gl/shader_program.h"
-#include "gl/mesh.h"
+#include "gl/shader_program_gl.h"
+#include "gl/mesh_gl.h"
 #include "gl/texture_gl.h"
 #include "object_renderer.h"
 #include "texture_setup.h"
@@ -24,7 +24,7 @@ namespace modelViewer::render
 		std::shared_ptr<gfx_device> m_Device;
 		std::unordered_map<std::shared_ptr<res::material_asset>, std::shared_ptr<material>> m_LoadedMaterials;
 
-		std::shared_ptr<shader_program> getProgram(std::shared_ptr<res::material_asset> materialAsset);
+		std::shared_ptr<shader_program_gl> getProgram(std::shared_ptr<res::material_asset> materialAsset);
 		std::vector<std::shared_ptr<mesh>> getMeshes(res::model_info& info);
 
 		std::shared_ptr<res::texture_asset> createEmbeddedTexture(std::shared_ptr<res::texture_embedded> embedded);

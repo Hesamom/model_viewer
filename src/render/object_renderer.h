@@ -4,7 +4,7 @@
 #include "glm/glm.hpp"
 #include "../common/transform.h"
 #include "../common/aabb.h"
-#include "gl/mesh.h"
+#include "gl/mesh_gl.h"
 #include "material.h"
 #include "renderable.h"
 #include "mesh_renderer.h"
@@ -13,17 +13,7 @@ namespace modelViewer::render
 {
    
     class object_renderer : public renderable {
-        
-    private:
-        common::transform m_Transform{};
-    	common::aabb m_BaseBoundingBox;
-        common::aabb m_BoundingBox;
-        std::string m_Name;
-		std::vector<std::shared_ptr<mesh_renderer>> m_MeshRenders;
-		
-		bool m_CastShadows = true;
-		bool m_ReceiveShadows = true;
-        
+    
     public:
         object_renderer(std::vector<std::shared_ptr<material>>& materials,
 			std::vector<std::shared_ptr<mesh>>& meshes,
@@ -44,6 +34,16 @@ namespace modelViewer::render
 		bool getCastShadows();
 		bool getReceiveShadows();
     	std::string getName();
+    	
+    private:
+    	common::transform m_Transform{};
+    	common::aabb m_BaseBoundingBox;
+    	common::aabb m_BoundingBox;
+    	std::string m_Name;
+    	std::vector<std::shared_ptr<mesh_renderer>> m_MeshRenders;
+		
+    	bool m_CastShadows = true;
+    	bool m_ReceiveShadows = true;
     };
 }
 #endif

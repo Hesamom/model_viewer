@@ -139,7 +139,7 @@ std::vector<std::shared_ptr<mesh>> object_factory::getMeshes(model_info & info) 
 		//TODO can cache already loaded meshes 
 		for (auto& meshAsset : info.meshes) {
 			
-			auto m = std::make_shared<mesh>(meshAsset);
+			auto m = m_Device->createMesh(meshAsset);
 			meshes.push_back(m);
 		}
 		return meshes;
@@ -147,27 +147,27 @@ std::vector<std::shared_ptr<mesh>> object_factory::getMeshes(model_info & info) 
 
 	auto meshAsset = m_ModelLoader.loadFirstMesh(info.path);
 	info.meshes.push_back(meshAsset);
-	auto meshPtr  = std::make_shared<mesh>(meshAsset);
+	auto meshPtr  = m_Device->createMesh(meshAsset);
 	meshes.push_back(meshPtr);
 	
 	return meshes;
 }
 
 
-std::shared_ptr<shader_program> object_factory::getProgram(std::shared_ptr<material_asset> materialAsset) {
+std::shared_ptr<shader_program_gl> object_factory::getProgram(std::shared_ptr<material_asset> materialAsset) {
 
-	std::vector<shader> shaders;
+	std::vector<shader_gl> shaders;
 	for (auto& shaderInfo : materialAsset->shaders) {
 
 		auto shaderAsset = m_ShaderLoader.load(shaderInfo.path, shaderInfo.type);
-		shader shader(shaderAsset);
+		shader_gl shader(shaderAsset);
 		shader.compile();
 		shader.verify();
 
 		shaders.push_back(shader);
 	}
 
-	auto program = std::make_shared<shader_program>(shaders);
+	auto program = std::make_shared<shader_program_gl>(shaders);
     program->validateLinking();
 	return program;
 }

@@ -5,7 +5,8 @@
 class texture
 {
 public:
-	virtual void active(const int index) = 0;
+	virtual void active(int index) = 0;
+	virtual ~texture() = default;
 };
 
 

@@ -1,4 +1,4 @@
-﻿#include "shader_program.h"
+﻿#include "shader_program_gl.h"
 #include "glew/include/GL/glew.h"
 #include <glm/gtc/type_ptr.hpp>
 
@@ -6,7 +6,7 @@ using namespace modelViewer::render;
 
 
 //TODO find a way to remove ctors duplications 
-shader_program::shader_program(std::vector<shader> &shaders) {
+shader_program_gl::shader_program_gl(std::vector<shader_gl> &shaders) {
     
     m_ProgramId = glCreateProgram();
 
@@ -19,7 +19,7 @@ shader_program::shader_program(std::vector<shader> &shaders) {
     glLinkProgram(m_ProgramId);
 }
 
-shader_program::shader_program(std::initializer_list<shader> shaders) {
+shader_program_gl::shader_program_gl(std::initializer_list<shader_gl> shaders) {
     
     m_ProgramId = glCreateProgram();
     
@@ -33,7 +33,7 @@ shader_program::shader_program(std::initializer_list<shader> shaders) {
 }
 
 
-std::string shader_program::getLinkLog() {
+std::string shader_program_gl::getLinkLog() {
     if(m_ProgramId == 0)
     {
         return {};
@@ -46,51 +46,51 @@ std::string shader_program::getLinkLog() {
     return message;
 }
 
-bool shader_program::isLinked() {
+bool shader_program_gl::isLinked() {
     int result;
     glGetProgramiv(m_ProgramId, GL_LINK_STATUS, &result);
     return result == GL_TRUE;
 }
 
-void shader_program::bind() {
+void shader_program_gl::bind() {
 	
 	//TODO add guards 
     glUseProgram(m_ProgramId);
 }
 
-shader_program::~shader_program() {
+shader_program_gl::~shader_program_gl() {
     glDeleteProgram(m_ProgramId);
 }
 
-int shader_program::getAttributeLocation(const std::string& attributeName)
+int shader_program_gl::getAttributeLocation(const std::string& attributeName)
 {
     return glGetAttribLocation(m_ProgramId, attributeName.c_str());
 }
 
-int shader_program::getUniformLocation(const std::string& uniformName) {
+int shader_program_gl::getUniformLocation(const std::string& uniformName) {
     return glGetUniformLocation(m_ProgramId, uniformName.c_str());
 }
 
-void shader_program::setUniform(int location, glm::vec3 vec3) {
+void shader_program_gl::setUniform(int location, glm::vec3 vec3) {
      glUniform3f(location, vec3.x,vec3.y,vec3.z);
 }
 
 
 
-void shader_program::setUniform(int location, glm::vec4 vec4) {
+void shader_program_gl::setUniform(int location, glm::vec4 vec4) {
     bind();
     glUniform4f(location, vec4.x,vec4.y,vec4.z,vec4.w);
 }
 
-void shader_program::setUniform(int location, float value) {
+void shader_program_gl::setUniform(int location, float value) {
     glUniform1f(location, value);
 }
 
-void shader_program::setUniform(int location, int value) {
+void shader_program_gl::setUniform(int location, int value) {
     glUniform1i(location, value);
 }
 
-void shader_program::setUniform(int index, glm::mat4& mat) {
+void shader_program_gl::setUniform(int index, glm::mat4& mat) {
     glUniformMatrix4fv(index, 1, false, glm::value_ptr(mat));
 }
 
@@ -125,7 +125,7 @@ shader_texture_usage getSamplerUsage(std::string& name) {
 	return shader_texture_usage::none;
 }
 
-std::vector<shader_uniform_info> shader_program::getActiveUniforms() {
+std::vector<shader_uniform_info> shader_program_gl::getActiveUniforms() {
     
 
     const int uniformsCount = getActiveUniformsCount();
@@ -145,13 +145,13 @@ std::vector<shader_uniform_info> shader_program::getActiveUniforms() {
     return uniforms;
 }
 
-int shader_program::getActiveUniformsCount() {
+int shader_program_gl::getActiveUniformsCount() {
     int count = 0;
     glGetProgramiv(m_ProgramId, GL_ACTIVE_UNIFORMS, &count);
     return count;
 }
 
-void shader_program::validateLinking()
+void shader_program_gl::validateLinking()
 {
 	if (!isLinked())
 	{

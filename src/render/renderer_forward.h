@@ -39,7 +39,7 @@ namespace modelViewer::render
 		const std::string m_MVPUniformName = "u_MVP";
 
 		framebuffer m_shadowBuffer;
-		std::unique_ptr<shader_program> m_shadowProgram;
+		std::unique_ptr<shader_program_gl> m_shadowProgram;
 		std::shared_ptr<object_renderer> m_Skybox;
 		std::shared_ptr<texture_gl> m_EmptyShadowmap;
 		

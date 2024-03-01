@@ -1,4 +1,4 @@
-﻿#include "gl/shader_program.h"
+﻿#include "gl/shader_program_gl.h"
 #include "material.h"
 #include "gl/texture_2D.h"
 
@@ -7,7 +7,7 @@ using namespace modelViewer::render;
 using namespace modelViewer::res;
 
 
-material::material(const material_asset& info, std::vector<texture_binding>& textures, std::shared_ptr<shader_program>& program, std::map<shader_uniform_texture_pair, std::shared_ptr<texture>>& defaultTextures) {
+material::material(const material_asset& info, std::vector<texture_binding>& textures, std::shared_ptr<shader_program_gl>& program, std::map<shader_uniform_texture_pair, std::shared_ptr<texture>>& defaultTextures) {
 
     m_Info = info;
     m_Program = program;

@@ -210,3 +210,8 @@ std::shared_ptr<texture> gfx_device_dx::createTexture2D(texture_setup& setup)
 {
 	return std::shared_ptr<texture>();
 }
+
+std::shared_ptr<modelViewer::render::mesh> gfx_device_dx::createMesh(
+	std::shared_ptr<modelViewer::res::mesh_asset>& asset) {
+	throw std::runtime_error("not imp");
+}
