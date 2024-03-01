@@ -12,6 +12,9 @@ public:
 	void swapBuffers() override;
 	void setViewport(int width, int height) override;
 	void setClearColor(glm::vec3& color) override;
+
+	std::shared_ptr<texture> createTextureCube(modelViewer::render::texture_setup &setup) override ;
+	std::shared_ptr<texture> createTexture2D(modelViewer::render::texture_setup &setup) override ;
 	
 private:
 

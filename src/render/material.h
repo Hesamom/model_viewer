@@ -22,7 +22,7 @@ namespace modelViewer::render
     {
     private:
         res::material_asset m_Info;
-        std::vector<std::shared_ptr<texture_gl>> m_ActiveTextures;
+        std::vector<std::shared_ptr<texture>> m_ActiveTextures;
         std::shared_ptr<shader_program> m_Program;
     	
         //TODO consider using a uniform block
@@ -42,17 +42,17 @@ namespace modelViewer::render
 		
 		int m_ShadowMapSamplerLocation = -1;
     	int m_SpotShadowMapSamplerLocation = -1;
-		std::map<shader_uniform_texture_pair, std::shared_ptr<texture_gl>> m_DefaultTextures;
+		std::map<shader_uniform_texture_pair, std::shared_ptr<texture>> m_DefaultTextures;
 
 		const std::set<int> m_AssignedTextureLocations;
 
         void applyMaterialProperties();
 
-        std::shared_ptr<texture_gl> getTextureForSampler(const shader_uniform_info& info, const std::vector<texture_binding>& textures);
+        std::shared_ptr<texture> getTextureForSampler(const shader_uniform_info& info, const std::vector<texture_binding>& textures);
 
     	int getMaxSupportedTextureUnits();
     public:
-        explicit material(const res::material_asset& info, std::vector<texture_binding>& textures, std::shared_ptr<shader_program>& program, std::map<shader_uniform_texture_pair, std::shared_ptr<texture_gl>>& defaultTextures);
+        explicit material(const res::material_asset& info, std::vector<texture_binding>& textures, std::shared_ptr<shader_program>& program, std::map<shader_uniform_texture_pair, std::shared_ptr<texture>>& defaultTextures);
         void setMVP( glm::mat4& matrix);
         void setModelView( glm::mat4& matrix);
         void setProjection( glm::mat4& projection);

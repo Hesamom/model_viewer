@@ -16,13 +16,13 @@ void modelviewer_app::onRender(float elapsed) {
 }
 
 
-void modelviewer_app::addModel(modelViewer::res::model_info& info) {
+void modelviewer_app::addModel(model_info& info) {
     
     m_NewModelsQueue.push_back(info);
 }
 
 
-modelviewer_app::modelviewer_app(std::shared_ptr<window>& window, std::shared_ptr<gfx_device>& device)
+modelviewer_app::modelviewer_app(std::shared_ptr<window>& window, std::shared_ptr<gfx_device>& device) : m_ObjectFactory(device)
 {
 	m_Window = window;
 	m_Device = device;
@@ -44,6 +44,8 @@ modelviewer_app::modelviewer_app(std::shared_ptr<window>& window, std::shared_pt
 	auto grid = m_Platform.generateGrid(m_ObjectFactory, info);
 	m_Scene.addStaticObject(plane);
 	m_Scene.addStaticObject(grid);
+
+	m_Renderer.setClearMode(clear_mode::skybox);
 }
 
 modelviewer_app::~modelviewer_app() {

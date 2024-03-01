@@ -8,7 +8,7 @@ using namespace modelViewer::render;
 using namespace modelViewer::common;
 
 
-std::shared_ptr<texture_gl> object_factory::createEmbeddedTexture(std::shared_ptr<texture_embedded> embedded, texture_setup setup) {
+std::shared_ptr<texture_asset> object_factory::createEmbeddedTexture(std::shared_ptr<texture_embedded> embedded) {
 
 	
 	if (embedded == nullptr) {
@@ -17,9 +17,7 @@ std::shared_ptr<texture_gl> object_factory::createEmbeddedTexture(std::shared_pt
 	
 	if (embedded->isCompressed) {
 		auto textureAsset = m_TextureLoader.loadFromMemmory(embedded->data, embedded->dataSize, embedded->channelsCount, true);
-		setup.assets.emplace_back(textureAsset);
-		auto texturePtr = std::make_shared<texture_2D>(setup);
-		return texturePtr;
+		return textureAsset;
 	}
 		
 	textureInfo info;
@@ -28,13 +26,11 @@ std::shared_ptr<texture_gl> object_factory::createEmbeddedTexture(std::shared_pt
 	info.height = embedded->height;
 	info.forceFlip = true;
 	auto textureAsset = std::make_shared<texture_asset>(embedded->data, info, "");
-	setup.assets.emplace_back(textureAsset);
-	auto texturePtr = std::make_shared<texture_2D>(setup);
-	return texturePtr;
+	return textureAsset;
 		
 }
 
-std::shared_ptr<texture_gl> object_factory::createTexture(const texture_asset_info& info) {
+std::shared_ptr<texture> object_factory::createTexture(const texture_asset_info& info) {
 	
 	texture_setup setup;
 	//TODO set wrap mode
@@ -44,9 +40,10 @@ std::shared_ptr<texture_gl> object_factory::createTexture(const texture_asset_in
 	setup.mipMapMinLevel = 0;
 	setup.type = info.type;
 
-	auto embededTexture = createEmbeddedTexture(info.embedded, setup);
-	if (embededTexture != nullptr) {
-		return embededTexture;
+	auto embeddedTexture = createEmbeddedTexture(info.embedded);
+	if (embeddedTexture != nullptr) {
+		setup.assets.push_back(embeddedTexture);
+		return m_Device->createTexture2D(setup);
 	}
 
 	if (info.paths.empty())
@@ -69,14 +66,14 @@ std::shared_ptr<texture_gl> object_factory::createTexture(const texture_asset_in
 		return nullptr;
 	}
 
-	std::shared_ptr<texture_gl> texturePtr = nullptr;
-	if (info.type == texture_asset_type::textureCube)
+	std::shared_ptr<texture> texturePtr = nullptr;
+	if (info.type == texture_asset_type::texture2D)
 	{
-		texturePtr = std::make_shared<texture_cube>(setup);
+		texturePtr = m_Device->createTexture2D(setup);
 	}
 	else
 	{
-		texturePtr = std::make_shared<texture_2D>(setup);
+		texturePtr = m_Device->createTextureCube(setup);
 	}
 	
 	return texturePtr;
@@ -175,8 +172,9 @@ std::shared_ptr<shader_program> object_factory::getProgram(std::shared_ptr<mater
 	return program;
 }
 
-object_factory::object_factory() {
-	
+object_factory::object_factory(std::shared_ptr<gfx_device>& device) {
+
+	m_Device = device;
 	std::vector<std::pair<shader_uniform_texture_pair, std::string>> assets;
 	shader_uniform_texture_pair diffuseSampler { shader_uniform_type::sampler2D, shader_texture_usage::diffuse};
 	assets.emplace_back(diffuseSampler, res::literals::textures::default_white);
@@ -234,7 +232,7 @@ texture_loader& object_factory::getTextureLoader()
 	return m_TextureLoader;
 }
 
-std::map<shader_uniform_texture_pair, std::shared_ptr<texture_gl>> object_factory::getDefaultTextures() {
+std::map<shader_uniform_texture_pair, std::shared_ptr<texture>> object_factory::getDefaultTextures() {
 	return m_DefaultTextures;
 }
 

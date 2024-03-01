@@ -24,7 +24,7 @@ void getWindow(bool dx)
 	if(dx)
 	{
 		auto win32 = std::make_shared<window_win32>(1024,1024, "dx12", false);
-		auto dx = std::make_shared<gfx_device_dx>(win32);
+		auto dx = std::make_shared<modelViewer::render::gfx_device_dx>(win32);
 		device = dx;
 		window = win32;
 		return;

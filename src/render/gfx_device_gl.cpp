@@ -1,5 +1,12 @@
 ﻿#include "gfx_device_gl.h"
 #include <GL/glew.h>
+#include "texture_setup.h"
+#include "gl/texture_gl.h"
+#include "gl/texture_cube.h"
+#include "gl/texture_2D.h"
+
+using namespace modelViewer::render;
+using namespace modelViewer::res;
 
 void gfx_device_gl::swapBuffers()
 {
@@ -82,4 +89,17 @@ void gfx_device_gl::initDevice() {
 	glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &maxTexturesVert);
 	std::cout << "max samplers: " << maxSamples << ", max texture units in frag: " << maxTexturesFrag <<
 			  ",max texture units in vert: " << maxTexturesVert << "\n";
+}
+
+
+std::shared_ptr<texture> gfx_device_gl::createTexture2D(texture_setup& setup)
+{
+	std::shared_ptr<texture_gl> texturePtr = std::make_shared<texture_2D>(setup);;
+	return texturePtr;
+}
+
+std::shared_ptr<texture> gfx_device_gl::createTextureCube(texture_setup& setup)
+{
+	std::shared_ptr<texture_gl> texturePtr = std::make_shared<texture_cube>(setup);;
+	return texturePtr;
 }

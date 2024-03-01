@@ -1,5 +1,6 @@
 ﻿
 #include "gfx_device_dx.h"
+#include "../error/not_implemented_error.h"
 #include <WindowsX.h>
 #if defined(DEBUG) || defined(_DEBUG)
 #define _CRTDBG_MAP_ALLOC
@@ -7,6 +8,7 @@
 #endif
 
 using namespace Microsoft::WRL;
+using namespace modelViewer::render;
 
 void gfx_device_dx::initDevice()
 {
@@ -197,4 +199,14 @@ gfx_device_dx::gfx_device_dx(std::shared_ptr<window_win32>& window)
 {
 	m_Window = window;
 	initDevice();
+}
+
+std::shared_ptr<texture> gfx_device_dx::createTextureCube(texture_setup& setup)
+{
+	return std::shared_ptr<texture>();
+}
+
+std::shared_ptr<texture> gfx_device_dx::createTexture2D(texture_setup& setup)
+{
+	return std::shared_ptr<texture>();
 }

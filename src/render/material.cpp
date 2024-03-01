@@ -7,7 +7,7 @@ using namespace modelViewer::render;
 using namespace modelViewer::res;
 
 
-material::material(const material_asset& info, std::vector<texture_binding>& textures, std::shared_ptr<shader_program>& program, std::map<shader_uniform_texture_pair, std::shared_ptr<texture_gl>>& defaultTextures) {
+material::material(const material_asset& info, std::vector<texture_binding>& textures, std::shared_ptr<shader_program>& program, std::map<shader_uniform_texture_pair, std::shared_ptr<texture>>& defaultTextures) {
 
     m_Info = info;
     m_Program = program;
@@ -105,7 +105,7 @@ int material::getMaxSupportedTextureUnits() {
 	return maxTexturesFrag;
 }
 
-std::shared_ptr<texture_gl> material::getTextureForSampler(const shader_uniform_info& info, const std::vector<texture_binding>& textures) {
+std::shared_ptr<texture> material::getTextureForSampler(const shader_uniform_info& info, const std::vector<texture_binding>& textures) {
 
 	for (const auto& texture : textures) {
 		//current convention has ".mat" prefix 
