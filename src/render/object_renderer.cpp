@@ -62,9 +62,13 @@ object_renderer::object_renderer(std::vector<std::shared_ptr<material>>& materia
 	}
 
 	setReceiveShadows(true);
+	
+	setCastReflection(true);
+	setReflectionMode(reflection_mode::disabled);
     m_BaseBoundingBox = calculateBoundingBox(meshes);
 }
 
+//TODO remove duplication with the other ctor 
 object_renderer::object_renderer(std::shared_ptr<material>& material,
 	std::shared_ptr<mesh>& mesh_1,
 	const std::string& name)
@@ -134,6 +138,32 @@ void object_renderer::setRenderMode(render_mode mode)
 {
 	for (auto& renderer : m_MeshRenders) {
 		renderer->setRenderMode(mode);
+	}
+}
+
+bool object_renderer::getCastReflection() const
+{
+	return m_CastReflection;
+}
+
+void object_renderer::setCastReflection(bool enabled)
+{
+	m_CastReflection = enabled;
+	for (auto& renderer : m_MeshRenders) {
+		renderer->setCastReflection(enabled);
+	}
+}
+
+reflection_mode object_renderer::getReflectionMode() const
+{
+	return m_ReflectionMode;
+}
+
+void object_renderer::setReflectionMode(reflection_mode mode)
+{
+	m_ReflectionMode = mode;
+	for (auto& renderer : m_MeshRenders) {
+		renderer->setReflectionMode(mode);
 	}
 }
 

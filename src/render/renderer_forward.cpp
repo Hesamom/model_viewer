@@ -4,19 +4,88 @@
 #include "camera.h"
 #include "object_factory.h"
 #include "texture_setup.h"
-#include "gl/texture_2D.h"
+#include "texture_2D.h"
+#include "texture_cube.h"
 
 using namespace modelViewer::res;
 using namespace modelViewer::render;
 
-void renderer_forward::render(render_scene& scene, camera& camera, bool shadowEnabled)
+const glm::vec3 m_CubeMapFacesDirection[] = {
+	glm::vec3(1.0f, 0.0f, 0.0f),  // Positive X
+	glm::vec3(-1.0f, 0.0f, 0.0f), // Negative X
+	glm::vec3(0.0f, 1.0f, 0.0f),  // Positive Y
+	glm::vec3(0.0f, -1.0f, 0.0f), // Negative Y
+	glm::vec3(0.0f, 0.0f, 1.0f),  // Positive Z
+	glm::vec3(0.0f, 0.0f, -1.0f)  // Negative Z
+};
+
+const std::string m_SideNames[]
+	{
+		"x+", "x-","y+","y-","z+","z-"
+	};
+
+void renderer_forward::render(render_scene& scene, camera& camera, bool shadowEnabled, bool reflectionEnabled)
 {
 	if (shadowEnabled)
 	{
 		renderShadows(scene);
 	}
 
-	renderObjects(scene, camera, shadowEnabled);
+	if (reflectionEnabled)
+	{
+		renderReflectionMap(scene, camera);
+	}
+
+	renderObjects(scene, camera, shadowEnabled, reflectionEnabled);
+}
+
+void renderer_forward::renderReflectionMap(render_scene& scene , camera& camera){
+
+	if (!requiresReflectionMapUpdate(scene,camera))
+	{
+		return;
+	}
+	
+	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "rendering reflection map");
+
+	m_ReflectionBuffer.bind();
+	glCullFace(GL_FRONT);
+	glViewport(0, 0, REFLECTION_SIZE, REFLECTION_SIZE);
+	m_ReflectionBuffer.attachDepthTexture();
+	m_EmptyReflectionMap->active(reflectionMapSlot);
+	
+	auto meshes = getSortedObjects(scene, m_ReflectionClearMode == clear_mode::skybox);
+	const glm::vec3  up (0.01f, -1.0f, 0.01f);
+	glm::mat4 projection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 500.0f);
+	
+	for (int index = 0; index < 6; ++index) {
+
+		glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, ("side: " + m_SideNames[index]).c_str());
+		m_ReflectionBuffer.attachCubeMapFace(index);
+
+		if (m_ReflectionClearMode == clear_mode::color)
+		{
+			glClearBufferfv(GL_COLOR, 0, &m_ReflectionClearFlag.x);
+		}
+		
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glm::mat4 view = glm::lookAt(m_ReflectionPosition, m_ReflectionPosition + m_CubeMapFacesDirection[index], up);
+		
+		for (auto& mesh : meshes) {
+			
+			if (mesh->getCastReflection() && mesh->getReflectionMode() == reflection_mode::disabled)
+			{
+				//TODO we can use a simple lit shader such as gouraud instead of the object's original shader to improve performance
+				mesh->render(view, projection);
+			}
+		}
+		
+		glPopDebugGroup();
+	}
+
+	m_ReflectionBuffer.unbind();
+
+	glPopDebugGroup();
 }
 
 void renderer_forward::renderDirectionalShadows(render_scene& scene) {
@@ -134,7 +203,7 @@ bool compareRenderQueue(std::shared_ptr<mesh_renderer> o1, std::shared_ptr<mesh_
 	return o1->getMaterial()->getInfo().propertySet.renderQueue < o2->getMaterial()->getInfo().propertySet.renderQueue;
 }
 
-std::vector<std::shared_ptr<mesh_renderer>> renderer_forward::getSortedObjects(render_scene& scene)
+std::vector<std::shared_ptr<mesh_renderer>> renderer_forward::getSortedObjects(render_scene& scene, bool includeSkybox)
 {
 	std::vector<std::shared_ptr<mesh_renderer>> renderers;
 	for (auto& object : scene.getObjects()) {
@@ -142,8 +211,8 @@ std::vector<std::shared_ptr<mesh_renderer>> renderer_forward::getSortedObjects(r
 			renderers.push_back(mesh);
 		}
 	}
-	
-	if(m_ClearMode == clear_mode::skybox)
+
+	if(includeSkybox)
 	{
 		renderers.push_back(m_Skybox->getRenderers().at(0));
 	}
@@ -153,7 +222,7 @@ std::vector<std::shared_ptr<mesh_renderer>> renderer_forward::getSortedObjects(r
 	return renderers;
 }
 
-void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool shadowsEnabled)
+void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool shadowsEnabled, bool reflectionEnabled)
 {
 	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "rendering objects");
 	
@@ -162,22 +231,34 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 	
 	glViewport(0, 0, viewportWidth, viewportHeight);
 	glClear(GL_DEPTH_BUFFER_BIT);
-	glClearBufferfv(GL_COLOR, 0, &m_ClearFlag.x);
+
+	if (m_ClearMode == clear_mode::color)
+	{
+		glClearBufferfv(GL_COLOR, 0, &m_ClearFlag.x);
+	}
+
 	glCullFace(GL_BACK);
 	
-	if(shadowsEnabled)
+	if (shadowsEnabled)
 	{
 		//TODO consider using another approach that would not be overriden by material, this is safe by now since we dont have 31 textures yet
 		m_shadowBuffer.activateDepthMap(shadowmapDirSlot);
 		m_shadowBuffer.activateDepthMapArray(shadowmapSpotSlot);
 		m_EmptyShadowmap->active(emptyShadowmapSlot);
 	}
+
+	if (reflectionEnabled)
+	{
+		m_SkyboxCubeMap->active(skyboxReflectionMapSlot);
+		m_ReflectionBuffer.activateCubeMap(reflectionMapSlot);
+		m_EmptyReflectionMap->active(emptyReflectionMapSlot);
+	}
 	
 
 	auto viewMatrix = camera.getView();
 	auto projection = camera.getProjection();
 	
-	for (auto& renderer : getSortedObjects(scene))
+	for (auto& renderer : getSortedObjects(scene, m_ClearMode == clear_mode::skybox))
 	{
 		if (shadowsEnabled)
 		{
@@ -191,6 +272,22 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 			{
 				renderer->getMaterial()->setShadowMapSlot(emptyShadowmapSlot);
 				renderer->getMaterial()->setSpotShadowMapSlot(shadowmapSpotSlot);
+			}
+		}
+		
+		if (reflectionEnabled && renderer->getMaterial()->isReflective())
+		{
+			auto mode = renderer->getReflectionMode();
+			switch (mode) {
+				case reflection_mode::environment:
+					renderer->getMaterial()->setReflectionMapSlot(reflectionMapSlot);
+					break;
+				case  reflection_mode::skybox:
+					renderer->getMaterial()->setReflectionMapSlot(skyboxReflectionMapSlot);
+					break;
+				case reflection_mode::disabled:
+					renderer->getMaterial()->setReflectionMapSlot(emptyReflectionMapSlot);
+					
 			}
 		}
 		
@@ -219,7 +316,8 @@ void renderer_forward::init(object_factory& objectFactory)
 	auto shaderLoader = objectFactory.getShaderLoader();
 	
 	initShadowmap(objectFactory, shaderLoader);
-	createSkybox(objectFactory);
+	initReflectionMap(objectFactory);
+	initSkybox(objectFactory);
 }
 
 void renderer_forward::initShadowmap(object_factory& objectFactory, shader_loader& shaderLoader)
@@ -227,8 +325,8 @@ void renderer_forward::initShadowmap(object_factory& objectFactory, shader_loade
 	auto vertShaderAsset = shaderLoader.load(m_DepthShaderVert, shaderType::vertex);
 	auto fragShaderAsset = shaderLoader.load(m_DepthShaderFrag, shaderType::fragment);
 
-	shader_gl vertShader(vertShaderAsset);
-	shader_gl fragShader(fragShaderAsset);
+	shader vertShader(vertShaderAsset);
+	shader fragShader(fragShaderAsset);
 
 	vertShader.compile();
 	vertShader.verify();
@@ -236,26 +334,48 @@ void renderer_forward::initShadowmap(object_factory& objectFactory, shader_loade
 	fragShader.compile();
 	fragShader.verify();
 
-	m_shadowProgram = std::make_unique<shader_program_gl>(std::initializer_list<shader_gl>{vertShader, fragShader});
+	m_shadowProgram = std::make_unique<shader_program>(std::initializer_list<shader>{vertShader, fragShader});
 	m_shadowProgram->validateLinking();
 
 	m_shadowProgram->bind();
 	m_MVPLocation = m_shadowProgram->getUniformLocation(m_MVPUniformName);
 
+	auto shadowDirName = std::string("shadowmap_dir");
 	m_shadowBuffer.bind();
-	m_shadowBuffer.createDepthTexture(SHADOW_DIR_WIDTH, SHADOW_DIR_HEIGHT, true);
-	m_shadowBuffer.createArrayDepthTexture(SHADOW_SPOT_WIDTH, SHADOW_SPOT_HEIGHT, SUPPORTTED_SPOT_LIGHTS, true);
+	m_shadowBuffer.createDepthTexture(SHADOW_DIR_WIDTH, SHADOW_DIR_HEIGHT, true, shadowDirName);
+	m_shadowBuffer.createArrayDepthTexture(SHADOW_SPOT_WIDTH, SHADOW_SPOT_HEIGHT,SUPPORTED_SPOT_LIGHTS, true);
 	m_shadowBuffer.unbind();
 
 	auto textureLoader = objectFactory.getTextureLoader();
 	auto textureAsset = textureLoader.load(m_EmptyShadowmapTexture,3);
 	texture_setup setup;
 	setup.assets.push_back(textureAsset);
-
+	
 	m_EmptyShadowmap = std::make_shared<texture_2D>(setup);
+
+
 }
 
-void renderer_forward::createSkybox(object_factory& objectFactory)
+void renderer_forward::initReflectionMap(object_factory& objectFactory)
+{
+	auto reflectionMapName = std::string("reflection_cubeMap");
+	auto reflectionMapDepthName = std::string("reflection_depth");
+	m_ReflectionBuffer.bind();
+	m_ReflectionBuffer.createCubeMap(REFLECTION_SIZE, reflectionMapName);
+	m_ReflectionBuffer.createDepthTexture(REFLECTION_SIZE, REFLECTION_SIZE, false, reflectionMapDepthName);
+	m_ReflectionBuffer.unbind();
+	
+	texture_setup setup;
+	auto textureAsset = objectFactory.getTextureLoader().load(m_EmptyReflectionTexturePath, 4, false);
+	for (int i = 0; i < 6; ++i) {
+		setup.assets.emplace_back(textureAsset);
+	}
+	setup.type = res::texture_asset_type::textureCube;
+	m_EmptyReflectionMap = std::make_shared<texture_cube>(setup);
+}
+
+
+void renderer_forward::initSkybox(object_factory& objectFactory)
 {
 	model_info skyboxModel;
 	shader_asset_info fragShader1 { res::literals::shaders::skybox_frag, shaderType::fragment};
@@ -289,9 +409,56 @@ void renderer_forward::createSkybox(object_factory& objectFactory)
 
 	skyboxModel.materials = materials;
 	m_Skybox = objectFactory.createObject(skyboxModel);
+	m_SkyboxCubeMap = m_Skybox->getRenderers().at(0)->getMaterial()->getBoundTextures().at(0);
+	m_Skybox->setCastReflection(true);
+	m_Skybox->setReflectionMode(reflection_mode::disabled);
 }
 
 void renderer_forward::setClearMode(clear_mode mode)
 {
 	m_ClearMode = mode;
+}
+
+void renderer_forward::setReflectionPosition(const glm::vec3& pos)
+{
+	m_ReflectionPosition = pos;
+}
+
+void renderer_forward::setReflectionClearFlag(const glm::vec4& color)
+{
+	m_ReflectionClearFlag = color;
+}
+
+glm::vec3& renderer_forward::getReflectionPosition()
+{
+	return m_ReflectionPosition;
+}
+
+//TODO we should receive a frustum culled set of objects but we don't have that filter yet so 
+bool renderer_forward::requiresReflectionMapUpdate(render_scene& scene, camera& camera)
+{
+	bool containsReflectiveRenderer = false;
+	bool containsReflectionCastingRenderer = false;
+	
+	for (auto& object : scene.getObjects()) {
+		if (!containsReflectiveRenderer && object->getReflectionMode() == reflection_mode::environment)
+		{
+			containsReflectiveRenderer = true;
+		}
+		if (!containsReflectionCastingRenderer && object->getCastReflection())
+		{
+			containsReflectionCastingRenderer = true;
+		}
+		if (containsReflectiveRenderer && containsReflectionCastingRenderer)
+		{
+			return true;
+		}
+	}
+	
+	return containsReflectiveRenderer && containsReflectionCastingRenderer;
+}
+
+void renderer_forward::setReflectionClearMode(clear_mode mode)
+{
+	m_ReflectionClearMode = mode;
 }

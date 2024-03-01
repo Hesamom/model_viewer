@@ -2,7 +2,7 @@
 #ifndef MESH_RENDERER_H
 #define MESH_RENDERER_H
 
-#include "gl/mesh_gl.h"
+#include "mesh.h"
 #include "material.h"
 
 namespace modelViewer::render
@@ -12,6 +12,7 @@ namespace modelViewer::render
 		triangles,
 		lines
 	};
+
 	
 	class mesh_renderer {
 	
@@ -23,6 +24,11 @@ namespace modelViewer::render
 		std::shared_ptr<material> getMaterial();
 		bool getReceiveShadows() const;
 		void setReceiveShadows(bool enabled);
+
+		bool getCastReflection() const;
+		reflection_mode getReflectionMode() const;
+		void setCastReflection(bool enabled);
+		void setReflectionMode(reflection_mode mode);
 		const std::string&  getName() const;
 
 	private:

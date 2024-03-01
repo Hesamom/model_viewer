@@ -4,6 +4,7 @@
 
 uniform sampler2DShadow u_shadowSampler;
 uniform sampler2DArrayShadow u_spotShadowSamplers;
+uniform samplerCube u_reflectionSampler;
 
 uniform vec3 u_lightAmbient;
 uniform vec3 u_lightDiffuse;
@@ -50,6 +51,14 @@ void main()
     
     finalColor += computePointLights(surf, u_pointLightCount, u_pointLights, u_mat);
     finalColor += computeSpotLights(surf, u_spotLightCount, u_spotLights, fs_in.fragSpotPosLightSpace, u_spotShadowSamplers, u_mat);
+    
+    if(u_mat.reflectivity > 0.1f)
+    {
+        //todo can take the reflection computation to vertex shader to improve perf
+        vec3 reflection = reflect(-surf.viewDir, surf.normal);
+        vec3 reflectionColor = texture(u_reflectionSampler, reflection).xyz;
+        finalColor = mix(finalColor, reflectionColor , u_mat.reflectivity);
+    }
     
     FragColor = vec4(finalColor, u_mat.opacity);
 }

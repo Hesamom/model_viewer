@@ -26,9 +26,12 @@ material::material(const material_asset& info, std::vector<texture_binding>& tex
 	m_LightDirUniform.getLocation(*m_Program);
 	
 	m_ShadowMapSamplerLocation = m_Program->getUniformLocation(m_ShadowSampler);
-	setShadowMapSlot(getMaxSupportedTextureUnits() - 2);
+	setShadowMapSlot(getMaxSupportedTextureUnits());
 	m_SpotShadowMapSamplerLocation = m_Program->getUniformLocation(m_SpotShadowSampler);
-	setSpotShadowMapSlot(getMaxSupportedTextureUnits() - 1);
+	setSpotShadowMapSlot(getMaxSupportedTextureUnits() - 2);
+
+	m_ReflectionMapSamplerLocation = m_Program->getUniformLocation(m_ReflectionSampler);
+	setReflectionMapSlot(getMaxSupportedTextureUnits() - 3);
 	
     applyMaterialProperties();
     bindTextures(textures);
@@ -205,6 +208,16 @@ void material::setShadowMapSlot(int slot) const {
 	m_Program->setUniform(m_ShadowMapSamplerLocation, slot);
 }
 
+void material::setReflectionMapSlot(int slot) const {
+	if (m_ReflectionMapSamplerLocation < 0)
+	{
+		return;
+	}
+
+	m_Program->bind();
+	m_Program->setUniform(m_ReflectionMapSamplerLocation, slot);
+}
+
 void material::setSpotShadowMapSlot(int slot) const {
 	if (m_SpotShadowMapSamplerLocation < 0)
 	{
@@ -301,4 +314,14 @@ void material::setPointLights(std::vector<light_point>& lights)
 		
 		index++;
 	}
+}
+
+bool material::isReflective() const
+{
+	return m_ReflectionMapSamplerLocation > 0;
+}
+
+const std::vector<std::shared_ptr<texture>>& material::getBoundTextures() const
+{
+	return m_ActiveTextures;
 }

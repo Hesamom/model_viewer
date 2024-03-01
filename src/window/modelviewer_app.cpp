@@ -34,6 +34,8 @@ modelviewer_app::modelviewer_app(std::shared_ptr<window>& window, std::shared_pt
 	//TODO set viewport when the window size changes too
 	m_Camera.setViewPort(m_Window->getWidth(), m_Window->getHeight());
 	m_Renderer.init(m_ObjectFactory);
+	m_Renderer.setReflectionPosition({0,0,0});
+	m_Renderer.setReflectionClearFlag({0,0,0,0});
     
     model_platform_info info;
     info.sizeZ = 12;
@@ -135,6 +137,14 @@ void modelviewer_app::onMousePositionChanged(double xpos, double ypos) {
 
 std::string modelviewer_app::label(std::string str, int id) {
 	return str + "##" + std::to_string(id);
+}
+
+void modelviewer_app::drawReflectionSettings()
+{
+	int biasedIndex = 2567;
+	ImGui::Text("Reflection");
+	auto& reflectionPos = m_Renderer.getReflectionPosition();
+	ImGui::SliderFloat3(label("position", biasedIndex).c_str(), &reflectionPos.x, -10,10, "%.2f");
 }
 
 
@@ -291,6 +301,7 @@ void modelviewer_app::displayLightPanel() {
 		return;
 	}
 
+	drawReflectionSettings();
 	drawDirectionalLightSettings();
 	drawSpotLightSettings();
 	drawPointLightSettings();

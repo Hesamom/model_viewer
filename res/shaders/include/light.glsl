@@ -9,6 +9,7 @@ struct material
     vec3 specularAlbedo;
     float shininess;
     float opacity;
+    float reflectivity;
 
     sampler2D diffuseSampler;
     sampler2D specularSampler;

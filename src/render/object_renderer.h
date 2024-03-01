@@ -4,7 +4,7 @@
 #include "glm/glm.hpp"
 #include "../common/transform.h"
 #include "../common/aabb.h"
-#include "gl/mesh_gl.h"
+#include "mesh.h"
 #include "material.h"
 #include "renderable.h"
 #include "mesh_renderer.h"
@@ -29,10 +29,17 @@ namespace modelViewer::render
 		void setRenderMode(render_mode mode);
 		void setCastShadow(bool enabled);
 		void setReceiveShadows(bool enabled);
+		bool getReceiveShadows();
+		bool getCastShadows();
+		
+		bool getCastReflection() const;
+		reflection_mode getReflectionMode() const;
+		void setCastReflection(bool enabled);
+		void setReflectionMode(reflection_mode mode);
+		
     	void computeBoundingBox();
     	common::aabb getBoundingBox();
-		bool getCastShadows();
-		bool getReceiveShadows();
+		
     	std::string getName();
     	
     private:
