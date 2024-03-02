@@ -38,6 +38,8 @@ namespace modelViewer::render
 		render_mode m_Mode = render_mode::triangles;
 		bool m_ReceivesShadow = true;
 		std::string m_Name;
+		reflection_mode m_ReflectionMode;
+		bool m_CastReflection;
 	};
 }
 #endif //MESH_RENDERER_H

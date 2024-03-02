@@ -5,7 +5,6 @@
 #include "camera.h"
 #include "framebuffer.h"
 #include "object_factory.h"
-#include "texture_cube.h"
 
 namespace modelViewer::render
 {
@@ -50,15 +49,18 @@ namespace modelViewer::render
 		const std::string m_DepthShaderFrag = modelViewer::res::literals::shaders::shadow_frag;
 		const std::string m_MVPUniformName = "u_MVP";
 
-		framebuffer m_shadowBuffer;
-		framebuffer m_ReflectionBuffer;
+		std::shared_ptr<framebuffer> m_shadowBuffer;
+		std::shared_ptr<framebuffer> m_ReflectionBuffer;
+		
 		std::shared_ptr<texture> m_SkyboxCubeMap;
 		
-		std::unique_ptr<shader_program> m_shadowProgram;
+		std::shared_ptr<shader_program> m_shadowProgram;
 		std::shared_ptr<object_renderer> m_Skybox;
 		
 		std::shared_ptr<texture> m_EmptyShadowmap;
-		std::shared_ptr<texture_cube> m_EmptyReflectionMap;
+		std::shared_ptr<texture> m_EmptyReflectionMap;
+
+		std::shared_ptr<gfx_device> m_Device;
 		
 		int m_MVPLocation = -1;
 		glm::mat4 m_LightViewProjection;
@@ -77,7 +79,8 @@ namespace modelViewer::render
 		void renderObjects(render_scene& scene, camera& camera, bool shadowsEnabled, bool reflectionEnabled);
 		
 	public:
-		
+
+		renderer_forward(const std::shared_ptr<gfx_device>& device);
 		void render(render_scene& scene, camera& camera, bool shadowEnabled, bool reflectionEnabled);
 		
 		void init(object_factory& objectFactory);

@@ -1,5 +1,5 @@
 ﻿#include "texture_format.h"
-#include "../resource/texture_asset.h"
+#include "../../resource/texture_asset.h"
 
 using namespace modelViewer::render;
 using namespace modelViewer::res;

@@ -2,7 +2,6 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include <glm/fwd.hpp>
 #include <glm/detail/type_vec3.hpp>
 #include "frustum_perspective.h"
 

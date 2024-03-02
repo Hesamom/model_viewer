@@ -2,7 +2,8 @@
 #include "model_platform_buffer.h"
 #include "object_factory.h"
 #include "texture_setup.h"
-#include "gl/texture_2D.h"
+#include "../resource/shader_asset.h"
+#include "gl/texture_2D_gl.h"
 
 using namespace modelViewer::render;
 using namespace modelViewer::res;
@@ -115,22 +116,15 @@ std::shared_ptr<mesh> generatePlaneMesh(const model_platform_info& info, gfx_dev
 
 
 std::shared_ptr<object_renderer> model_platform_buffer::generateGrid(object_factory& objectFactory,
-                                                                     const model_platform_info &info, gfx_device& device)
+                                                                     const model_platform_info &info, std::shared_ptr<gfx_device>& device)
 {
 	auto shaderLoader = objectFactory.getShaderLoader();
-	auto mesh = generateGridMesh(info, device);
-	auto fragShaderAsset = shaderLoader.load(m_GridFragShaderPath, shaderType::fragment);
-	auto vertexShaderAsset = shaderLoader.load(m_GridVertShaderPath, shaderType::vertex);
-	shader_gl fragShader (fragShaderAsset);
-	fragShader.compile();
-	fragShader.verify();
-	
-	shader_gl vertexShader (vertexShaderAsset);
-	vertexShader.compile();
-	vertexShader.verify();
-	
-	auto program = std::make_shared<shader_program_gl>(std::initializer_list<shader_gl>{fragShader, vertexShader});
-    program->validateLinking();
+	auto mesh = generateGridMesh(info, *device);
+
+	std::vector<std::shared_ptr<shader_asset>> shaders;
+	shaders.push_back(shaderLoader.load(m_GridFragShaderPath, shaderType::fragment));
+	shaders.push_back(shaderLoader.load(m_GridVertShaderPath, shaderType::vertex));
+	auto program = device->createProgram(shaders);
 
 	material_asset materialInfo;
 	std::vector<texture_binding> textures;
@@ -138,7 +132,7 @@ std::shared_ptr<object_renderer> model_platform_buffer::generateGrid(object_fact
 	materialInfo.propertySet.renderQueue = (render_queue_transparent + 1);
 
 	auto defaults = objectFactory.getDefaultTextures();
-	auto mat = std::make_shared<material>(materialInfo, textures, program, defaults);
+	auto mat = std::make_shared<material>(device, materialInfo, textures, program, defaults);
 	auto grid = std::make_shared<object_renderer>(mat, mesh, "platform_grid");
 	
 	grid->setRenderMode(render_mode::lines);
@@ -150,28 +144,20 @@ std::shared_ptr<object_renderer> model_platform_buffer::generateGrid(object_fact
 }
 
 std::shared_ptr<object_renderer> model_platform_buffer::generatePlane(object_factory& objectFactory,
-                                                                      const model_platform_info &info, gfx_device& device)
+                                                                      const model_platform_info &info, std::shared_ptr<gfx_device>& device)
 {
 	auto shaderLoader = objectFactory.getShaderLoader();
-	auto mesh = generatePlaneMesh(info, device);
-	auto fragShaderAsset = shaderLoader.load(m_PlaneFragShaderPath, shaderType::fragment);
-	auto vertexShaderAsset = shaderLoader.load(m_PlaneVertShaderPath, shaderType::vertex);
-	shader_gl fragShader (fragShaderAsset);
-	fragShader.compile();
-	fragShader.verify();
-	
-	shader_gl vertexShader (vertexShaderAsset);
-	vertexShader.compile();
-	vertexShader.verify();
-	
-	auto program = std::make_shared<shader_program_gl>(std::initializer_list<shader_gl>{fragShader, vertexShader});
-    program->validateLinking();
+	auto mesh = generatePlaneMesh(info, *device);
 
+	std::vector<std::shared_ptr<shader_asset>> shaders;
+	shaders.push_back(shaderLoader.load(m_PlaneFragShaderPath, shaderType::fragment));
+	shaders.push_back(shaderLoader.load(m_PlaneVertShaderPath, shaderType::vertex));
+	auto program = device->createProgram(shaders);
 
 	auto diffuseTextureAsset = objectFactory.getTextureLoader().load(m_PlaneDiffuseTexture,3);
 	texture_setup textureSetup;
 	textureSetup.assets.push_back(diffuseTextureAsset);
-	auto diffuseTexture = std::make_shared<texture_2D>(textureSetup);
+	auto diffuseTexture = std::make_shared<texture_2D_gl>(textureSetup);
 	
 	std::vector<texture_binding> textures;
 	texture_binding binding;
@@ -188,7 +174,7 @@ std::shared_ptr<object_renderer> model_platform_buffer::generatePlane(object_fac
 	materialInfo.propertySet.floats.push_back({Literals::Reflectivity, 0.3f});
 	materialInfo.propertySet.renderQueue = render_queue_transparent;
 	auto defaults = objectFactory.getDefaultTextures();
-	auto mat = std::make_shared<material>(materialInfo, textures, program, defaults);
+	auto mat = std::make_shared<material>(device, materialInfo, textures, program, defaults);
 
 	auto plane = std::make_shared<object_renderer>(mat, mesh, "platform_plane");
 	plane->setCastShadow(false);

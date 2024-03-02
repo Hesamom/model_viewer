@@ -1,20 +1,20 @@
 ﻿
 #include <GL/glew.h>
-#include "framebuffer.h"
+#include "framebuffer_gl.h"
 
 //TODO use Texture_2D and Texture_Array classes instead of manual creation, need new Texture_Array and new ctor for Texture_2D
 
-modelViewer::render::framebuffer::framebuffer()
+modelViewer::render::framebuffer_gl::framebuffer_gl()
 {
 	glGenFramebuffers(1, &m_BufferId);
 }
 
-void modelViewer::render::framebuffer::bind()
+void modelViewer::render::framebuffer_gl::bind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_BufferId);
 }
 
-unsigned int modelViewer::render::framebuffer::createArrayDepthTexture(int width, int height, int layers, bool enableDepthCompare)
+void modelViewer::render::framebuffer_gl::createArrayDepthTexture(int width, int height, int layers, bool enableDepthCompare)
 {
 	glGenTextures(1, &m_ArrayDepthTextureId);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, m_ArrayDepthTextureId);
@@ -41,11 +41,10 @@ unsigned int modelViewer::render::framebuffer::createArrayDepthTexture(int width
 	glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, borderColor);
 
 	glBindTexture(GL_TEXTURE_2D_ARRAY,0);
-	return m_ArrayDepthTextureId;
 }
 
 
-unsigned int modelViewer::render::framebuffer::createDepthTexture(int width, int height, bool enableDepthCompare, std::string& name)
+void modelViewer::render::framebuffer_gl::createDepthTexture(int width, int height, bool enableDepthCompare, std::string& name)
 {
 	glGenTextures(1, &m_DepthTextureId);
 	glBindTexture(GL_TEXTURE_2D, m_DepthTextureId);
@@ -74,10 +73,9 @@ unsigned int modelViewer::render::framebuffer::createDepthTexture(int width, int
 
 	glObjectLabel(GL_TEXTURE, m_DepthTextureId, -1, name.data());
 	glBindTexture(GL_TEXTURE_2D,0);
-	return m_DepthTextureId;
 }
 
-unsigned int modelViewer::render::framebuffer::createCubeMap(int size, std::string& name){
+void modelViewer::render::framebuffer_gl::createCubeMap(int size, std::string& name){
 	if (size < 1) {
 		throw std::length_error("size is smaller than 1");
 	}
@@ -97,33 +95,40 @@ unsigned int modelViewer::render::framebuffer::createCubeMap(int size, std::stri
 			size, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 	}
 	glObjectLabel(GL_TEXTURE, m_CubeMapId, -1, name.c_str());
-	return m_CubeMapId;
 }
 
-void modelViewer::render::framebuffer::attachCubeMapFace(int index){
+void modelViewer::render::framebuffer_gl::attachCubeMapFace(int index){
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_TEXTURE_CUBE_MAP_POSITIVE_X + index, m_CubeMapId, 0);
 	glDrawBuffer(GL_COLOR_ATTACHMENT0 + index);
 	glReadBuffer(GL_COLOR_ATTACHMENT0 + index);
 }
 
-void modelViewer::render::framebuffer::attachDepthTexture() {
+void modelViewer::render::framebuffer_gl::attachDepthTexture() {
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_DepthTextureId, 0);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 }
 
-void modelViewer::render::framebuffer::attachDepthTextureArray(int layer) {
+void modelViewer::render::framebuffer_gl::attachDepthTextureArray(int layer) {
 	glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_ArrayDepthTextureId, 0, layer);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 }
 
-void modelViewer::render::framebuffer::unbind()
+void modelViewer::render::framebuffer_gl::clearColorBuffer(const glm::vec4& color) {
+	glClearBufferfv(GL_COLOR, 0, &color.x);
+}
+
+void modelViewer::render::framebuffer_gl::clearDepthBuffer() {
+	glClear(GL_DEPTH_BUFFER_BIT);
+}
+
+void modelViewer::render::framebuffer_gl::unbind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-modelViewer::render::framebuffer::~framebuffer()
+modelViewer::render::framebuffer_gl::~framebuffer_gl()
 {
 	//TODO unbind them first 
 	if (m_DepthTextureId > -1)
@@ -139,7 +144,7 @@ modelViewer::render::framebuffer::~framebuffer()
 	glDeleteFramebuffers(1, &m_BufferId);
 }
 
-void modelViewer::render::framebuffer::activateDepthMap(int slot)
+void modelViewer::render::framebuffer_gl::activateDepthMap(int slot)
 {
 	if (m_DepthTextureId < 0)
 	{
@@ -152,7 +157,7 @@ void modelViewer::render::framebuffer::activateDepthMap(int slot)
 	glBindTexture(GL_TEXTURE_2D, m_DepthTextureId);
 }
 
-void modelViewer::render::framebuffer::activateDepthMapArray(int slot)
+void modelViewer::render::framebuffer_gl::activateDepthMapArray(int slot)
 {
 	if (m_ArrayDepthTextureId < 0)
 	{
@@ -165,7 +170,7 @@ void modelViewer::render::framebuffer::activateDepthMapArray(int slot)
 	glBindTexture(GL_TEXTURE_2D_ARRAY, m_ArrayDepthTextureId);
 }
 
-void modelViewer::render::framebuffer::activateCubeMap(int slot) const
+void modelViewer::render::framebuffer_gl::activateCubeMap(int slot) const
 {
 	if (m_CubeMapId < 0)
 	{

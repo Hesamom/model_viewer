@@ -1,13 +1,13 @@
 ﻿#include "src/window/modelviewer_app.h"
 #include "src/window/window_win32.h"
-#include "src/render/gfx_device_dx.h"
-#include "src/render/gfx_device_gl.h"
+#include "src/render/dx/gfx_device_dx.h"
+#include "src/render/gl/gfx_device_gl.h"
 
 void getWindow(bool dx);
 bool isUsingDX(int count, const char** cmd);
 
 std::shared_ptr<window> window;
-std::shared_ptr<gfx_device> device;
+std::shared_ptr<modelViewer::render::gfx_device> device;
 
 int main(int count, const char** cmd)
 {
@@ -31,7 +31,7 @@ void getWindow(bool dx)
 	}
 
 	auto winGL =  std::make_shared<window_glfw>(1024, 1024, "Playground", false);
-	device = std::make_shared<gfx_device_gl>(winGL);
+	device = std::make_shared<modelViewer::render::gfx_device_gl>(winGL);
 	window = winGL;
 }
 

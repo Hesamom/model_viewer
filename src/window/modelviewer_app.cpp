@@ -3,6 +3,7 @@
 #include "modelviewer_app.h"
 #include "regex"
 #include "../common/stopwatch.h"
+#include "../resource/shader_asset.h"
 
 using namespace modelViewer::res;
 using namespace modelViewer::render;
@@ -12,7 +13,7 @@ glm::vec3 getPosition(float pitch, float yaw, float zoomLevel);
 
 void modelviewer_app::onRender(float elapsed) {
     addNewModels();
-	m_Renderer.render(m_Scene, m_Camera, true);
+	m_Renderer.render(m_Scene, m_Camera, true, true);
 }
 
 
@@ -22,7 +23,7 @@ void modelviewer_app::addModel(model_info& info) {
 }
 
 
-modelviewer_app::modelviewer_app(std::shared_ptr<window>& window, std::shared_ptr<gfx_device>& device) : m_ObjectFactory(device)
+modelviewer_app::modelviewer_app(std::shared_ptr<window>& window, std::shared_ptr<gfx_device>& device) : m_ObjectFactory(device), m_Renderer(device)
 {
 	m_Window = window;
 	m_Device = device;
@@ -42,8 +43,8 @@ modelviewer_app::modelviewer_app(std::shared_ptr<window>& window, std::shared_pt
     info.sizeX = 12;
     info.lineSpace = 1;
 	
-	auto plane = m_Platform.generatePlane(m_ObjectFactory, info, *m_Device);
-	auto grid = m_Platform.generateGrid(m_ObjectFactory, info, *m_Device);
+	auto plane = m_Platform.generatePlane(m_ObjectFactory, info, m_Device);
+	auto grid = m_Platform.generateGrid(m_ObjectFactory, info, m_Device);
 	
 	m_Scene.addStaticObject(plane);
 	m_Scene.addStaticObject(grid);

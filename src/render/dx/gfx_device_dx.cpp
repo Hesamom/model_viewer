@@ -1,6 +1,6 @@
 ﻿
 #include "gfx_device_dx.h"
-#include "../error/not_implemented_error.h"
+#include "../../error/not_implemented_error.h"
 #include <WindowsX.h>
 #if defined(DEBUG) || defined(_DEBUG)
 #define _CRTDBG_MAP_ALLOC
@@ -195,6 +195,31 @@ void gfx_device_dx::setClearColor(glm::vec3& color)
 
 }
 
+void gfx_device_dx::setCullFaceMode(cull_face_mode mode) {
+}
+
+void gfx_device_dx::setDepthmap(bool enable) {
+}
+
+void gfx_device_dx::setCullFace(bool enable) {
+}
+
+void gfx_device_dx::clearDepthBuffer() {
+}
+
+void gfx_device_dx::clearColorBuffer(const glm::vec4& color) {
+}
+
+void gfx_device_dx::popDebugGroup() {
+}
+
+void gfx_device_dx::pushDebugGroup(const char* label) {
+}
+
+int gfx_device_dx::getMaxSamplersPerProgram() {
+	return 0;
+}
+
 gfx_device_dx::gfx_device_dx(std::shared_ptr<window_win32>& window)
 {
 	m_Window = window;
@@ -211,7 +236,15 @@ std::shared_ptr<texture> gfx_device_dx::createTexture2D(texture_setup& setup)
 	return std::shared_ptr<texture>();
 }
 
-std::shared_ptr<modelViewer::render::mesh> gfx_device_dx::createMesh(
-	std::shared_ptr<modelViewer::res::mesh_asset>& asset) {
+std::shared_ptr<mesh> gfx_device_dx::createMesh(
+	std::shared_ptr<res::mesh_asset>& asset) {
+	throw std::runtime_error("not imp");
+}
+
+std::shared_ptr<shader_program> gfx_device_dx::createProgram(std::vector<std::shared_ptr<res::shader_asset>>& assets) {
+	throw std::runtime_error("not imp");
+}
+
+std::shared_ptr<framebuffer> gfx_device_dx::createFramebuffer() {
 	throw std::runtime_error("not imp");
 }

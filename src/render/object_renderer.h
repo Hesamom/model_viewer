@@ -51,6 +51,8 @@ namespace modelViewer::render
 		
     	bool m_CastShadows = true;
     	bool m_ReceiveShadows = true;
+        bool m_CastReflection = false;
+        reflection_mode m_ReflectionMode;
     };
 }
 #endif

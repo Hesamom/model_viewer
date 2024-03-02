@@ -1,6 +1,6 @@
 ﻿
-#ifndef MODEL_VIEWER_MESH_H
-#define MODEL_VIEWER_MESH_H
+#ifndef MESH_GL_H
+#define MESH_GL_H
 
 #include "../../resource/mesh_asset.h"
 #include "vertex_buffer.h"

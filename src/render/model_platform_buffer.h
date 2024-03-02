@@ -28,9 +28,9 @@ namespace modelViewer::render
 		
     public:
 		std::shared_ptr<object_renderer> generateGrid(object_factory& objectFactory,
-		                                              const model_platform_info &info, gfx_device& device);
+		                                              const model_platform_info &info, std::shared_ptr<gfx_device>& device);
 		std::shared_ptr<object_renderer> generatePlane(object_factory& objectFactory,
-		                                                                    const model_platform_info &info, gfx_device& device);
+		                                                                    const model_platform_info &info, std::shared_ptr<gfx_device>& device);
     };
 }
 

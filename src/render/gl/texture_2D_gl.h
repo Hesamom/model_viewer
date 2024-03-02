@@ -1,13 +1,11 @@
-﻿#ifndef MODEL_VIEWER_TEXTURE_2D_H
-#define MODEL_VIEWER_TEXTURE_2D_H
+﻿#ifndef TEXTURE_2D_GL_H
+#define TEXTURE_2D_GL_H
 
-
-#include "../../resource/texture_asset.h"
 #include "../texture_setup.h"
 #include "texture_gl.h"
 
 namespace modelViewer::render {
-    class texture_2D : public texture_gl{
+    class texture_2D_gl : public texture_gl{
     private:
         texture_setup m_Setup;
         
@@ -18,8 +16,8 @@ namespace modelViewer::render {
         unsigned int GetTextureType() override{return GL_TEXTURE_2D;};
         modelViewer::res::texture_asset_type GetTextureAssetType()const override{return m_Setup.type;};
     public:
-        texture_2D(texture_setup& texture_setup);
-        ~texture_2D();
+        texture_2D_gl(texture_setup& texture_setup);
+        ~texture_2D_gl();
         texture_filtering_mode  getFilteringModeMin() const;
         texture_filtering_mode  getFilteringModeMag() const;
         texture_wrapping_mode getWrappingMode() const;

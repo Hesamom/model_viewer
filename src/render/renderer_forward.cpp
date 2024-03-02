@@ -4,8 +4,7 @@
 #include "camera.h"
 #include "object_factory.h"
 #include "texture_setup.h"
-#include "texture_2D.h"
-#include "texture_cube.h"
+#include "../resource/shader_asset.h"
 
 using namespace modelViewer::res;
 using namespace modelViewer::render;
@@ -45,13 +44,13 @@ void renderer_forward::renderReflectionMap(render_scene& scene , camera& camera)
 	{
 		return;
 	}
-	
-	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "rendering reflection map");
 
-	m_ReflectionBuffer.bind();
-	glCullFace(GL_FRONT);
-	glViewport(0, 0, REFLECTION_SIZE, REFLECTION_SIZE);
-	m_ReflectionBuffer.attachDepthTexture();
+	m_Device->pushDebugGroup("rendering reflection map");
+
+	m_ReflectionBuffer->bind();
+	m_Device->setCullFaceMode(cull_face_mode::front);
+	m_Device->setViewport(REFLECTION_SIZE,REFLECTION_SIZE);
+	m_ReflectionBuffer->attachDepthTexture();
 	m_EmptyReflectionMap->active(reflectionMapSlot);
 	
 	auto meshes = getSortedObjects(scene, m_ReflectionClearMode == clear_mode::skybox);
@@ -60,15 +59,16 @@ void renderer_forward::renderReflectionMap(render_scene& scene , camera& camera)
 	
 	for (int index = 0; index < 6; ++index) {
 
-		glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, ("side: " + m_SideNames[index]).c_str());
-		m_ReflectionBuffer.attachCubeMapFace(index);
+		m_Device->pushDebugGroup(("side: " + m_SideNames[index]).c_str());
+		m_ReflectionBuffer->attachCubeMapFace(index);
 
 		if (m_ReflectionClearMode == clear_mode::color)
 		{
-			glClearBufferfv(GL_COLOR, 0, &m_ReflectionClearFlag.x);
+			m_ReflectionBuffer->clearColorBuffer(m_ReflectionClearFlag);
 		}
+
+		m_ReflectionBuffer->clearDepthBuffer();
 		
-		glClear(GL_DEPTH_BUFFER_BIT);
 		glm::mat4 view = glm::lookAt(m_ReflectionPosition, m_ReflectionPosition + m_CubeMapFacesDirection[index], up);
 		
 		for (auto& mesh : meshes) {
@@ -80,21 +80,19 @@ void renderer_forward::renderReflectionMap(render_scene& scene , camera& camera)
 			}
 		}
 		
-		glPopDebugGroup();
+		m_Device->popDebugGroup();
 	}
 
-	m_ReflectionBuffer.unbind();
-
-	glPopDebugGroup();
+	m_ReflectionBuffer->unbind();
+	m_Device->popDebugGroup();
 }
 
 void renderer_forward::renderDirectionalShadows(render_scene& scene) {
 
-	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "rendering directional shadows");
-	
-	glViewport(0, 0, SHADOW_DIR_WIDTH, SHADOW_DIR_HEIGHT);
-	m_shadowBuffer.attachDepthTexture();
-	glClear(GL_DEPTH_BUFFER_BIT);
+	m_Device->pushDebugGroup("rendering directional shadows");
+	m_Device->setViewport(SHADOW_DIR_WIDTH, SHADOW_DIR_HEIGHT);
+	m_shadowBuffer->attachDepthTexture();
+	m_shadowBuffer->clearDepthBuffer();
 	
 	constexpr float near_plane = 30.0f;
 	constexpr float far_plane = 100.0f;
@@ -126,7 +124,7 @@ void renderer_forward::renderDirectionalShadows(render_scene& scene) {
 		}
 	}
 
-	glPopDebugGroup();
+	m_Device->popDebugGroup();
 }
 
 glm::mat4 compute_view_matrix_for_rotation(glm::vec3 origin, glm::vec3 rot) {
@@ -143,14 +141,14 @@ glm::mat4 compute_view_matrix_for_rotation(glm::vec3 origin, glm::vec3 rot) {
 
 void renderer_forward::renderSpotShadows(render_scene& scene) {
 
-	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "rendering spot shadows");
-	glViewport(0, 0, SHADOW_SPOT_WIDTH, SHADOW_SPOT_HEIGHT);
+	m_Device->pushDebugGroup( "rendering spot shadows");
+	m_Device->setViewport(SHADOW_SPOT_WIDTH, SHADOW_SPOT_HEIGHT);
 	
 	int layer = 0;
 	for (auto& spot : scene.getSpotLights()) {
 		
-		m_shadowBuffer.attachDepthTextureArray(layer);
-		glClear(GL_DEPTH_BUFFER_BIT);
+		m_shadowBuffer->attachDepthTextureArray(layer);
+		m_shadowBuffer->clearDepthBuffer();
 		layer++;
 		
 		constexpr float near_plane = 0.1f;
@@ -183,19 +181,19 @@ void renderer_forward::renderSpotShadows(render_scene& scene) {
 		}
 	}
 
-	glPopDebugGroup();
+	m_Device->popDebugGroup();
 }
 
 void renderer_forward::renderShadows(render_scene& scene)
 {
-	m_shadowBuffer.bind();
-	glCullFace(GL_FRONT);
+	m_shadowBuffer->bind();
+	m_Device->setCullFaceMode(cull_face_mode::front);
 	m_shadowProgram->bind();
 	
 	renderDirectionalShadows(scene);
 	renderSpotShadows(scene);
 	
-	m_shadowBuffer.unbind();
+	m_shadowBuffer->unbind();
 }
 
 bool compareRenderQueue(std::shared_ptr<mesh_renderer> o1, std::shared_ptr<mesh_renderer> o2)
@@ -224,33 +222,32 @@ std::vector<std::shared_ptr<mesh_renderer>> renderer_forward::getSortedObjects(r
 
 void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool shadowsEnabled, bool reflectionEnabled)
 {
-	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "rendering objects");
+	m_Device->pushDebugGroup("rendering objects");
 	
 	int viewportWidth, viewportHeight;
 	camera.getViewport(viewportWidth, viewportHeight);
-	
-	glViewport(0, 0, viewportWidth, viewportHeight);
-	glClear(GL_DEPTH_BUFFER_BIT);
+	m_Device->setViewport(viewportWidth, viewportHeight);
+	m_Device->clearDepthBuffer();
 
 	if (m_ClearMode == clear_mode::color)
 	{
-		glClearBufferfv(GL_COLOR, 0, &m_ClearFlag.x);
+		m_Device->clearColorBuffer(m_ClearFlag);
 	}
 
-	glCullFace(GL_BACK);
+	m_Device->setCullFaceMode(cull_face_mode::back);
 	
 	if (shadowsEnabled)
 	{
 		//TODO consider using another approach that would not be overriden by material, this is safe by now since we dont have 31 textures yet
-		m_shadowBuffer.activateDepthMap(shadowmapDirSlot);
-		m_shadowBuffer.activateDepthMapArray(shadowmapSpotSlot);
+		m_shadowBuffer->activateDepthMap(shadowmapDirSlot);
+		m_shadowBuffer->activateDepthMapArray(shadowmapSpotSlot);
 		m_EmptyShadowmap->active(emptyShadowmapSlot);
 	}
 
 	if (reflectionEnabled)
 	{
 		m_SkyboxCubeMap->active(skyboxReflectionMapSlot);
-		m_ReflectionBuffer.activateCubeMap(reflectionMapSlot);
+		m_ReflectionBuffer->activateCubeMap(reflectionMapSlot);
 		m_EmptyReflectionMap->active(emptyReflectionMapSlot);
 	}
 	
@@ -297,13 +294,17 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 		renderer->getMaterial()->setPointLights(scene.getPointLights());
 		renderer->getMaterial()->setSpotLights(scene.getSpotLights());
 
-		glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, renderer->getName().c_str());
+		m_Device->pushDebugGroup(renderer->getName().c_str());
 		renderer->render(viewMatrix, projection);
-		glPopDebugGroup();
+		m_Device->popDebugGroup();
 	}
 	
 
-	glPopDebugGroup();
+	m_Device->popDebugGroup();
+}
+
+renderer_forward::renderer_forward(const std::shared_ptr<gfx_device>& device) {
+	m_Device = device;
 }
 
 void renderer_forward::setClearFlag(glm::vec4 color)
@@ -322,48 +323,39 @@ void renderer_forward::init(object_factory& objectFactory)
 
 void renderer_forward::initShadowmap(object_factory& objectFactory, shader_loader& shaderLoader)
 {
-	auto vertShaderAsset = shaderLoader.load(m_DepthShaderVert, shaderType::vertex);
-	auto fragShaderAsset = shaderLoader.load(m_DepthShaderFrag, shaderType::fragment);
-
-	shader vertShader(vertShaderAsset);
-	shader fragShader(fragShaderAsset);
-
-	vertShader.compile();
-	vertShader.verify();
-
-	fragShader.compile();
-	fragShader.verify();
-
-	m_shadowProgram = std::make_unique<shader_program>(std::initializer_list<shader>{vertShader, fragShader});
-	m_shadowProgram->validateLinking();
-
+	std::vector<std::shared_ptr<shader_asset>> assets;
+	assets.emplace_back(shaderLoader.load(m_DepthShaderVert, shaderType::vertex));
+	assets.emplace_back(shaderLoader.load(m_DepthShaderFrag, shaderType::fragment));;
+	
+	m_shadowProgram = m_Device->createProgram(assets);
 	m_shadowProgram->bind();
 	m_MVPLocation = m_shadowProgram->getUniformLocation(m_MVPUniformName);
 
 	auto shadowDirName = std::string("shadowmap_dir");
-	m_shadowBuffer.bind();
-	m_shadowBuffer.createDepthTexture(SHADOW_DIR_WIDTH, SHADOW_DIR_HEIGHT, true, shadowDirName);
-	m_shadowBuffer.createArrayDepthTexture(SHADOW_SPOT_WIDTH, SHADOW_SPOT_HEIGHT,SUPPORTED_SPOT_LIGHTS, true);
-	m_shadowBuffer.unbind();
+	m_shadowBuffer = m_Device->createFramebuffer();
+	m_shadowBuffer->bind();
+	m_shadowBuffer->createDepthTexture(SHADOW_DIR_WIDTH, SHADOW_DIR_HEIGHT, true, shadowDirName);
+	m_shadowBuffer->createArrayDepthTexture(SHADOW_SPOT_WIDTH, SHADOW_SPOT_HEIGHT,SUPPORTED_SPOT_LIGHTS, true);
+	m_shadowBuffer->unbind();
 
 	auto textureLoader = objectFactory.getTextureLoader();
 	auto textureAsset = textureLoader.load(m_EmptyShadowmapTexture,3);
 	texture_setup setup;
 	setup.assets.push_back(textureAsset);
 	
-	m_EmptyShadowmap = std::make_shared<texture_2D>(setup);
-
-
+	m_EmptyShadowmap = m_Device->createTexture2D(setup);
 }
 
 void renderer_forward::initReflectionMap(object_factory& objectFactory)
 {
 	auto reflectionMapName = std::string("reflection_cubeMap");
 	auto reflectionMapDepthName = std::string("reflection_depth");
-	m_ReflectionBuffer.bind();
-	m_ReflectionBuffer.createCubeMap(REFLECTION_SIZE, reflectionMapName);
-	m_ReflectionBuffer.createDepthTexture(REFLECTION_SIZE, REFLECTION_SIZE, false, reflectionMapDepthName);
-	m_ReflectionBuffer.unbind();
+
+	m_ReflectionBuffer = m_Device->createFramebuffer();
+	m_ReflectionBuffer->bind();
+	m_ReflectionBuffer->createCubeMap(REFLECTION_SIZE, reflectionMapName);
+	m_ReflectionBuffer->createDepthTexture(REFLECTION_SIZE, REFLECTION_SIZE, false, reflectionMapDepthName);
+	m_ReflectionBuffer->unbind();
 	
 	texture_setup setup;
 	auto textureAsset = objectFactory.getTextureLoader().load(m_EmptyReflectionTexturePath, 4, false);
@@ -371,15 +363,15 @@ void renderer_forward::initReflectionMap(object_factory& objectFactory)
 		setup.assets.emplace_back(textureAsset);
 	}
 	setup.type = res::texture_asset_type::textureCube;
-	m_EmptyReflectionMap = std::make_shared<texture_cube>(setup);
+	m_EmptyReflectionMap = m_Device->createTextureCube(setup);
 }
 
 
 void renderer_forward::initSkybox(object_factory& objectFactory)
 {
 	model_info skyboxModel;
-	shader_asset_info fragShader1 { res::literals::shaders::skybox_frag, shaderType::fragment};
-	shader_asset_info vertShader1 {  res::literals::shaders::skybox_vert, shaderType::vertex};
+	shader_asset_info fragShader1 { literals::shaders::skybox_frag, shaderType::fragment};
+	shader_asset_info vertShader1 {  literals::shaders::skybox_vert, shaderType::vertex};
 	
 	auto material = std::make_shared<material_asset>();
 
@@ -390,15 +382,15 @@ void renderer_forward::initSkybox(object_factory& objectFactory)
 	texture_asset_info skyboxTexture;
 	skyboxTexture.samplerName = "u_skybox";
 	skyboxTexture.type = texture_asset_type::textureCube;
-	skyboxTexture.paths.emplace_back(res::literals::textures::skybox_right);
-	skyboxTexture.paths.emplace_back(res::literals::textures::skybox_left);
-    skyboxTexture.paths.emplace_back(res::literals::textures::skybox_top);
-    skyboxTexture.paths.emplace_back(res::literals::textures::skybox_bottom);
-    skyboxTexture.paths.emplace_back(res::literals::textures::skybox_front);
-	skyboxTexture.paths.emplace_back(res::literals::textures::skybox_back);
+	skyboxTexture.paths.emplace_back(literals::textures::skybox_right);
+	skyboxTexture.paths.emplace_back(literals::textures::skybox_left);
+    skyboxTexture.paths.emplace_back(literals::textures::skybox_top);
+    skyboxTexture.paths.emplace_back(literals::textures::skybox_bottom);
+    skyboxTexture.paths.emplace_back(literals::textures::skybox_front);
+	skyboxTexture.paths.emplace_back(literals::textures::skybox_back);
     skyboxTexture.forceFlip = false;
 	material->textures.push_back(skyboxTexture);
-	skyboxModel.path =  res::literals::models::primitive_cube;
+	skyboxModel.path =  literals::models::primitive_cube;
 	skyboxModel.name = "skybox";
 	skyboxModel.transform.setScale(glm::vec3(100.0));
 	material->propertySet.renderQueue = render_queue_transparent - 1;

@@ -1,5 +1,5 @@
-﻿#ifndef MODEL_VIEWER_SHADER_PROGRAM_H
-#define MODEL_VIEWER_SHADER_PROGRAM_H
+﻿#ifndef SHADER_PROGRAM_GL_H
+#define SHADER_PROGRAM_GL_H
 
 #include "../../resource/shader_loader.h"
 #include "shader_gl.h"

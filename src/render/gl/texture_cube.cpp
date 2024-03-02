@@ -1,6 +1,6 @@
 ﻿#include "texture_cube.h"
 #include "GL/glew.h"
-#include "../texture_format.h"
+#include "texture_format.h"
 
 modelViewer::render::texture_cube::texture_cube(texture_setup& textureSetup) {
     glGenTextures(1, &m_TextureId);

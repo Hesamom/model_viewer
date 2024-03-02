@@ -1,6 +1,6 @@
 ﻿#ifndef GFX_DEVICE_DX_H
 #define GFX_DEVICE_DX_H
-#include "gfx_device.h"
+#include "../gfx_device.h"
 
 #include <windows.h>
 #include <wrl.h>
@@ -12,9 +12,9 @@
 #include <DirectXColors.h>
 #include <DirectXCollision.h>
 #include "d3dx12.h"
-#include "../window/window_win32.h"
-#include "texture.h"
-#include "../resource/model_info.h"
+#include "../../window/window_win32.h"
+#include "../texture.h"
+#include "../../resource/model_info.h"
 
 namespace modelViewer::render
 {
@@ -24,15 +24,24 @@ namespace modelViewer::render
 		explicit gfx_device_dx(std::shared_ptr<window_win32>& window);
 
 		void swapBuffers() override;
-
 		void setViewport(int width, int height) override;
-
 		void setClearColor(glm::vec3& color) override;
+		void setCullFaceMode(cull_face_mode mode) override;
+		void setDepthmap(bool enable) override;
+		void setCullFace(bool enable) override;
+		void clearDepthBuffer() override;
+		void clearColorBuffer(const glm::vec4& color) override;
+		
+		void popDebugGroup() override;
+		void pushDebugGroup(const char* label) override;
+		
+		int getMaxSamplersPerProgram() override;
 
 		std::shared_ptr<texture> createTextureCube(texture_setup &setup) override ;
 		std::shared_ptr<texture> createTexture2D(texture_setup &setup) override ;
-
 		std::shared_ptr<mesh> createMesh(std::shared_ptr<res::mesh_asset>& asset) override;
+		std::shared_ptr<shader_program> createProgram(std::vector<std::shared_ptr<res::shader_asset>>& assets) override;
+		std::shared_ptr<framebuffer> createFramebuffer() override;
 
 	private:
 

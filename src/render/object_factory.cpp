@@ -1,6 +1,4 @@
 ﻿#include "object_factory.h"
-#include "gl/texture_cube.h"
-#include "gl/texture_2D.h"
 #include "../common/stopwatch.h"
 
 using namespace modelViewer::res;
@@ -107,8 +105,7 @@ std::shared_ptr<material> object_factory::getMaterial(const std::shared_ptr<mate
 
 	auto program = getProgram(asset);
 	auto textures = getTextures(asset);
-	auto mat = std::make_shared<material>(*asset, textures, program, m_DefaultTextures);
-	
+	auto mat = std::make_shared<material>(m_Device, *asset, textures, program, m_DefaultTextures);
 	m_LoadedMaterials[asset] = mat;
 	return mat;
 }
@@ -154,21 +151,16 @@ std::vector<std::shared_ptr<mesh>> object_factory::getMeshes(model_info & info) 
 }
 
 
-std::shared_ptr<shader_program_gl> object_factory::getProgram(std::shared_ptr<material_asset> materialAsset) {
+std::shared_ptr<shader_program> object_factory::getProgram(std::shared_ptr<material_asset> materialAsset) {
 
-	std::vector<shader_gl> shaders;
+	std::vector<std::shared_ptr<shader_asset>> assets;
 	for (auto& shaderInfo : materialAsset->shaders) {
 
 		auto shaderAsset = m_ShaderLoader.load(shaderInfo.path, shaderInfo.type);
-		shader_gl shader(shaderAsset);
-		shader.compile();
-		shader.verify();
-
-		shaders.push_back(shader);
+		assets.push_back(shaderAsset);
 	}
 
-	auto program = std::make_shared<shader_program_gl>(shaders);
-    program->validateLinking();
+	auto program = m_Device->createProgram(assets);
 	return program;
 }
 

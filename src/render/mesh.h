@@ -1,10 +1,14 @@
-﻿
-#ifndef MESH_H
+﻿#ifndef MESH_H
 #define MESH_H
-#include "material.h"
+
+namespace modelViewer::res {
+    class mesh_asset;
+}
 
 namespace modelViewer::render
 {
+    class material;
+
     class mesh
     {
         public:

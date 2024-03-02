@@ -17,7 +17,7 @@ class modelviewer_app {
 private:
 
 	std::shared_ptr<window> m_Window;
-	std::shared_ptr<gfx_device> m_Device;
+	std::shared_ptr<modelViewer::render::gfx_device> m_Device;
 	modelViewer::render::object_factory m_ObjectFactory;
     modelViewer::render::render_scene m_Scene;
     modelViewer::render::model_platform_buffer m_Platform;
@@ -73,7 +73,7 @@ protected:
     void onMousePositionChanged(double xpos, double ypos);
 	
 public:
-	 modelviewer_app(std::shared_ptr<window>& window, std::shared_ptr<gfx_device>& device);
+	 modelviewer_app(std::shared_ptr<window>& window, std::shared_ptr<modelViewer::render::gfx_device>& device);
      ~modelviewer_app();
 	
 	void addModel(modelViewer::res::model_info& info);

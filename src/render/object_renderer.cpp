@@ -13,14 +13,9 @@ void object_renderer::setTransform(const transform &t) {
 
 
 void object_renderer::render(glm::mat4 view, glm::mat4 projection) {
-
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, ("render: " + m_Name).c_str());
-
 	for (auto& renderer : m_MeshRenders) {
 		renderer->render(view, projection);
 	}
-    
-    glPopDebugGroup();
 }
 
 
