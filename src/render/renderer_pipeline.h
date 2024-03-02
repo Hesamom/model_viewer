@@ -2,6 +2,9 @@
 #ifndef RENDERER_PIPELINE_H
 #define RENDERER_PIPELINE_H
 
+#include "render_scene.h"
+#include "camera.h"
+
 namespace modelViewer::render {
     
     enum class clear_mode

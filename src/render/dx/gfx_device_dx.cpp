@@ -14,6 +14,7 @@ void gfx_device_dx::initDevice()
 {
 	//TODO check when we define "DEBUG" in cmake 
 #if defined(DEBUG) || defined(_DEBUG)
+	std::cout << "debug layer is enable for dx\n";
 	// Enable the D3D12 debug layer.
 	ComPtr<ID3D12Debug> debugController;
 	D3D12GetDebugInterface(IID_PPV_ARGS(&debugController));
@@ -56,10 +57,10 @@ void gfx_device_dx::initDevice()
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 	m_d3dDevice->CreateCommandQueue( &queueDesc, IID_PPV_ARGS(&mCommandQueue));
-	m_d3dDevice->CreateCommandAllocator( D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&mDirectCmdListAlloc));
-	m_d3dDevice->CreateCommandList( 0,D3D12_COMMAND_LIST_TYPE_DIRECT,mDirectCmdListAlloc.Get(), nullptr, IID_PPV_ARGS(&mCommandList));
+	m_d3dDevice->CreateCommandAllocator( D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_DirectCmdListAlloc));
+	m_d3dDevice->CreateCommandList( 0,D3D12_COMMAND_LIST_TYPE_DIRECT,m_DirectCmdListAlloc.Get(), nullptr, IID_PPV_ARGS(&m_CommandList));
 
-	mCommandList->Close();
+	m_CommandList->Close();
 
 	createSwapChain();
 	createDescriptorHeaps();
@@ -73,7 +74,7 @@ void gfx_device_dx::createRenderTargets()
 {
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHeapHandle( mRtvHeap->GetCPUDescriptorHandleForHeapStart());
 	for (UINT i = 0; i < SwapChainBufferCount; i++) {
-		mSwapChain->GetBuffer( i, IID_PPV_ARGS(&m_SwapChainBuffer[i]));
+		m_SwapChain->GetBuffer( i, IID_PPV_ARGS(&m_SwapChainBuffer[i]));
 		m_d3dDevice->CreateRenderTargetView(m_SwapChainBuffer[i].Get(), nullptr, rtvHeapHandle);
 		rtvHeapHandle.Offset(1, mRtvDescriptorSize);
 	}
@@ -88,10 +89,10 @@ void gfx_device_dx::setViewport(int width, int height)
 	vp.Height = static_cast<float>(height);
 	vp.MinDepth = 0.0f;
 	vp.MaxDepth = 1.0f;
-	mCommandList->RSSetViewports(1, &vp);
+	m_CommandList->RSSetViewports(1, &vp);
 
 	tagRECT mScissorRect = { 0, 0, width/2, height/2 };
-	mCommandList->RSSetScissorRects(1, &mScissorRect);
+	m_CommandList->RSSetScissorRects(1, &mScissorRect);
 }
 
 void gfx_device_dx::createStencilDepthBuffer()
@@ -127,14 +128,14 @@ void gfx_device_dx::createStencilDepthBuffer()
 	m_d3dDevice->CreateDepthStencilView(mDepthStencilBuffer.Get(), &dsvDesc, getDepthStencilView());
 
 	// Transition the resource from its initial state to be used as a depth buffer.
-	mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mDepthStencilBuffer.Get(),
+	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mDepthStencilBuffer.Get(),
 		D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE));
 
 }
 
 void gfx_device_dx::createSwapChain() {
 
-	mSwapChain.Reset();
+	m_SwapChain.Reset();
 	DXGI_SWAP_CHAIN_DESC sd;
 	sd.BufferDesc.Width = m_Window->getWidth();
 	sd.BufferDesc.Height =  m_Window->getHeight();
@@ -153,7 +154,7 @@ void gfx_device_dx::createSwapChain() {
 	sd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 	// Note: Swap chain uses queue to perform flush. 
 
-	m_dxgiFactory->CreateSwapChain( mCommandQueue.Get(), &sd,mSwapChain.GetAddressOf());
+	m_dxgiFactory->CreateSwapChain( mCommandQueue.Get(), &sd,m_SwapChain.GetAddressOf());
 }
 
 
@@ -187,12 +188,76 @@ D3D12_CPU_DESCRIPTOR_HANDLE gfx_device_dx::getDepthStencilView() const
 
 void gfx_device_dx::swapBuffers()
 {
-
+	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_SwapChainBuffer[mCurrBackBuffer].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+	m_SwapChain->Present(0,0);
+	mCurrBackBuffer++;
+	if (mCurrBackBuffer > 1)
+		mCurrBackBuffer = 0;
 }
 
-void gfx_device_dx::setClearColor(glm::vec3& color)
+void gfx_device_dx::setClearColor(glm::vec4& color)
 {
+	
+}
 
+void gfx_device_dx::flushCommandQueue()
+{
+	// Advance the fence value to mark commands up to this fence point.
+	mCurrentFence++;
+
+	// Add an instruction to the command queue to set a new fence point.  Because we 
+	// are on the GPU timeline, the new fence point won't be set until the GPU finishes
+	// processing all the commands prior to this Signal().
+	mCommandQueue->Signal(m_Fence.Get(), mCurrentFence);
+
+	// Wait until the GPU has completed commands up to this fence point.
+	if(m_Fence->GetCompletedValue() < mCurrentFence)
+	{
+		HANDLE eventHandle = CreateEventEx(nullptr, nullptr, false, EVENT_ALL_ACCESS);
+		// Fire event when GPU hits current fence.  
+		m_Fence->SetEventOnCompletion(mCurrentFence, eventHandle);
+		// Wait until the GPU hits current fence event is fired.
+		WaitForSingleObject(eventHandle, INFINITE);
+		CloseHandle(eventHandle);
+	}
+}
+
+
+void gfx_device_dx::resize(int width, int height) {
+	
+	assert(m_d3dDevice);
+	assert(m_SwapChain);
+    assert(m_DirectCmdListAlloc);
+
+	// Flush before changing any resources.
+	flushCommandQueue();
+
+    m_CommandList->Reset(m_DirectCmdListAlloc.Get(), nullptr);
+
+	// Release the previous resources we will be recreating.
+	for (auto & i : m_SwapChainBuffer) {
+		i.Reset();
+	}
+	
+    mDepthStencilBuffer.Reset();
+	// Resize the swap chain.
+    m_SwapChain->ResizeBuffers(SwapChainBufferCount, width, height, 
+		m_BackBufferFormat, 
+		DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
+	mCurrBackBuffer = 0;
+
+	createRenderTargets();
+	createStencilDepthBuffer();
+	
+    // Execute the resize commands.
+    m_CommandList->Close();
+	
+    ID3D12CommandList* cmdsLists[] = { m_CommandList.Get() };
+    mCommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
+
+	// Wait until resize is complete.
+	flushCommandQueue();
+	setViewport(width, height);
 }
 
 void gfx_device_dx::setCullFaceMode(cull_face_mode mode) {
@@ -207,7 +272,12 @@ void gfx_device_dx::setCullFace(bool enable) {
 void gfx_device_dx::clearDepthBuffer() {
 }
 
-void gfx_device_dx::clearColorBuffer(const glm::vec4& color) {
+void gfx_device_dx::clearColorBuffer(const glm::vec4& color)
+{
+	const auto handle = getCurrentBackBufferView();
+	
+	m_CommandList->OMSetRenderTargets(1, &handle, FALSE, nullptr);
+	m_CommandList->ClearRenderTargetView(handle, &color.x, 0, nullptr);
 }
 
 void gfx_device_dx::popDebugGroup() {

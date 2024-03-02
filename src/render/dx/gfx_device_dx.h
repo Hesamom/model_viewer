@@ -25,7 +25,8 @@ namespace modelViewer::render
 
 		void swapBuffers() override;
 		void setViewport(int width, int height) override;
-		void setClearColor(glm::vec3& color) override;
+		void setClearColor(glm::vec4& color) override;
+		void resize(int width, int height) override;
 		void setCullFaceMode(cull_face_mode mode) override;
 		void setDepthmap(bool enable) override;
 		void setCullFace(bool enable) override;
@@ -55,7 +56,8 @@ namespace modelViewer::render
 
 		void createStencilDepthBuffer();
 
-
+		void flushCommandQueue();
+		
 		D3D12_CPU_DESCRIPTOR_HANDLE getCurrentBackBufferView() const;
 
 		D3D12_CPU_DESCRIPTOR_HANDLE getDepthStencilView() const;
@@ -65,14 +67,16 @@ namespace modelViewer::render
 		Microsoft::WRL::ComPtr<IDXGIFactory4> m_dxgiFactory;
 		Microsoft::WRL::ComPtr<ID3D12Device> m_d3dDevice;
 		Microsoft::WRL::ComPtr<ID3D12Fence> m_Fence;
-
+		int mCurrentFence;
+		
 		Microsoft::WRL::ComPtr<ID3D12CommandQueue> mCommandQueue;
-		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mDirectCmdListAlloc;
-		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> mCommandList;
+		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> m_DirectCmdListAlloc;
+		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> m_CommandList;
 
-		Microsoft::WRL::ComPtr<IDXGISwapChain> mSwapChain;
+		Microsoft::WRL::ComPtr<IDXGISwapChain> m_SwapChain;
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mRtvHeap;
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mDsvHeap;
+		
 
 		static constexpr int SwapChainBufferCount = 2;
 		Microsoft::WRL::ComPtr<ID3D12Resource> m_SwapChainBuffer[SwapChainBufferCount];
@@ -86,6 +90,7 @@ namespace modelViewer::render
 		const DXGI_FORMAT m_BackBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 		const DXGI_FORMAT mDepthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
+	
 		UINT mCurrBackBuffer = 0;
 		bool m4xMsaaState = false;
 		UINT m4xMsaaQuality = 0;

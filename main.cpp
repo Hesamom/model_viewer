@@ -12,7 +12,7 @@ std::shared_ptr<modelViewer::render::gfx_device> device;
 int main(int count, const char** cmd)
 {
 	getWindow(isUsingDX(count, cmd));
-	modelviewer_app app(window, device);
+	modelviewer_app app(window, device, true);
 	
 	app.loop();
 	

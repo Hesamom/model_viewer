@@ -76,12 +76,12 @@ void window_win32::setSize(int width, int height)
 
 int window_win32::getHeight()
 {
-	return 0;
+	return m_ClientHeight;
 }
 
 int window_win32::getWidth()
 {
-	return 0;
+	return m_ClientWidth;
 }
 
 
@@ -142,7 +142,7 @@ LRESULT window_win32::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		case WM_EXITSIZEMOVE:
 				m_Paused = false;
-				m_SizeChangedCallback(m_ClientWidth, m_ClientWidth);
+				m_SizeChangedCallback(m_ClientWidth, m_ClientHeight);
 		break;
 				
 		default:

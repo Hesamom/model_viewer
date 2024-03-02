@@ -74,10 +74,8 @@ namespace modelViewer::render
 		
 	public:
 
-		renderer_forward(const std::shared_ptr<gfx_device>& device);
+		renderer_forward(const std::shared_ptr<gfx_device>& device, object_factory& factory);
 		void render(render_scene& scene, camera& camera, bool shadowEnabled, bool reflectionEnabled) override;
-		
-		void init(object_factory& objectFactory);
 		void setClearFlag(glm::vec4 color) override;
 		void setReflectionPosition(const glm::vec3& pos) override;
 		glm::vec3& getReflectionPosition() override;

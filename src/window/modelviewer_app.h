@@ -21,7 +21,7 @@ private:
 	modelViewer::render::object_factory m_ObjectFactory;
     modelViewer::render::render_scene m_Scene;
     modelViewer::render::model_platform_buffer m_Platform;
-	modelViewer::render::renderer_forward m_Renderer;
+	std::unique_ptr<modelViewer::render::renderer_pipeline> m_Renderer;
 	modelViewer::render::camera m_Camera;
 	
     file_picker_windows m_FilePicker {"select the model file"};
@@ -38,7 +38,7 @@ private:
 	long double m_elapsedTimeSinceStart = 0;
     
             
-    glm::vec<2,double,glm::defaultp> m_LastMousePosition;
+    glm::vec<2,double> m_LastMousePosition;
 	
     void addNewModels();
     void openDemoModel(std::string name);
@@ -73,11 +73,10 @@ protected:
     void onMousePositionChanged(double xpos, double ypos);
 	
 public:
-	 modelviewer_app(std::shared_ptr<window>& window, std::shared_ptr<modelViewer::render::gfx_device>& device);
+	 modelviewer_app(std::shared_ptr<window>& window, std::shared_ptr<modelViewer::render::gfx_device>& device, bool simpleRenderer);
      ~modelviewer_app();
 	
 	void addModel(modelViewer::res::model_info& info);
-	void setClearMode(modelViewer::render::clear_mode mode);
 	void loop();
 	void openSpecularMapModel();
 	int getTargetFrameRate();

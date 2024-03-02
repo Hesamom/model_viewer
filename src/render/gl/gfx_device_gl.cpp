@@ -22,7 +22,7 @@ void gfx_device_gl::setViewport(int width, int height)
 	glViewport(0, 0, width, height);
 }
 
-void gfx_device_gl::setClearColor(glm::vec3& color)
+void gfx_device_gl::setClearColor(glm::vec4& color)
 {
 	glClearColor(color.r, color.g, color.b, 1);
 }
@@ -50,6 +50,11 @@ void gfx_device_gl::setCullFace(bool enable) {
 
 void gfx_device_gl::clearDepthBuffer() {
 	glClear(GL_DEPTH_BUFFER_BIT);
+}
+
+void gfx_device_gl::resize(int width, int height) {
+	//TODO maybe need to do more?
+	setViewport(width, height);
 }
 
 void gfx_device_gl::clearColorBuffer(const glm::vec4& color) {

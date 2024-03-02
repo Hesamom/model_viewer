@@ -21,8 +21,9 @@ namespace modelViewer::render {
 		virtual ~gfx_device() = default;
 
 		virtual void swapBuffers() = 0;
+		virtual void resize(int width, int height) = 0;
 		virtual void setViewport(int width, int height) = 0;
-		virtual void setClearColor(glm::vec3& color) = 0;
+		virtual void setClearColor(glm::vec4& color) = 0;
 		virtual void setCullFaceMode(cull_face_mode mode) = 0;
 		virtual int getMaxSamplersPerProgram() = 0;
 		virtual void setDepthmap(bool enable) = 0;

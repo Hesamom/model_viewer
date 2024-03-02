@@ -303,22 +303,19 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 	m_Device->popDebugGroup();
 }
 
-renderer_forward::renderer_forward(const std::shared_ptr<gfx_device>& device) {
+renderer_forward::renderer_forward(const std::shared_ptr<gfx_device>& device, object_factory& factory) {
 	m_Device = device;
+
+	auto shaderLoader = factory.getShaderLoader();
+	
+	initShadowmap(factory, shaderLoader);
+	initReflectionMap(factory);
+	initSkybox(factory);
 }
 
 void renderer_forward::setClearFlag(glm::vec4 color)
 {
 	m_ClearFlag = color;
-}
-
-void renderer_forward::init(object_factory& objectFactory)
-{
-	auto shaderLoader = objectFactory.getShaderLoader();
-	
-	initShadowmap(objectFactory, shaderLoader);
-	initReflectionMap(objectFactory);
-	initSkybox(objectFactory);
 }
 
 void renderer_forward::initShadowmap(object_factory& objectFactory, shader_loader& shaderLoader)

@@ -3,6 +3,7 @@
 #include "modelviewer_app.h"
 #include "regex"
 #include "../common/stopwatch.h"
+#include "../render/renderer_simple.h"
 #include "../resource/shader_asset.h"
 
 using namespace modelViewer::res;
@@ -13,7 +14,7 @@ glm::vec3 getPosition(float pitch, float yaw, float zoomLevel);
 
 void modelviewer_app::onRender(float elapsed) {
     addNewModels();
-	m_Renderer.render(m_Scene, m_Camera, true, true);
+	m_Renderer->render(m_Scene, m_Camera, true, true);
 }
 
 
@@ -23,10 +24,18 @@ void modelviewer_app::addModel(model_info& info) {
 }
 
 
-modelviewer_app::modelviewer_app(std::shared_ptr<window>& window, std::shared_ptr<gfx_device>& device) : m_ObjectFactory(device), m_Renderer(device)
+modelviewer_app::modelviewer_app(std::shared_ptr<window>& window, std::shared_ptr<gfx_device>& device, bool simpleRenderer) : m_ObjectFactory(device)
 {
 	m_Window = window;
 	m_Device = device;
+
+	if (simpleRenderer) {
+		m_Renderer = std::make_unique<renderer_simple>(m_Device);
+	}
+	else {
+		m_Renderer = std::make_unique<renderer_forward>(m_Device, m_ObjectFactory);
+	}
+
 	
 	m_Window->setOnSizeChangedCallback(std::bind(&modelviewer_app::onSizeChanged, this, std::placeholders::_1, std::placeholders::_2));
 	setTargetFrameRate(360);
@@ -34,22 +43,19 @@ modelviewer_app::modelviewer_app(std::shared_ptr<window>& window, std::shared_pt
     updateCameraPosition();
 	//TODO set viewport when the window size changes too
 	m_Camera.setViewPort(m_Window->getWidth(), m_Window->getHeight());
-	m_Renderer.init(m_ObjectFactory);
-	m_Renderer.setReflectionPosition({0,0,0});
-	m_Renderer.setReflectionClearFlag({0,0,0,0});
+	m_Renderer->setClearFlag(glm::vec4{1,0,0,1});
+	m_Renderer->setReflectionPosition({0,0,0});
+	m_Renderer->setReflectionClearFlag({0,0,0,0});
     
-    model_platform_info info;
+    /*model_platform_info info;
     info.sizeZ = 12;
     info.sizeX = 12;
     info.lineSpace = 1;
 	
 	auto plane = m_Platform.generatePlane(m_ObjectFactory, info, m_Device);
 	auto grid = m_Platform.generateGrid(m_ObjectFactory, info, m_Device);
-	
 	m_Scene.addStaticObject(plane);
-	m_Scene.addStaticObject(grid);
-
-	m_Renderer.setClearMode(clear_mode::skybox);
+	m_Scene.addStaticObject(grid);*/
 }
 
 modelviewer_app::~modelviewer_app() {
@@ -144,7 +150,7 @@ void modelviewer_app::drawReflectionSettings()
 {
 	int biasedIndex = 2567;
 	ImGui::Text("Reflection");
-	auto& reflectionPos = m_Renderer.getReflectionPosition();
+	auto& reflectionPos = m_Renderer->getReflectionPosition();
 	ImGui::SliderFloat3(label("position", biasedIndex).c_str(), &reflectionPos.x, -10,10, "%.2f");
 }
 
@@ -409,11 +415,11 @@ void modelviewer_app::displayMenubar() {
 		{
 			if(ImGui::MenuItem("color"))
 			{
-				setClearMode(clear_mode::color);
+				m_Renderer->setClearMode(clear_mode::color);
 			}
 			if(ImGui::MenuItem("skybox"))
 			{
-				setClearMode(clear_mode::skybox);
+				m_Renderer->setClearMode(clear_mode::skybox);
 			}
 			ImGui::EndMenu();
 		}
@@ -437,7 +443,7 @@ void modelviewer_app::onSizeChanged(int width, int height)
 		return;
 	}
 	
-	m_Device->setViewport(width, height);
+	m_Device->resize(width, height);
 	m_Camera.setViewPort(width, height);
 }
 
@@ -647,10 +653,6 @@ model_info modelviewer_app::getDemoModel(const std::string& name) const
 	return info;
 }
 
-void modelviewer_app::setClearMode(clear_mode mode)
-{
-	m_Renderer.setClearMode(mode);
-}
 
 void modelviewer_app::openSpecularMapModel()
 {
