@@ -5,11 +5,8 @@
 #include "../resource/shader_loader.h"
 #include "../resource/texture_loader.h"
 #include "../resource/model_loader.h"
-#include "shader_program.h"
-#include "mesh.h"
-#include "texture.h"
 #include "object_renderer.h"
-#include "texture_setup.h"
+#include "gfx_device.h"
 
 namespace modelViewer::render
 {
@@ -20,12 +17,13 @@ namespace modelViewer::render
 		res::model_loader m_ModelLoader;
 		res::texture_loader m_TextureLoader;
 		res::shader_loader m_ShaderLoader;
+		std::shared_ptr<gfx_device> m_Device;
 		std::unordered_map<std::shared_ptr<res::material_asset>, std::shared_ptr<material>> m_LoadedMaterials;
 
 		std::shared_ptr<shader_program> getProgram(std::shared_ptr<res::material_asset> materialAsset);
 		std::vector<std::shared_ptr<mesh>> getMeshes(res::model_info& info);
 
-		std::shared_ptr<texture> createEmbeddedTexture(std::shared_ptr<res::texture_embedded> embedded, texture_setup setup);
+		std::shared_ptr<res::texture_asset> createEmbeddedTexture(std::shared_ptr<res::texture_embedded> embedded);
 
 		std::shared_ptr<texture> createTexture(const res::texture_asset_info& info);
 
@@ -34,7 +32,7 @@ namespace modelViewer::render
 		std::map<shader_uniform_texture_pair, std::shared_ptr<texture>> m_DefaultTextures;
 		
 	public:
-		object_factory();
+		explicit object_factory(std::shared_ptr<gfx_device>& device);
 		std::shared_ptr<object_renderer> createObject(res::model_info& info);
 		res::shader_loader& getShaderLoader();
 		res::model_loader& getModelLoader();

@@ -1,6 +1,8 @@
 ﻿#ifndef SHADER_UNIFORM_H
 #define SHADER_UNIFORM_H
 
+#include "shader_program.h"
+
 namespace modelViewer::render
 {
 	template<typename T>
@@ -32,12 +34,12 @@ namespace modelViewer::render
 			}
 		}
 		
-		void getLocation(modelViewer::render::shader_program& program)
+		void getLocation(render::shader_program& program)
 		{
 			m_Location = program.getUniformLocation(m_Name);
 		}
 		
-		void setValue(T& value, modelViewer::render::shader_program& program)
+		void setValue(T& value, render::shader_program& program)
 		{
 			if (m_Location < 0)
 			{

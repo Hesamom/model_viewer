@@ -2,7 +2,7 @@
 #ifndef MODEL_VIEWER_VERTEXBUFFER_H
 #define MODEL_VIEWER_VERTEXBUFFER_H
 
-#include "gl/glew.h"
+#include "glew/include/GL/glew.h"
 #include "glm/glm.hpp"
 
 

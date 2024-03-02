@@ -1,15 +1,15 @@
 ﻿
-#include "shader.h"
+#include "shader_gl.h"
 #include <utility>
 #include "glew/include/GL/glew.h"
 
 using namespace modelViewer::res;
 
-shaderType modelViewer::render::shader::getType() {
+shaderType modelViewer::render::shader_gl::getType() {
     return m_Asset->getType();
 }
 
-modelViewer::render::shader::shader(std::shared_ptr<modelViewer::res::shader_asset>& asset): m_Asset{asset} {
+modelViewer::render::shader_gl::shader_gl(std::shared_ptr<modelViewer::res::shader_asset>& asset): m_Asset{asset} {
     
    
 }
@@ -36,7 +36,7 @@ unsigned int getShaderType(shaderType type)
     return -1;
 }
 
-void modelViewer::render::shader::compile() {
+void modelViewer::render::shader_gl::compile() {
 
     if (m_ShaderId != 0)
     {
@@ -51,7 +51,7 @@ void modelViewer::render::shader::compile() {
     glCompileShader(m_ShaderId);
 }
 
-std::string modelViewer::render::shader::getCompilationLog() {
+std::string modelViewer::render::shader_gl::getCompilationLog() {
     
     if(m_ShaderId == 0)
     {
@@ -72,17 +72,17 @@ std::string modelViewer::render::shader::getCompilationLog() {
     return message;
 }
 
-bool modelViewer::render::shader::isCompiled() {
+bool modelViewer::render::shader_gl::isCompiled() {
     int result;
     glGetShaderiv(m_ShaderId, GL_COMPILE_STATUS, &result);
     return result == GL_TRUE;
 }
 
-unsigned int modelViewer::render::shader::getId() const {
+unsigned int modelViewer::render::shader_gl::getId() const {
     return m_ShaderId;
 }
 
-void modelViewer::render::shader::destroy() const {
+void modelViewer::render::shader_gl::destroy() const {
     if(m_ShaderId <= 0)
     {
         return;
@@ -90,7 +90,7 @@ void modelViewer::render::shader::destroy() const {
     glDeleteShader(m_ShaderId);
 }
 
-void modelViewer::render::shader::verify()
+void modelViewer::render::shader_gl::verify()
 {
 	if(!isCompiled())
 	{

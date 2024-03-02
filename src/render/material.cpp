@@ -1,14 +1,13 @@
-﻿#include "shader_program.h"
-#include "material.h"
-#include "texture_2D.h"
+﻿#include "material.h"
 
 
 using namespace modelViewer::render;
 using namespace modelViewer::res;
 
 
-material::material(const material_asset& info, std::vector<texture_binding>& textures, std::shared_ptr<shader_program>& program, std::map<shader_uniform_texture_pair, std::shared_ptr<texture>>& defaultTextures) {
+material::material(std::shared_ptr<gfx_device>& device, const res::material_asset& info, std::vector<texture_binding>& textures, std::shared_ptr<shader_program>& program, std::map<shader_uniform_texture_pair, std::shared_ptr<texture>>& defaultTextures) {
 
+	m_Device = device;
     m_Info = info;
     m_Program = program;
 	m_DefaultTextures = defaultTextures;
@@ -36,6 +35,7 @@ material::material(const material_asset& info, std::vector<texture_binding>& tex
     applyMaterialProperties();
     bindTextures(textures);
 }
+
 
 
 void material::setMVP(glm::mat4 &matrix) 
@@ -103,8 +103,8 @@ int material::getMaxSupportedTextureUnits() {
 	if (maxTexturesFrag > 0) {
 		return maxTexturesFrag;
 	}
-	
-	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTexturesFrag);
+
+	maxTexturesFrag = m_Device->getMaxSamplersPerProgram();
 	return maxTexturesFrag;
 }
 
@@ -154,16 +154,9 @@ void material::bindTextures(const std::vector<texture_binding>& textures)
 
 void material::bind() {
     m_Program->bind();
-	
-	glDepthMask(m_Info.propertySet.depthWriteEnabled);
-	if (m_Info.propertySet.cullFaceEnabled)
-	{
-		glEnable(GL_CULL_FACE);
-	}
-	else
-	{
-		glDisable(GL_CULL_FACE);
-	}
+
+	m_Device->setDepthmap(m_Info.propertySet.depthWriteEnabled);
+	m_Device->setCullFace(m_Info.propertySet.cullFaceEnabled);
 	
     int index = 0;
     for (const auto &item: m_ActiveTextures)

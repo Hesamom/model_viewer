@@ -1,8 +1,8 @@
 ﻿#ifndef MODEL_VIEWER_TEXTURE_FORMAT_H
 #define MODEL_VIEWER_TEXTURE_FORMAT_H
 
-#include "GL/glew.h"
-#include "../resource/texture_asset.h"
+#include "../../../libs/glew/include/GL/glew.h"
+#include "../../resource/texture_asset.h"
 
 namespace modelViewer::render {
 

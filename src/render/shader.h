@@ -1,25 +1,10 @@
 ﻿
-#ifndef MODEL_VIEWER_SHADER_H
-#define MODEL_VIEWER_SHADER_H
-
-#include "../resource/shader_asset.h"
+#ifndef SHADER_H
+#define SHADER_H
 
 namespace modelViewer::render {
-
     class shader {
-    private:
-        unsigned int m_ShaderId = 0;
-        std::shared_ptr<modelViewer::res::shader_asset> m_Asset;
-    public:
-        explicit shader(std::shared_ptr<modelViewer::res::shader_asset>& asset);
-        
-        void compile();
-        void destroy() const;
-        std::string  getCompilationLog();
-        bool isCompiled();
-		void verify();
-        res::shaderType getType();
-        unsigned int getId() const;
+        //TODO define if required 
     };
 }
-#endif //MODEL_VIEWER_SHADER_H
+#endif //SHADER_H

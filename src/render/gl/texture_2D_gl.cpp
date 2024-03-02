@@ -1,4 +1,4 @@
-﻿#include "texture_2D.h"
+﻿#include "texture_2D_gl.h"
 #include "texture_format.h"
 #include <GL/glew.h>
 
@@ -17,7 +17,7 @@ GLint getFormat(int channelsCount)
     }
 }
 
-texture_2D::texture_2D(texture_setup& texture_setup)
+texture_2D_gl::texture_2D_gl(texture_setup& texture_setup)
 {
     m_Setup = texture_setup;
 	assert(!m_Setup.assets.empty());
@@ -55,27 +55,27 @@ texture_2D::texture_2D(texture_setup& texture_setup)
     setBind(false);
 }
 
-texture_2D::~texture_2D() {
+texture_2D_gl::~texture_2D_gl() {
     glDeleteTextures(1, &m_TextureId);
 }
 
 texture_filtering_mode
-texture_2D::getFilteringModeMin() const {
+texture_2D_gl::getFilteringModeMin() const {
     return m_Setup.filteringMin;
 }
 
 texture_filtering_mode
-texture_2D::getFilteringModeMag() const {
+texture_2D_gl::getFilteringModeMag() const {
     return m_Setup.filteringMag;
 }
 
 texture_wrapping_mode
-texture_2D::getWrappingMode() const {
+texture_2D_gl::getWrappingMode() const {
     return m_Setup.wrapping;
 }
 
 void
-texture_2D::setFilteringMode(
+texture_2D_gl::setFilteringMode(
         texture_filtering_mode textureFilteringMin, texture_filtering_mode textureFilteringMag){
     setFilteringModeMin(textureFilteringMin);
     setFilteringModeMag(textureFilteringMag);
@@ -108,7 +108,7 @@ void setFilteringModeInternal(
 }
 
 void
-texture_2D::setFilteringModeMin(
+texture_2D_gl::setFilteringModeMin(
         texture_filtering_mode textureFiltering){
     if (!isTextureResident())
     {
@@ -121,7 +121,7 @@ texture_2D::setFilteringModeMin(
 }
 
 void
-texture_2D::setFilteringModeMag(
+texture_2D_gl::setFilteringModeMag(
         texture_filtering_mode textureFiltering){
     if (!isTextureResident())
     {
@@ -134,7 +134,7 @@ texture_2D::setFilteringModeMag(
 }
 
 void
-texture_2D::setWrappingMode(
+texture_2D_gl::setWrappingMode(
         texture_wrapping_mode textureWrapping){
     m_Setup.wrapping = textureWrapping;
     setBind(true);
@@ -168,24 +168,24 @@ texture_2D::setWrappingMode(
 }
 
 unsigned int
-texture_2D::getMipMapMinLevel() {
+texture_2D_gl::getMipMapMinLevel() {
     return m_Setup.mipMapMinLevel;
 }
 
 unsigned int
-texture_2D::getMipMapMaxLevel() {
+texture_2D_gl::getMipMapMaxLevel() {
     return  m_Setup.mipMapMaxLevel;
 }
 
 
 bool
-texture_2D::isTextureResident() {
+texture_2D_gl::isTextureResident() {
     GLboolean state;
     //return !glAreTexturesResident(1, &m_TextureId, &state);
     return true;
 }
 
-void texture_2D::setMipMapLevels(unsigned int min, unsigned int max) {
+void texture_2D_gl::setMipMapLevels(unsigned int min, unsigned int max) {
     if (max <= min)
     {
         throw std::invalid_argument( "mipmap min level is bigger than mipmap max level");

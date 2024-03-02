@@ -1,6 +1,4 @@
 ﻿#include "object_factory.h"
-#include "texture_cube.h"
-#include "texture_2D.h"
 #include "../common/stopwatch.h"
 
 using namespace modelViewer::res;
@@ -8,7 +6,7 @@ using namespace modelViewer::render;
 using namespace modelViewer::common;
 
 
-std::shared_ptr<texture> object_factory::createEmbeddedTexture(std::shared_ptr<texture_embedded> embedded, texture_setup setup) {
+std::shared_ptr<texture_asset> object_factory::createEmbeddedTexture(std::shared_ptr<texture_embedded> embedded) {
 
 	
 	if (embedded == nullptr) {
@@ -17,9 +15,7 @@ std::shared_ptr<texture> object_factory::createEmbeddedTexture(std::shared_ptr<t
 	
 	if (embedded->isCompressed) {
 		auto textureAsset = m_TextureLoader.loadFromMemmory(embedded->data, embedded->dataSize, embedded->channelsCount, true);
-		setup.assets.emplace_back(textureAsset);
-		auto texturePtr = std::make_shared<texture_2D>(setup);
-		return texturePtr;
+		return textureAsset;
 	}
 		
 	textureInfo info;
@@ -28,9 +24,7 @@ std::shared_ptr<texture> object_factory::createEmbeddedTexture(std::shared_ptr<t
 	info.height = embedded->height;
 	info.forceFlip = true;
 	auto textureAsset = std::make_shared<texture_asset>(embedded->data, info, "");
-	setup.assets.emplace_back(textureAsset);
-	auto texturePtr = std::make_shared<texture_2D>(setup);
-	return texturePtr;
+	return textureAsset;
 		
 }
 
@@ -44,9 +38,10 @@ std::shared_ptr<texture> object_factory::createTexture(const texture_asset_info&
 	setup.mipMapMinLevel = 0;
 	setup.type = info.type;
 
-	auto embededTexture = createEmbeddedTexture(info.embedded, setup);
-	if (embededTexture != nullptr) {
-		return embededTexture;
+	auto embeddedTexture = createEmbeddedTexture(info.embedded);
+	if (embeddedTexture != nullptr) {
+		setup.assets.push_back(embeddedTexture);
+		return m_Device->createTexture2D(setup);
 	}
 
 	if (info.paths.empty())
@@ -70,13 +65,13 @@ std::shared_ptr<texture> object_factory::createTexture(const texture_asset_info&
 	}
 
 	std::shared_ptr<texture> texturePtr = nullptr;
-	if (info.type == texture_asset_type::textureCube)
+	if (info.type == texture_asset_type::texture2D)
 	{
-		texturePtr = std::make_shared<texture_cube>(setup);
+		texturePtr = m_Device->createTexture2D(setup);
 	}
 	else
 	{
-		texturePtr = std::make_shared<texture_2D>(setup);
+		texturePtr = m_Device->createTextureCube(setup);
 	}
 	
 	return texturePtr;
@@ -110,8 +105,7 @@ std::shared_ptr<material> object_factory::getMaterial(const std::shared_ptr<mate
 
 	auto program = getProgram(asset);
 	auto textures = getTextures(asset);
-	auto mat = std::make_shared<material>(*asset, textures, program, m_DefaultTextures);
-	
+	auto mat = std::make_shared<material>(m_Device, *asset, textures, program, m_DefaultTextures);
 	m_LoadedMaterials[asset] = mat;
 	return mat;
 }
@@ -142,7 +136,7 @@ std::vector<std::shared_ptr<mesh>> object_factory::getMeshes(model_info & info) 
 		//TODO can cache already loaded meshes 
 		for (auto& meshAsset : info.meshes) {
 			
-			auto m = std::make_shared<mesh>(meshAsset);
+			auto m = m_Device->createMesh(meshAsset);
 			meshes.push_back(m);
 		}
 		return meshes;
@@ -150,7 +144,7 @@ std::vector<std::shared_ptr<mesh>> object_factory::getMeshes(model_info & info) 
 
 	auto meshAsset = m_ModelLoader.loadFirstMesh(info.path);
 	info.meshes.push_back(meshAsset);
-	auto meshPtr  = std::make_shared<mesh>(meshAsset);
+	auto meshPtr  = m_Device->createMesh(meshAsset);
 	meshes.push_back(meshPtr);
 	
 	return meshes;
@@ -159,24 +153,20 @@ std::vector<std::shared_ptr<mesh>> object_factory::getMeshes(model_info & info) 
 
 std::shared_ptr<shader_program> object_factory::getProgram(std::shared_ptr<material_asset> materialAsset) {
 
-	std::vector<shader> shaders;
+	std::vector<std::shared_ptr<shader_asset>> assets;
 	for (auto& shaderInfo : materialAsset->shaders) {
 
 		auto shaderAsset = m_ShaderLoader.load(shaderInfo.path, shaderInfo.type);
-		shader shader(shaderAsset);
-		shader.compile();
-		shader.verify();
-
-		shaders.push_back(shader);
+		assets.push_back(shaderAsset);
 	}
 
-	auto program = std::make_shared<shader_program>(shaders);
-    program->validateLinking();
+	auto program = m_Device->createProgram(assets);
 	return program;
 }
 
-object_factory::object_factory() {
-	
+object_factory::object_factory(std::shared_ptr<gfx_device>& device) {
+
+	m_Device = device;
 	std::vector<std::pair<shader_uniform_texture_pair, std::string>> assets;
 	shader_uniform_texture_pair diffuseSampler { shader_uniform_type::sampler2D, shader_texture_usage::diffuse};
 	assets.emplace_back(diffuseSampler, res::literals::textures::default_white);

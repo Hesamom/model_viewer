@@ -11,21 +11,9 @@
 
 namespace modelViewer::render
 {
+   
     class object_renderer : public renderable {
-        
-    private:
-        common::transform m_Transform{};
-    	common::aabb m_BaseBoundingBox;
-        common::aabb m_BoundingBox;
-        std::string m_Name;
-		std::vector<std::shared_ptr<mesh_renderer>> m_MeshRenders;
-		
-		bool m_CastShadows = true;
-		bool m_ReceiveShadows = true;
-		
-		bool m_CastReflection = true;
-		reflection_mode m_ReflectionMode = reflection_mode::disabled;
-        
+    
     public:
         object_renderer(std::vector<std::shared_ptr<material>>& materials,
 			std::vector<std::shared_ptr<mesh>>& meshes,
@@ -39,7 +27,6 @@ namespace modelViewer::render
 		
         void render(glm::mat4 view, glm::mat4 projection) override;
 		void setRenderMode(render_mode mode);
-		
 		void setCastShadow(bool enabled);
 		void setReceiveShadows(bool enabled);
 		bool getReceiveShadows();
@@ -54,6 +41,18 @@ namespace modelViewer::render
     	common::aabb getBoundingBox();
 		
     	std::string getName();
+    	
+    private:
+    	common::transform m_Transform{};
+    	common::aabb m_BaseBoundingBox;
+    	common::aabb m_BoundingBox;
+    	std::string m_Name;
+    	std::vector<std::shared_ptr<mesh_renderer>> m_MeshRenders;
+		
+    	bool m_CastShadows = true;
+    	bool m_ReceiveShadows = true;
+        bool m_CastReflection = false;
+        reflection_mode m_ReflectionMode;
     };
 }
 #endif

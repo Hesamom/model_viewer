@@ -40,8 +40,7 @@ void mesh_renderer::setRenderMode(render_mode mode)
 	m_Mode = mode;
 }
 
-void mesh_renderer::renderShadow()
-{
+void mesh_renderer::renderShadow() const {
 	m_Mesh->bind();
 	m_Mesh->draw();
 }
@@ -56,7 +55,7 @@ bool mesh_renderer::getReceiveShadows() const
 	return m_ReceivesShadow;
 }
 
-void mesh_renderer::setReceiveShadows(bool enabled)
+void mesh_renderer::setReceiveShadows(const bool enabled)
 {
 	m_ReceivesShadow = enabled;
 }

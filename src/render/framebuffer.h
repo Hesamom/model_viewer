@@ -1,36 +1,28 @@
-﻿
-#ifndef FRAMEBUFFER_H
+﻿#ifndef FRAMEBUFFER_H
 #define FRAMEBUFFER_H
+#include <glm/vec4.hpp>
 
-namespace modelViewer::render
-{
-	class framebuffer {
-	private:
-		unsigned int m_BufferId = -1;
-		unsigned int m_depthRenderBuffer = -1;
-		unsigned int m_CubeMapId = -1;
-		unsigned int m_DepthTextureId = -1;
-		unsigned int m_ArrayDepthTextureId = -1;
-		
-	public:
-		framebuffer();
-		~framebuffer();
-		void bind();
+namespace modelViewer::render {
+    class framebuffer {
+    public:
 
-		unsigned int createArrayDepthTexture(int width, int height, int layers, bool enableDepthCompare);
-		unsigned int createDepthTexture(int width, int height, bool enableDepthCompare, std::string& name);
-		unsigned int createCubeMap(int size, std::string& name);
-		void attachCubeMapFace(int index);
-		void attachDepthTexture();
-		void attachDepthTextureArray(int layer);
-		
-		void unbind();
-		void activateDepthMap(int slot);
-		void activateDepthMapArray(int slot);
-		void activateCubeMap(int slot) const;
-	};
-
+        virtual ~framebuffer() = default;
+        virtual void bind() = 0;
+        virtual void unbind() = 0;
+        
+        virtual void createArrayDepthTexture(int width, int height, int layers, bool enableDepthCompare) = 0;
+        virtual void createDepthTexture(int width, int height, bool enableDepthCompare, std::string& name) = 0;
+        virtual void createCubeMap(int size, std::string& name) = 0;
+        virtual void clearColorBuffer(const glm::vec4& color) = 0;
+        virtual void clearDepthBuffer() = 0;
+        
+        virtual void attachCubeMapFace(int index) = 0;
+        virtual void attachDepthTexture() = 0;
+        virtual void attachDepthTextureArray(int layer) = 0;
+        virtual void activateDepthMap(int slot) = 0;
+        virtual void activateDepthMapArray(int slot) = 0;
+        virtual void activateCubeMap(int slot) const  = 0;
+    };
 }
-
 
 #endif //FRAMEBUFFER_H

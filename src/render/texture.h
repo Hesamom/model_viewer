@@ -1,12 +1,8 @@
-﻿#ifndef MODEL_VIEWER_TEXTURE_H
-#define MODEL_VIEWER_TEXTURE_H
-
-#include "../resource/model_info.h"
-#include "gl/glew.h"
+﻿
+#ifndef TEXTURE_H
+#define TEXTURE_H
 
 namespace modelViewer::render {
-    class texture;
-	
 	enum texture_cube_face
 	{
 		x_positive,
@@ -17,39 +13,18 @@ namespace modelViewer::render {
 		z_negative
 	};
 
-    struct texture_binding {
-        std::shared_ptr<texture> texture;
-        std::string samplerName;
-    };
-    
-    class texture {
-    protected:
-        ~texture() = default;
+	class texture
+	{
+	public:
+		virtual void active(int index) = 0;
+		virtual ~texture() = default;
+	};
 
-        unsigned int m_TextureId = -1;
 
-        void setBind(bool bind) {
-            
-            glBindTexture(GetTextureType(), m_TextureId);
-        }
-
-        virtual unsigned int GetTextureType() = 0;
-        virtual res::texture_asset_type GetTextureAssetType() const = 0;
- 
-    public:
-        virtual void active(const int index)
-        {
-            constexpr int firstIndex = GL_TEXTURE0;
-            const int slotIndex = firstIndex + index;
-            glActiveTexture(slotIndex);
-            setBind(true);
-        }
-
-        res::texture_asset_type getType() const {
-            return GetTextureAssetType();
-        }
-    };
+	struct texture_binding {
+		std::shared_ptr<texture> texture;
+		std::string samplerName;
+	};
 }
 
-
-#endif
+#endif //TEXTURE_H
