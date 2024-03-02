@@ -5,14 +5,6 @@
 
 #include <windows.h>
 #include <wrl.h>
-#include <dxgi1_4.h>
-#include <d3d12.h>
-#include <D3Dcompiler.h>
-#include <DirectXMath.h>
-#include <DirectXPackedVector.h>
-#include <DirectXColors.h>
-#include <DirectXCollision.h>
-#include "d3dx12.h"
 #include "window.h"
 
 class window_win32 : public window{
@@ -27,8 +19,8 @@ private:
 
 	MSG m_LastWindowMessage {0};
 
-	int m_Width = 0;
-	int m_Height = 0;
+	int m_ClientWidth = 0;
+	int m_ClientHeight = 0;
 	
 	bool createWindow();
 	
@@ -49,7 +41,7 @@ public:
 
 	LRESULT MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	static window_win32* current;
-	bool mAppPaused = false;
+	bool m_Paused = false;
 };
 
 

@@ -15,8 +15,8 @@ window_win32::window_win32(int width, int height, const std::string& title, bool
 	window_win32::current = this;
 	
 	//TODO add validations 
-	m_Width = width;
-	m_Height = height;
+	m_ClientWidth = width;
+	m_ClientHeight = height;
 	m_Instance = GetModuleHandle(nullptr);
 
 	if (!createWindow())
@@ -51,7 +51,7 @@ bool window_win32::createWindow()
 	}
 
 	// Compute window rectangle dimensions based on requested client area dimensions.
-	RECT R = { 0, 0, m_Width, m_Height };
+	RECT R = { 0, 0, m_ClientWidth, m_ClientHeight };
 	AdjustWindowRect(&R, WS_OVERLAPPEDWINDOW, false);
 	int width  = R.right - R.left;
 	int height = R.bottom - R.top;
@@ -108,7 +108,7 @@ bool window_win32::shouldClose()
 
 bool window_win32::isPaused()
 {
-	return mAppPaused;
+	return m_Paused;
 }
 
 void window_win32::pollEvents()
@@ -126,15 +126,25 @@ LRESULT window_win32::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case WM_ACTIVATE:
 			if (LOWORD(wParam) == WA_INACTIVE )
 			{
-				mAppPaused = true;
+				m_Paused = true;
 			}
 			else
 			{
-				mAppPaused = false;
+				m_Paused = false;
 			}
 			return 0;
+		case WM_SIZE:
+			m_ClientWidth  = LOWORD(lParam);
+			m_ClientHeight = HIWORD(lParam);
+			break;
+		case WM_ENTERSIZEMOVE:
+				m_Paused = true;
+			break;
 		case WM_EXITSIZEMOVE:
-				//TODO implement resizing 
+				m_Paused = false;
+				m_SizeChangedCallback(m_ClientWidth, m_ClientWidth);
+		break;
+				
 		default:
 			return DefWindowProc(hwnd, msg, wParam, lParam);
 	}

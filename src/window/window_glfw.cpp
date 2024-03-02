@@ -135,7 +135,7 @@ void window_glfw::subscribeEvents() {
     );
 
     static auto callback_static_4 = [this](GLFWwindow* window, int width, int height){
-        onSizeChanged(height, width);
+        onSizeChanged(width, height);
     };
 
     glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
@@ -154,10 +154,10 @@ void window_glfw::onMousePositionChanged(double xpos, double ypos) {
     
 }
 
-void window_glfw::onSizeChanged(int height, int width) {
-    m_Height = height;
+void window_glfw::onSizeChanged(int width, int height)
+{
     m_Width = width;
-
+    m_Height = height;
     m_Paused = m_Height == 0 || m_Width == 0;
 	
 	m_SizeCallback(width, height);

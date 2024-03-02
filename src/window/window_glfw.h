@@ -18,12 +18,10 @@ private:
     void subscribeEvents();
 
 	std::function<void(int, int)>  m_SizeCallback;
-    
-protected:
-    virtual void onScrollChanged(double yOffset);
-    virtual void onMouseButtonChanged(int button, int action, int mods);
-    virtual void onMousePositionChanged(double xpos, double ypos);
-    virtual void onSizeChanged(int height, int width);
+	void onScrollChanged(double yOffset);
+	void onMouseButtonChanged(int button, int action, int mods);
+	void onMousePositionChanged(double xpos, double ypos);
+	void onSizeChanged(int height, int width);
     
 public:
     window_glfw(int width, int height, const std::string& title, bool fullscreen, bool vSync = true, int mssaLevel = 8);

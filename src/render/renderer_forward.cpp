@@ -421,6 +421,10 @@ void renderer_forward::setReflectionClearFlag(const glm::vec4& color)
 	m_ReflectionClearFlag = color;
 }
 
+renderer_forward::~renderer_forward() {
+	
+}
+
 glm::vec3& renderer_forward::getReflectionPosition()
 {
 	return m_ReflectionPosition;

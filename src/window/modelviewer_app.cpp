@@ -431,7 +431,7 @@ void modelviewer_app::onRenderImGUI() {
 	displayMenubar();
 }
 
-void modelviewer_app::onSizeChanged(int height, int width)
+void modelviewer_app::onSizeChanged(int width, int height)
 {
 	if(height == 0 || width == 0) {
 		return;

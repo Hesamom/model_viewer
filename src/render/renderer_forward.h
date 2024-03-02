@@ -5,17 +5,11 @@
 #include "camera.h"
 #include "framebuffer.h"
 #include "object_factory.h"
+#include "renderer_pipeline.h"
 
 namespace modelViewer::render
 {
-	enum class clear_mode
-	{
-		color ,
-		skybox
-	};
-	
-
-	class renderer_forward {
+	class renderer_forward : public renderer_pipeline {
 		
 	private:
 		glm::vec4 m_ClearFlag;
@@ -81,16 +75,16 @@ namespace modelViewer::render
 	public:
 
 		renderer_forward(const std::shared_ptr<gfx_device>& device);
-		void render(render_scene& scene, camera& camera, bool shadowEnabled, bool reflectionEnabled);
+		void render(render_scene& scene, camera& camera, bool shadowEnabled, bool reflectionEnabled) override;
 		
 		void init(object_factory& objectFactory);
-		void setClearFlag(glm::vec4 color);
-		void setReflectionPosition(const glm::vec3& pos);
-		glm::vec3& getReflectionPosition();
-		void setClearMode(clear_mode mode);
-		void setReflectionClearMode(clear_mode mode);
-		void setReflectionClearFlag(const glm::vec4& color);
-	
+		void setClearFlag(glm::vec4 color) override;
+		void setReflectionPosition(const glm::vec3& pos) override;
+		glm::vec3& getReflectionPosition() override;
+		void setClearMode(clear_mode mode) override;
+		void setReflectionClearMode(clear_mode mode) override;
+		void setReflectionClearFlag(const glm::vec4& color) override;
+		~renderer_forward() override;
 	};
 }
 
