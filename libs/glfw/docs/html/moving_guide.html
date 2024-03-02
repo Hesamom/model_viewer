@@ -252,7 +252,7 @@ Support for versions of Windows older than XP</h2>
 <p >The Win32 API has also not stood still, and GLFW 3 uses many functions only present on Windows XP or later. Even supporting an OS as new as XP (new from the perspective of GLFW 2, which still supports Windows 95) requires runtime checking for a number of functions that are present only on modern version of Windows.</p>
 <h2><a class="anchor" id="moving_syskeys"></a>
 Capture of system-wide hotkeys</h2>
-<p >The ability to disable and capture system-wide hotkeys like Alt+Tab has been removed. Modern applications, whether they're games, scientific visualisations or something else, are nowadays expected to be good desktop citizens and allow these hotkeys to function even when running in full screen mode.</p>
+<p >The ability to disable and startCapture system-wide hotkeys like Alt+Tab has been removed. Modern applications, whether they're games, scientific visualisations or something else, are nowadays expected to be good desktop citizens and allow these hotkeys to function even when running in full screen mode.</p>
 <h2><a class="anchor" id="moving_terminate"></a>
 Automatic termination</h2>
 <p >GLFW 3 does not register <a class="el" href="group__init.html#gaaae48c0a18607ea4a4ba951d939f0901">glfwTerminate</a> with <code>atexit</code> at initialization, because <code>exit</code> calls registered functions from the calling thread and while it is permitted to call <code>exit</code> from any thread, <a class="el" href="group__init.html#gaaae48c0a18607ea4a4ba951d939f0901">glfwTerminate</a> must only be called from the main thread.</p>

@@ -409,7 +409,7 @@ version of Windows.
 
 @subsection moving_syskeys Capture of system-wide hotkeys
 
-The ability to disable and capture system-wide hotkeys like Alt+Tab has been
+The ability to disable and startCapture system-wide hotkeys like Alt+Tab has been
 removed.  Modern applications, whether they're games, scientific visualisations
 or something else, are nowadays expected to be good desktop citizens and allow
 these hotkeys to function even when running in full screen mode.
