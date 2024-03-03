@@ -91,6 +91,9 @@ renderdoc::renderdoc() {
 			auto path = m_Api->GetCaptureFilePathTemplate();
 			std::cout << "initiated renderdoc successfully!, path:" << path << std::endl;
 		}
+
+		//turn off renderdoc overlay
+		m_Api->MaskOverlayBits(0, 0);
 	}
 	else
 	{
