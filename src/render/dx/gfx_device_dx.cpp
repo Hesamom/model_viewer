@@ -2,6 +2,9 @@
 #include "gfx_device_dx.h"
 #include "../../error/not_implemented_error.h"
 #include <WindowsX.h>
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_dx12.h>
+
 #if defined(DEBUG) || defined(_DEBUG)
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
@@ -321,4 +324,35 @@ std::shared_ptr<shader_program> gfx_device_dx::createProgram(std::vector<std::sh
 
 std::shared_ptr<framebuffer> gfx_device_dx::createFramebuffer() {
 	throw std::runtime_error("not imp");
+}
+
+void gfx_device_dx::onRenderImGUI()
+{
+	//TODO imp 
+}
+
+void gfx_device_dx::onPostRenderImGUI()
+{
+	//TODO imp
+}
+
+void gfx_device_dx::onInitImGUI()
+{
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; 
+	
+	m_Window->onInitImGUI();
+	//BUG not sure about the second arg 
+	/*ImGui_ImplDX12_Init(m_d3dDevice, 2, m_BackBufferFormat,
+		YOUR_SRV_DESC_HEAP,
+		// You'll need to designate a descriptor from your descriptor heap for Dear ImGui to use internally for its font texture's SRV
+		YOUR_CPU_DESCRIPTOR_HANDLE_FOR_FONT_SRV,
+		YOUR_GPU_DESCRIPTOR_HANDLE_FOR_FONT_SRV);*/
+}
+
+void gfx_device_dx::onShutdownImGUI()
+{
+	ImGui_ImplDX12_Shutdown();
 }

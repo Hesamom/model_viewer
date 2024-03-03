@@ -46,6 +46,10 @@ public:
 	void setOnMouseButtonCallback(std::function<void (mouse_event)> callback) override;
 	void setOnMouseScrollCallback(std::function<void(int)> callback) override;
 	
+	void onNewImGUIFrame() override;
+	void onInitImGUI();
+	void onShutdownImGUI() override;
+	
 	void* getHandleRaw() override;
 	HWND  getHandle();
 	bool shouldClose() override;
@@ -54,9 +58,6 @@ public:
 
 	LRESULT MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	static window_win32* current;
-
-
-	
 };
 
 

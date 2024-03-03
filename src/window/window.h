@@ -24,6 +24,9 @@ public:
 	virtual void setOnMouseButtonCallback(std::function<void(mouse_event)> callback) = 0;
 	virtual void setOnMouseScrollCallback(std::function<void(int)> callback) = 0;
 	
+	virtual void onNewImGUIFrame() = 0;
+	virtual void onShutdownImGUI() = 0;
+	
 	virtual void setSize(int width, int height) = 0;
 	virtual int getHeight() = 0;
 	virtual int getWidth() = 0;

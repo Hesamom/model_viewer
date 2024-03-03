@@ -1,6 +1,7 @@
 ﻿#include "gfx_device_gl.h"
 #include <../../../libs/glew/include/GL/glew.h>
-#include "../texture_setup.h"
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_opengl3.h>
 #include "framebuffer_gl.h"
 #include "mesh_gl.h"
 #include "shader_gl.h"
@@ -185,4 +186,30 @@ std::shared_ptr<texture> gfx_device_gl::createTextureCube(texture_setup& setup)
 {
 	std::shared_ptr<texture_gl> texturePtr = std::make_shared<texture_cube>(setup);;
 	return texturePtr;
+}
+
+void gfx_device_gl::onRenderImGUI()
+{
+	ImGui_ImplOpenGL3_NewFrame();
+}
+
+void gfx_device_gl::onPostRenderImGUI()
+{
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void gfx_device_gl::onInitImGUI()
+{
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	 	
+	m_Window->initOpenGLImGUI();
+	ImGui_ImplOpenGL3_Init();
+}
+
+void gfx_device_gl::onShutdownImGUI()
+{
+	ImGui_ImplOpenGL3_Shutdown();
 }

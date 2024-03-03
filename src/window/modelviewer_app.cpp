@@ -58,10 +58,14 @@ modelviewer_app::modelviewer_app(std::shared_ptr<window>& window, std::shared_pt
 	setTargetFrameRate(360);
     updateCameraPosition();
 	m_Camera.setViewPort(m_Window->getWidth(), m_Window->getHeight());
+	m_Device->onInitImGUI();
 }
 
 modelviewer_app::~modelviewer_app() {
     
+	m_Device->onShutdownImGUI();
+	m_Window->onShutdownImGUI();
+	ImGui::DestroyContext();
 }
 
 std::string getLightObjectName(int id) {
@@ -430,6 +434,9 @@ void modelviewer_app::displayMenubar() {
 
 void modelviewer_app::onRenderImGUI() {
 	
+	m_Device->onRenderImGUI();
+	m_Window->onNewImGUIFrame();
+	ImGui::NewFrame();
 	//ImGui::ShowDemoWindow();
 	displayLightPanel();
 	displayMenubar();
@@ -726,18 +733,12 @@ void modelviewer_app::loop()
 		watch.stop();
 		double elapsed = watch.getSeconds();
 		watch.start();
-
-		//ImGui_ImplOpenGL3_NewFrame();
-		//ImGui_ImplGlfw_NewFrame();
-		//ImGui::NewFrame();
-		//onRenderImGUI();
-		//ImGui::ShowDemoWindow();
+		
+		onRenderImGUI();
 
 		m_Window->pollEvents();
 		onRender((float)elapsed);
-
-		//ImGui::Render();
-		//ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		onPostRenderImGUI();
 
 		m_Device->swapBuffers();
 		watch.stop();
@@ -759,4 +760,10 @@ int modelviewer_app::getTargetFrameRate()
 void modelviewer_app::onKeyPressed(int key, int action, int mods)
 {
 
+}
+
+void modelviewer_app::onPostRenderImGUI()
+{
+	ImGui::Render();
+	m_Device->onPostRenderImGUI();
 }

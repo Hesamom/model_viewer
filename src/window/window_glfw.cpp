@@ -3,10 +3,7 @@
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
-
-#include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
-#include "imgui/imgui_impl_opengl3.h"
 
 window_glfw::window_glfw(int width, int height, const std::string& title, bool fullscreen, bool vSync,  int mssaLevel ) 
 {
@@ -243,5 +240,20 @@ void window_glfw::setOnMouseButtonCallback(std::function<void(mouse_event)> call
 void window_glfw::setOnMouseScrollCallback(std::function<void(int)> callback)
 {
 	m_MouseScrollCallback = callback;
+}
+
+void window_glfw::onNewImGUIFrame()
+{
+	ImGui_ImplGlfw_NewFrame();
+}
+
+void window_glfw::initOpenGLImGUI()
+{
+	ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
+}
+
+void window_glfw::onShutdownImGUI()
+{
+	ImGui_ImplGlfw_Shutdown();
 }
 

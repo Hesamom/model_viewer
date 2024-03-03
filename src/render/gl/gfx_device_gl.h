@@ -22,6 +22,11 @@ namespace modelViewer::render {
 		void popDebugGroup() override;
 		void pushDebugGroup(const char* label) override;
 		
+		void onRenderImGUI() override;
+		void onPostRenderImGUI() override;
+		void onInitImGUI() override;
+		void onShutdownImGUI() override;
+		
 		int getMaxSamplersPerProgram() override;
 
 		std::shared_ptr<texture> createTextureCube(texture_setup &setup) override ;

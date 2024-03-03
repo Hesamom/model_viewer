@@ -44,6 +44,10 @@ public:
 	void setOnMouseButtonCallback(std::function<void(mouse_event)> callback) override;
 	void setOnMouseScrollCallback(std::function<void(int)> callback) override;
 	
+	void onNewImGUIFrame() override;
+	
+	void initOpenGLImGUI();
+	void onShutdownImGUI() override;
 	void setSize(int width, int height) override;
     int getHeight() override;
     int getWidth() override;

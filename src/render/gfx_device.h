@@ -32,6 +32,11 @@ namespace modelViewer::render {
 		virtual void clearDepthBuffer() = 0;
 		virtual void* getDevice() = 0;
 		
+		virtual void onRenderImGUI() = 0;
+		virtual void onPostRenderImGUI() = 0;
+		virtual void onInitImGUI() =0;
+		virtual void onShutdownImGUI() = 0;
+		
 		virtual void pushDebugGroup(const char* label) = 0;
 		virtual void popDebugGroup() = 0;
 		

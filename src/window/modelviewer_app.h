@@ -69,6 +69,7 @@ protected:
     void onRender(float elapsed);
 	void onSizeChanged(int height, int width);
 	void onRenderImGUI();
+	void onPostRenderImGUI();
 	
     void onScrollChanged(int yOffset);
 	void onMouseButtonCallback(window::mouse_event event);
@@ -83,6 +84,7 @@ public:
 	void openSpecularMapModel();
 	int getTargetFrameRate();
 	void setTargetFrameRate(int fps);
+
 
 };
 

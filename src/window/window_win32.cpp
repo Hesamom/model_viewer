@@ -1,6 +1,7 @@
 ﻿
 #include "window_win32.h"
 #include <WindowsX.h>
+#include "imgui/imgui_impl_win32.h"
 
 using namespace Microsoft::WRL;
 
@@ -143,6 +144,9 @@ void window_win32::onMousePosChanged(int x, int y)
 
 LRESULT window_win32::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	//if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wParam, lParam))
+		//return true;
+	
 	switch (msg) {
 		case WM_ACTIVATE:
 			if (LOWORD(wParam) == WA_INACTIVE )
@@ -227,6 +231,21 @@ void window_win32::setOnMouseScrollCallback(std::function<void(int)> callback)
 void window_win32::onMouseScrollChanged(int offset)
 {
 	m_MouseScrollCallback(offset);
+}
+
+void window_win32::onNewImGUIFrame()
+{
+	ImGui_ImplWin32_NewFrame();
+}
+
+void window_win32::onInitImGUI()
+{
+	ImGui_ImplWin32_Init(m_Handle);
+}
+
+void window_win32::onShutdownImGUI()
+{
+	ImGui_ImplWin32_Shutdown();
 }
 
 
