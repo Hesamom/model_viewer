@@ -11,6 +11,7 @@ bool containsArg(int count, const char** cmd, const char* arg);
 std::shared_ptr<window> window;
 std::shared_ptr<modelViewer::render::gfx_device> device;
 
+
 int main(int count, const char** cmd)
 {
 	std::shared_ptr<modelViewer::debug::renderdoc> renderDoc;

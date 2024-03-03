@@ -115,6 +115,26 @@ void window_glfw::onScrollChanged(double yOffset) {
 
 }
 
+int mapButton(int button) {
+	return button;
+}
+
+bool mapButtonState(int action) {
+	
+	if (action == GLFW_RELEASE)
+	{
+		return false;
+	}
+	
+	return true;
+}
+
+void window_glfw::onMouseCallback()
+{
+	window::mouse_event event = {m_MouseStates[0], m_MouseStates[1], m_MouseStates[2], m_MousePosX, m_MousePosY};
+	m_MouseCallback(event);
+}
+
 void window_glfw::subscribeEvents() {
     
     static auto callback_static = [this](GLFWwindow* window, double xoffset, double yoffset){
@@ -128,7 +148,9 @@ void window_glfw::subscribeEvents() {
     );
 
     static auto callback_static_2 = [this](GLFWwindow* window, int button, int action, int mods){
-        onMouseButtonChanged(button, action, mods);
+		
+		m_MouseStates[mapButton(button)] =  mapButtonState(action);
+		onMouseCallback();
     };
 
     glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
@@ -138,7 +160,9 @@ void window_glfw::subscribeEvents() {
     );
 
     static auto callback_static_3 = [this](GLFWwindow* window, double xpos, double ypos){
-        onMousePositionChanged(xpos, ypos);
+		m_MousePosY = (int)ypos;
+		m_MousePosX = (int)xpos;
+		onMouseCallback();
     };
 
     glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xpos, double ypos)
@@ -209,5 +233,10 @@ void window_glfw::swapBuffers()
 void window_glfw::setOnSizeChangedCallback(std::function<void(int, int)> callback)
 {
 	m_SizeCallback = callback;
+}
+
+void window_glfw::setOnMouseButtonCallback(std::function<void(mouse_event)> callback)
+{
+	m_MouseCallback = callback;
 }
 

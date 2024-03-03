@@ -15,13 +15,20 @@ private:
 	HWND  m_Handle = nullptr;
 	HINSTANCE m_Instance = nullptr;
 	std::function<void(int, int)> m_SizeChangedCallback;
-
+	std::function<void (mouse_event)> m_MouseCallback;
 
 	MSG m_LastWindowMessage {0};
 
 	int m_ClientWidth = 0;
 	int m_ClientHeight = 0;
-	
+	int m_MousePosX = 0;
+	int m_MousePosY = 0;
+	bool m_Paused = false;
+	bool m_MouseStates[3]{};
+
+	void onMouseCallback();
+	void onMouseStateChanged(int button, bool pressed);
+	void onMousePosChanged(int x, int y);
 	bool createWindow();
 	
 public:
@@ -34,6 +41,8 @@ public:
 	std::string  getTitle() override;
 
 	void setOnSizeChangedCallback(std::function<void(int, int)> callback) override;
+	void setOnMouseButtonCallback(std::function<void (mouse_event)> callback) override;
+	
 	void* getHandleRaw() override;
 	HWND  getHandle();
 	bool shouldClose() override;
@@ -42,7 +51,7 @@ public:
 
 	LRESULT MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	static window_win32* current;
-	bool m_Paused = false;
+
 };
 
 

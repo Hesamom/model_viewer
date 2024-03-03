@@ -37,7 +37,7 @@ modelviewer_app::modelviewer_app(std::shared_ptr<window>& window, std::shared_pt
 		m_Renderer = std::make_unique<renderer_forward>(m_Device, m_ObjectFactory);
 	}
 
-	
+	m_Window->setOnMouseButtonCallback(std::bind(&modelviewer_app::onMouseButtonCallback, this, std::placeholders::_1));
 	m_Window->setOnSizeChangedCallback(std::bind(&modelviewer_app::onSizeChanged, this, std::placeholders::_1, std::placeholders::_2));
 	setTargetFrameRate(360);
 	
@@ -114,34 +114,30 @@ void modelviewer_app::onScrollChanged(double yOffset) {
     updateCameraPosition();
 }
 
-/*void modelviewer_app::onMouseButtonChanged(int button, int action, int mods) {
-    
-    if (button !=  GLFW_MOUSE_BUTTON_MIDDLE)
-    {
-        return;
-    }
+void modelviewer_app::onMouseButtonCallback(window::mouse_event event) {
+	
+	std::cout<< "onMouseButtonCallback, left: " << event.leftPressed << " right: " << event.rightPressed << " middle: " 
+	<< event.middlePressed<< " x: " << event.x
+	 << ", y: " << event.y << std::endl;
+	
+    m_IsMouseButtonDown = event.middlePressed;
 
-    m_IsMouseButtonDown = action == GLFW_REPEAT || action == GLFW_PRESS;
+	if (m_IsMouseButtonDown)
+	{
+		auto deltaY = m_LastMousePosition.y - event.y;
+		m_PitchAngle += -deltaY * AngleChangeMul;
+		m_PitchAngle = std::clamp<float>(m_PitchAngle, PitchAngleRange.x,PitchAngleRange.y);
+
+		auto deltaX = m_LastMousePosition.x - event.x;
+		m_YawAngle += deltaX * AngleChangeMul;
+
+		updateCameraPosition();
+	}
+
+	m_LastMousePosition.x = event.x;
+	m_LastMousePosition.y = event.y;
 }
 
-
-void modelviewer_app::onMousePositionChanged(double xpos, double ypos) {
-    
-    if (m_IsMouseButtonDown)
-    {
-        auto deltaY = m_LastMousePosition.y - ypos;
-        m_PitchAngle += -deltaY * AngleChangeMul;
-        m_PitchAngle = std::clamp<float>(m_PitchAngle, PitchAngleRange.x,PitchAngleRange.y);
-
-        auto deltaX = m_LastMousePosition.x - xpos;
-        m_YawAngle += deltaX * AngleChangeMul;
-        
-        updateCameraPosition();
-    }
-
-    m_LastMousePosition.x = xpos;
-    m_LastMousePosition.y = ypos;
-}*/
 
 std::string modelviewer_app::label(std::string str, int id) {
 	return str + "##" + std::to_string(id);

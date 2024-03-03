@@ -15,9 +15,14 @@ private:
     int m_Height = 0;
     bool m_Paused = false;
 
+	int m_MousePosX = 0;
+	int m_MousePosY = 0;
+	bool m_MouseStates[3]{};
+
     void subscribeEvents();
 
 	std::function<void(int, int)>  m_SizeCallback;
+	std::function<void(mouse_event)> m_MouseCallback;
 
     void onScrollChanged(double yOffset);
 	void onMouseButtonChanged(int button, int action, int mods);
@@ -34,6 +39,8 @@ public:
 	void swapBuffers();
 
 	void setOnSizeChangedCallback(std::function<void(int, int)> callback) override;
+	void setOnMouseButtonCallback(std::function<void(mouse_event)> callback) override;
+	
 	void setSize(int width, int height) override;
     int getHeight() override;
     int getWidth() override;
@@ -44,7 +51,8 @@ public:
 	bool shouldClose() override;
 	bool isPaused() override;
 	void pollEvents() override;
-    
+
+	void onMouseCallback();
 };
 
 #endif

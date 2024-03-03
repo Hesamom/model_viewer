@@ -1,5 +1,6 @@
 ﻿
 #include "window_win32.h"
+#include <WindowsX.h>
 
 using namespace Microsoft::WRL;
 
@@ -120,6 +121,26 @@ void window_win32::pollEvents()
 	}
 }
 
+void window_win32::onMouseCallback()
+{
+	window::mouse_event event = {m_MouseStates[0], m_MouseStates[1], m_MouseStates[2], m_MousePosX, m_MousePosY};
+	m_MouseCallback(event);
+}
+
+void window_win32::onMouseStateChanged(int button, bool pressed)
+{
+	m_MouseStates[button] = pressed;
+	onMouseCallback();
+}
+
+void window_win32::onMousePosChanged(int x, int y)
+{
+	m_MousePosX = x;
+	m_MousePosY = y;
+
+	onMouseCallback();
+}
+
 LRESULT window_win32::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg) {
@@ -132,6 +153,32 @@ LRESULT window_win32::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			{
 				m_Paused = false;
 			}
+			return 0;
+			
+		case WM_LBUTTONDOWN:
+			onMouseStateChanged(0, true);
+			return 0;
+		case WM_MBUTTONDOWN:
+			onMouseStateChanged(2, true);
+			return 0;
+		case WM_RBUTTONDOWN:
+			onMouseStateChanged(1, true);
+			return 0;
+			
+			
+		case WM_LBUTTONUP:
+			onMouseStateChanged(0, false);
+			return 0;
+		case WM_MBUTTONUP:
+			onMouseStateChanged(2, false);
+			return 0;
+		case WM_RBUTTONUP:
+			onMouseStateChanged(1, false);
+			return 0;
+			
+			
+		case WM_MOUSEMOVE:
+			onMousePosChanged(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 			return 0;
 		case WM_SIZE:
 			m_ClientWidth  = LOWORD(lParam);
@@ -163,3 +210,10 @@ void window_win32::setOnSizeChangedCallback(std::function<void(int, int)> callba
 void* window_win32::getHandleRaw() {
 	return m_Handle;
 }
+
+void window_win32::setOnMouseButtonCallback(std::function<void(mouse_event)> callback)
+{
+	m_MouseCallback = callback;
+}
+
+
