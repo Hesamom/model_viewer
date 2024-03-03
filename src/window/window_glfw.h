@@ -23,8 +23,10 @@ private:
 
 	std::function<void(int, int)>  m_SizeCallback;
 	std::function<void(mouse_event)> m_MouseCallback;
+	std::function<void(int)> m_MouseScrollCallback;
 
-    void onScrollChanged(double yOffset);
+	void onMouseCallback();
+	void onScrollChanged(double yOffset);
 	void onMouseButtonChanged(int button, int action, int mods);
 	void onMousePositionChanged(double xpos, double ypos);
 	void onSizeChanged(int height, int width);
@@ -40,6 +42,7 @@ public:
 
 	void setOnSizeChangedCallback(std::function<void(int, int)> callback) override;
 	void setOnMouseButtonCallback(std::function<void(mouse_event)> callback) override;
+	void setOnMouseScrollCallback(std::function<void(int)> callback) override;
 	
 	void setSize(int width, int height) override;
     int getHeight() override;
@@ -51,8 +54,6 @@ public:
 	bool shouldClose() override;
 	bool isPaused() override;
 	void pollEvents() override;
-
-	void onMouseCallback();
 };
 
 #endif

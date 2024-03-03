@@ -70,8 +70,7 @@ protected:
 	void onSizeChanged(int height, int width);
 	void onRenderImGUI();
 	
-    void onScrollChanged(double yOffset);
-
+    void onScrollChanged(int yOffset);
 	void onMouseButtonCallback(window::mouse_event event);
 	void onKeyPressed(int key, int action, int mods);
 	

@@ -16,7 +16,8 @@ private:
 	HINSTANCE m_Instance = nullptr;
 	std::function<void(int, int)> m_SizeChangedCallback;
 	std::function<void (mouse_event)> m_MouseCallback;
-
+	std::function<void(int)> m_MouseScrollCallback;
+	
 	MSG m_LastWindowMessage {0};
 
 	int m_ClientWidth = 0;
@@ -25,7 +26,8 @@ private:
 	int m_MousePosY = 0;
 	bool m_Paused = false;
 	bool m_MouseStates[3]{};
-
+	
+	void onMouseScrollChanged(int offset);
 	void onMouseCallback();
 	void onMouseStateChanged(int button, bool pressed);
 	void onMousePosChanged(int x, int y);
@@ -42,6 +44,7 @@ public:
 
 	void setOnSizeChangedCallback(std::function<void(int, int)> callback) override;
 	void setOnMouseButtonCallback(std::function<void (mouse_event)> callback) override;
+	void setOnMouseScrollCallback(std::function<void(int)> callback) override;
 	
 	void* getHandleRaw() override;
 	HWND  getHandle();
@@ -52,6 +55,8 @@ public:
 	LRESULT MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	static window_win32* current;
 
+
+	
 };
 
 

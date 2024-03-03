@@ -175,7 +175,10 @@ LRESULT window_win32::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case WM_RBUTTONUP:
 			onMouseStateChanged(1, false);
 			return 0;
-			
+
+		case WM_MOUSEWHEEL:
+			onMouseScrollChanged(GET_WHEEL_DELTA_WPARAM(wParam));
+			return 0;
 			
 		case WM_MOUSEMOVE:
 			onMousePosChanged(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
@@ -214,6 +217,16 @@ void* window_win32::getHandleRaw() {
 void window_win32::setOnMouseButtonCallback(std::function<void(mouse_event)> callback)
 {
 	m_MouseCallback = callback;
+}
+
+void window_win32::setOnMouseScrollCallback(std::function<void(int)> callback)
+{
+	m_MouseScrollCallback = callback;
+}
+
+void window_win32::onMouseScrollChanged(int offset)
+{
+	m_MouseScrollCallback(offset);
 }
 
 

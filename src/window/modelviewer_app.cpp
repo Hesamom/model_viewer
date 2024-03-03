@@ -32,31 +32,32 @@ modelviewer_app::modelviewer_app(std::shared_ptr<window>& window, std::shared_pt
 
 	if (simpleRenderer) {
 		m_Renderer = std::make_unique<renderer_simple>(m_Device);
+		m_Renderer->setClearFlag(glm::vec4{1,0,0,1});
 	}
 	else {
 		m_Renderer = std::make_unique<renderer_forward>(m_Device, m_ObjectFactory);
+		m_Renderer->setClearFlag(glm::vec4{0,0,0,1});
+		m_Renderer->setReflectionPosition({0,0,0});
+		m_Renderer->setReflectionClearFlag({0,0,0,0});
+
+		model_platform_info info;
+		info.sizeZ = 12;
+		info.sizeX = 12;
+		info.lineSpace = 1;
+
+		auto plane = m_Platform.generatePlane(m_ObjectFactory, info, m_Device);
+		auto grid = m_Platform.generateGrid(m_ObjectFactory, info, m_Device);
+		m_Scene.addStaticObject(plane);
+		m_Scene.addStaticObject(grid);
 	}
 
 	m_Window->setOnMouseButtonCallback(std::bind(&modelviewer_app::onMouseButtonCallback, this, std::placeholders::_1));
 	m_Window->setOnSizeChangedCallback(std::bind(&modelviewer_app::onSizeChanged, this, std::placeholders::_1, std::placeholders::_2));
+	m_Window->setOnMouseScrollCallback(std::bind(&modelviewer_app::onScrollChanged, this, std::placeholders::_1));
+	
 	setTargetFrameRate(360);
-	
     updateCameraPosition();
-	//TODO set viewport when the window size changes too
 	m_Camera.setViewPort(m_Window->getWidth(), m_Window->getHeight());
-	m_Renderer->setClearFlag(glm::vec4{1,0,0,1});
-	m_Renderer->setReflectionPosition({0,0,0});
-	m_Renderer->setReflectionClearFlag({0,0,0,0});
-    
-    /*model_platform_info info;
-    info.sizeZ = 12;
-    info.sizeX = 12;
-    info.lineSpace = 1;
-	
-	auto plane = m_Platform.generatePlane(m_ObjectFactory, info, m_Device);
-	auto grid = m_Platform.generateGrid(m_ObjectFactory, info, m_Device);
-	m_Scene.addStaticObject(plane);
-	m_Scene.addStaticObject(grid);*/
 }
 
 modelviewer_app::~modelviewer_app() {
@@ -105,7 +106,7 @@ glm::vec3 getPosition(float pitch, float yaw, float zoomLevel)
     return {xPos,yPos, zPos};
 }
 
-void modelviewer_app::onScrollChanged(double yOffset) {
+void modelviewer_app::onScrollChanged(int yOffset) {
     
     //down -1, up 1
     m_ZoomLevel += yOffset * -1 * 3;
@@ -116,9 +117,9 @@ void modelviewer_app::onScrollChanged(double yOffset) {
 
 void modelviewer_app::onMouseButtonCallback(window::mouse_event event) {
 	
-	std::cout<< "onMouseButtonCallback, left: " << event.leftPressed << " right: " << event.rightPressed << " middle: " 
+	/*std::cout<< "onMouseButtonCallback, left: " << event.leftPressed << " right: " << event.rightPressed << " middle: " 
 	<< event.middlePressed<< " x: " << event.x
-	 << ", y: " << event.y << std::endl;
+	 << ", y: " << event.y << std::endl;*/
 	
     m_IsMouseButtonDown = event.middlePressed;
 

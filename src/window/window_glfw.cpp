@@ -112,7 +112,7 @@ void* window_glfw::getContextRaw() const {
 }
 
 void window_glfw::onScrollChanged(double yOffset) {
-
+	m_MouseScrollCallback((int)yOffset);
 }
 
 int mapButton(int button) {
@@ -238,5 +238,10 @@ void window_glfw::setOnSizeChangedCallback(std::function<void(int, int)> callbac
 void window_glfw::setOnMouseButtonCallback(std::function<void(mouse_event)> callback)
 {
 	m_MouseCallback = callback;
+}
+
+void window_glfw::setOnMouseScrollCallback(std::function<void(int)> callback)
+{
+	m_MouseScrollCallback = callback;
 }
 
