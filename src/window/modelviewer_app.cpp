@@ -24,10 +24,11 @@ void modelviewer_app::addModel(model_info& info) {
 }
 
 
-modelviewer_app::modelviewer_app(std::shared_ptr<window>& window, std::shared_ptr<gfx_device>& device, bool simpleRenderer) : m_ObjectFactory(device)
+modelviewer_app::modelviewer_app(std::shared_ptr<window>& window, std::shared_ptr<gfx_device>& device,std::shared_ptr<modelViewer::debug::tracer>& tracer, bool simpleRenderer) : m_ObjectFactory(device)
 {
 	m_Window = window;
 	m_Device = device;
+	m_Tracer = tracer;
 
 	if (simpleRenderer) {
 		m_Renderer = std::make_unique<renderer_simple>(m_Device);
@@ -756,4 +757,9 @@ void modelviewer_app::setTargetFrameRate(int fps)
 int modelviewer_app::getTargetFrameRate()
 {
 	return m_TargetFrameRate;
+}
+
+void modelviewer_app::onKeyPressed(int key, int action, int mods)
+{
+
 }

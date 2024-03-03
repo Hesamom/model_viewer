@@ -34,6 +34,7 @@ public:
 	std::string  getTitle() override;
 
 	void setOnSizeChangedCallback(std::function<void(int, int)> callback) override;
+	void* getHandleRaw() override;
 	HWND  getHandle();
 	bool shouldClose() override;
 	bool isPaused() override;

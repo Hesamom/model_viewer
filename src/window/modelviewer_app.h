@@ -10,7 +10,7 @@
 #include "../render/object_factory.h"
 #include "../render/renderer_forward.h"
 #include "../render/gfx_device.h"
-
+#include "../debug/renderdoc.h"
 
 class modelviewer_app {
     
@@ -36,11 +36,13 @@ private:
     const float AngleChangeMul = 0.5f;
 	int m_TargetFrameRate = -1;
 	long double m_elapsedTimeSinceStart = 0;
-    
+
             
     glm::vec<2,double> m_LastMousePosition;
+	std::shared_ptr<modelViewer::debug::tracer> m_Tracer;
 	
-    void addNewModels();
+
+	void addNewModels();
     void openDemoModel(std::string name);
     void updateCameraPosition();
 	void displayFilePicker();
@@ -71,9 +73,10 @@ protected:
     void onScrollChanged(double yOffset);
     void onMouseButtonChanged(int button, int action, int mods);
     void onMousePositionChanged(double xpos, double ypos);
+	void onKeyPressed(int key, int action, int mods);
 	
 public:
-	 modelviewer_app(std::shared_ptr<window>& window, std::shared_ptr<modelViewer::render::gfx_device>& device, bool simpleRenderer);
+	 modelviewer_app(std::shared_ptr<window>& window, std::shared_ptr<modelViewer::render::gfx_device>& device, std::shared_ptr<modelViewer::debug::tracer>& tracer, bool simpleRenderer);
      ~modelviewer_app();
 	
 	void addModel(modelViewer::res::model_info& info);

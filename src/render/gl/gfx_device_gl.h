@@ -18,7 +18,7 @@ namespace modelViewer::render {
 		void clearDepthBuffer() override;
 		void resize(int width, int height) override;
 		void clearColorBuffer(const glm::vec4& color) override;
-		
+		void* getDevice() override;
 		void popDebugGroup() override;
 		void pushDebugGroup(const char* label) override;
 		

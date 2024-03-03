@@ -159,3 +159,7 @@ void window_win32::setOnSizeChangedCallback(std::function<void(int, int)> callba
 {
 	m_SizeChangedCallback = callback;
 }
+
+void* window_win32::getHandleRaw() {
+	return m_Handle;
+}

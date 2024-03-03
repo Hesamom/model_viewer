@@ -5,14 +5,32 @@
 
 void getWindow(bool dx);
 bool isUsingDX(int count, const char** cmd);
+bool attachRenderdoc(int count, const char** cmd);
+bool containsArg(int count, const char** cmd, const char* arg);
 
 std::shared_ptr<window> window;
 std::shared_ptr<modelViewer::render::gfx_device> device;
 
 int main(int count, const char** cmd)
 {
+	std::shared_ptr<modelViewer::debug::renderdoc> renderDoc;
+	if (attachRenderdoc(count, cmd))
+	{
+		auto renderdoc = std::make_shared<modelViewer::debug::renderdoc>();
+		renderdoc->showUI();
+		renderDoc = renderdoc;
+	}
+
 	getWindow(isUsingDX(count, cmd));
-	modelviewer_app app(window, device, true);
+	
+	if(renderDoc)
+	{
+		renderDoc->setContext(device->getDevice());
+		renderDoc->setWindow(window->getHandleRaw());
+	}
+
+	std::shared_ptr<modelViewer::debug::tracer> tracer = renderDoc;
+	modelviewer_app app(window, device, tracer, true);
 	
 	app.loop();
 	
@@ -35,18 +53,26 @@ void getWindow(bool dx)
 	window = winGL;
 }
 
+bool attachRenderdoc(int count, const char** cmd)
+{
+	return containsArg(count, cmd, "-doc");
+}
+
 
 bool isUsingDX(int count, const char** cmd)
 {
-	if(count > 1)
+	return containsArg(count, cmd, "-dx");
+}
+
+bool containsArg(int count, const char** cmds, const char* arg)
+{
+	for(int i = 1; i < count; i++)
 	{
-		std::string firstCmd = cmd[1];
-		if (firstCmd == "-dx")
+		if(strcmp(cmds[i], arg) == 0)
 		{
 			return true;
 		}
 	}
-
 	return false;
 }
 

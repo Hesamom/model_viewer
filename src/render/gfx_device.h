@@ -30,6 +30,7 @@ namespace modelViewer::render {
 		virtual void setCullFace(bool enable) = 0;
 		virtual void clearColorBuffer(const glm::vec4& color) = 0;
 		virtual void clearDepthBuffer() = 0;
+		virtual void* getDevice() = 0;
 		
 		virtual void pushDebugGroup(const char* label) = 0;
 		virtual void popDebugGroup() = 0;

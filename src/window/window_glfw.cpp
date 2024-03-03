@@ -1,5 +1,9 @@
 ﻿#include "GLFW/glfw3.h"
 #include "window_glfw.h"
+
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
+
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
@@ -97,6 +101,15 @@ std::string window_glfw::getTitle() {
 /*void window_glfw::setVsync(bool enabled) {
     glfwSwapInterval(enabled ? 1 : 0);
 }*/
+
+void* window_glfw::getHandleRaw() {
+    return glfwGetWin32Window(m_Window);
+}
+
+void* window_glfw::getContextRaw() const {
+    //return glfwGetGLXContext(m_Window);
+    return nullptr;
+}
 
 void window_glfw::onScrollChanged(double yOffset) {
 

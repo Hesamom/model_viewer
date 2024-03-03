@@ -280,6 +280,10 @@ void gfx_device_dx::clearColorBuffer(const glm::vec4& color)
 	m_CommandList->ClearRenderTargetView(handle, &color.x, 0, nullptr);
 }
 
+void* gfx_device_dx::getDevice() {
+	return m_d3dDevice.Get();
+}
+
 void gfx_device_dx::popDebugGroup() {
 }
 

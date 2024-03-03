@@ -11,6 +11,7 @@ public:
 		
 	};
 
+	virtual void* getHandleRaw() = 0;
 	virtual void setOnSizeChangedCallback(std::function<void(int, int)> callback) = 0;
 	virtual void setSize(int width, int height) = 0;
 	virtual int getHeight() = 0;

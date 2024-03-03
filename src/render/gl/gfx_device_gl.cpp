@@ -61,6 +61,10 @@ void gfx_device_gl::clearColorBuffer(const glm::vec4& color) {
 	glClearBufferfv(GL_COLOR, 0, &color.x);
 }
 
+void* gfx_device_gl::getDevice() {
+	return m_Window->getContextRaw();
+}
+
 void gfx_device_gl::popDebugGroup() {
 	glPopDebugGroup();
 }
