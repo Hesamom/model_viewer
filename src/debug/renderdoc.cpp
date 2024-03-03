@@ -94,6 +94,10 @@ renderdoc::renderdoc() {
 
 		//turn off renderdoc overlay
 		m_Api->MaskOverlayBits(0, 0);
+
+		RENDERDOC_InputButton inputs[]= {RENDERDOC_InputButton::eRENDERDOC_Key_F6} ;
+
+		m_Api->SetCaptureKeys(inputs , 1);
 	}
 	else
 	{
