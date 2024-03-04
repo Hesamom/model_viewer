@@ -98,7 +98,7 @@ void __stdcall debugCallback(GLenum source, GLenum type, GLuint id, GLenum sever
 
 void gfx_device_gl::initDevice() {
 
-	m_Window->setGlContext(4,6,4);
+	m_Window->setGlContext(4,6,8);
 	glewExperimental = GL_TRUE; // Enable experimental features
 	glewInit();
 

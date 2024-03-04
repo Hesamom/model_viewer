@@ -82,7 +82,7 @@ namespace modelViewer::render
 		Microsoft::WRL::ComPtr<IDXGISwapChain> m_SwapChain;
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mRtvHeap;
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mDsvHeap;
-		
+		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_SRVHeap;
 
 		static constexpr int SwapChainBufferCount = 2;
 		Microsoft::WRL::ComPtr<ID3D12Resource> m_SwapChainBuffer[SwapChainBufferCount];
@@ -101,6 +101,7 @@ namespace modelViewer::render
 		bool m4xMsaaState = false;
 		UINT m4xMsaaQuality = 0;
 
+		void createSRVHeap();
 	};
 }
 

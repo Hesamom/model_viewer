@@ -44,10 +44,6 @@ window_glfw::window_glfw(int width, int height, const std::string& title, bool f
 
 window_glfw::~window_glfw() {
 	
-    /*ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();*/
-	
     glfwDestroyWindow(m_Window);
 }
 
@@ -179,14 +175,6 @@ void window_glfw::subscribeEvents() {
     );
 }
 
-void window_glfw::onMouseButtonChanged(int button, int action, int mods) {
-    
-
-}
-
-void window_glfw::onMousePositionChanged(double xpos, double ypos) {
-    
-}
 
 void window_glfw::onSizeChanged(int width, int height)
 {

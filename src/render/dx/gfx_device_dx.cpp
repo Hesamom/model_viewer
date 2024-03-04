@@ -69,6 +69,7 @@ void gfx_device_dx::initDevice()
 	createDescriptorHeaps();
 	createRenderTargets();
 	createStencilDepthBuffer();
+	createSRVHeap();
 	setViewport(m_Window->getWidth(), m_Window->getHeight());
 }
 
@@ -81,6 +82,15 @@ void gfx_device_dx::createRenderTargets()
 		m_d3dDevice->CreateRenderTargetView(m_SwapChainBuffer[i].Get(), nullptr, rtvHeapHandle);
 		rtvHeapHandle.Offset(1, mRtvDescriptorSize);
 	}
+}
+
+void gfx_device_dx::createSRVHeap()
+{
+	D3D12_DESCRIPTOR_HEAP_DESC desc = {};
+	desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	desc.NumDescriptors = 1;
+	desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	m_d3dDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_SRVHeap));
 }
 
 void gfx_device_dx::setViewport(int width, int height)
@@ -328,12 +338,12 @@ std::shared_ptr<framebuffer> gfx_device_dx::createFramebuffer() {
 
 void gfx_device_dx::onRenderImGUI()
 {
-	//TODO imp 
+	ImGui_ImplDX12_NewFrame();
 }
 
 void gfx_device_dx::onPostRenderImGUI()
 {
-	//TODO imp
+	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_CommandList.Get());
 }
 
 void gfx_device_dx::onInitImGUI()
@@ -345,11 +355,9 @@ void gfx_device_dx::onInitImGUI()
 	
 	m_Window->onInitImGUI();
 	//BUG not sure about the second arg 
-	/*ImGui_ImplDX12_Init(m_d3dDevice, 2, m_BackBufferFormat,
-		YOUR_SRV_DESC_HEAP,
-		// You'll need to designate a descriptor from your descriptor heap for Dear ImGui to use internally for its font texture's SRV
-		YOUR_CPU_DESCRIPTOR_HANDLE_FOR_FONT_SRV,
-		YOUR_GPU_DESCRIPTOR_HANDLE_FOR_FONT_SRV);*/
+	ImGui_ImplDX12_Init(m_d3dDevice.Get(), SwapChainBufferCount, m_BackBufferFormat,
+		m_SRVHeap.Get(), m_SRVHeap->GetCPUDescriptorHandleForHeapStart(),
+		m_SRVHeap->GetGPUDescriptorHandleForHeapStart());
 }
 
 void gfx_device_dx::onShutdownImGUI()

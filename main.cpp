@@ -31,7 +31,7 @@ int main(int count, const char** cmd)
 	}
 
 	std::shared_ptr<modelViewer::debug::tracer> tracer = renderDoc;
-	modelviewer_app app(window, device, tracer, false);
+	modelviewer_app app(window, device, tracer, true);
 	
 	app.loop();
 	
