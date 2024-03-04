@@ -432,14 +432,11 @@ void modelviewer_app::displayMenubar() {
 	ImGui::End();
 }
 
-void modelviewer_app::onRenderImGUI() {
-	
-	m_Device->onRenderImGUI();
+void modelviewer_app::onPreRenderImGUI() {
+
+	m_Device->onPreRenderImGUI();
 	m_Window->onNewImGUIFrame();
 	ImGui::NewFrame();
-	//ImGui::ShowDemoWindow();
-	displayLightPanel();
-	displayMenubar();
 }
 
 void modelviewer_app::onSizeChanged(int width, int height)
@@ -733,14 +730,15 @@ void modelviewer_app::loop()
 		watch.stop();
 		double elapsed = watch.getSeconds();
 		watch.start();
-		
-		onRenderImGUI();
 
 		m_Window->pollEvents();
+		//onPreRenderImGUI();
+		//onRenderImGUI();
+		m_Device->onStartRender();
 		onRender((float)elapsed);
-		onPostRenderImGUI();
-
+		//onPostRenderImGUI();
 		m_Device->swapBuffers();
+		
 		watch.stop();
 		m_elapsedTimeSinceStart += watch.getSeconds();
 		capTargetFrameRate(watch.getSeconds(), m_TargetFrameRate);
@@ -764,6 +762,14 @@ void modelviewer_app::onKeyPressed(int key, int action, int mods)
 
 void modelviewer_app::onPostRenderImGUI()
 {
-	ImGui::Render();
 	m_Device->onPostRenderImGUI();
+}
+
+void modelviewer_app::onRenderImGUI()
+{
+	//ImGui::ShowDemoWindow();
+	displayLightPanel();
+	displayMenubar();
+	
+	ImGui::Render();
 }

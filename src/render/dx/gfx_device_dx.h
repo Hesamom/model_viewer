@@ -22,10 +22,10 @@ namespace modelViewer::render
 
 	public:
 		explicit gfx_device_dx(std::shared_ptr<window_win32>& window);
-
+		
 		void swapBuffers() override;
+		void onStartRender() override;
 		void setViewport(int width, int height) override;
-		void setClearColor(glm::vec4& color) override;
 		void resize(int width, int height) override;
 		void setCullFaceMode(cull_face_mode mode) override;
 		void setDepthmap(bool enable) override;
@@ -34,7 +34,7 @@ namespace modelViewer::render
 		void clearColorBuffer(const glm::vec4& color) override;
 		void* getDevice() override;
 		
-		void onRenderImGUI() override;
+		void onPreRenderImGUI() override;
 		void onPostRenderImGUI() override;
 		void onInitImGUI() override;
 		void onShutdownImGUI() override;
@@ -52,30 +52,26 @@ namespace modelViewer::render
 
 	private:
 
-		void initDevice();
-
+		void initContext();
 		void createDescriptorHeaps();
-
 		void createSwapChain();
-
 		void createRenderTargets();
-
 		void createStencilDepthBuffer();
-
 		void flushCommandQueue();
-		
 		D3D12_CPU_DESCRIPTOR_HANDLE getCurrentBackBufferView() const;
-
 		D3D12_CPU_DESCRIPTOR_HANDLE getDepthStencilView() const;
-
+		void createSRVHeap();
+		ID3D12Resource* getCurrentBackBuffer();
+		
+		Microsoft::WRL::ComPtr<ID3D12PipelineState> mPSO = nullptr;
 		std::shared_ptr<window_win32> m_Window;
 
 		Microsoft::WRL::ComPtr<IDXGIFactory4> m_dxgiFactory;
-		Microsoft::WRL::ComPtr<ID3D12Device> m_d3dDevice;
+		Microsoft::WRL::ComPtr<ID3D12Device> m_device;
 		Microsoft::WRL::ComPtr<ID3D12Fence> m_Fence;
 		int mCurrentFence;
 		
-		Microsoft::WRL::ComPtr<ID3D12CommandQueue> mCommandQueue;
+		Microsoft::WRL::ComPtr<ID3D12CommandQueue> m_CommandQueue;
 		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> m_DirectCmdListAlloc;
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> m_CommandList;
 
@@ -96,12 +92,26 @@ namespace modelViewer::render
 		const DXGI_FORMAT m_BackBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 		const DXGI_FORMAT mDepthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
+		D3D12_VIEWPORT mScreenViewport;
+		D3D12_RECT mScissorRect;
 	
 		UINT mCurrBackBuffer = 0;
 		bool m4xMsaaState = false;
 		UINT m4xMsaaQuality = 0;
 
-		void createSRVHeap();
+		void setScissorRect(int x, int y, int width, int height);
+
+		void enableDebugLayer() const;
+
+		void createDevice();
+
+		void queryDescriptorSizes();
+
+		void initMSAA();
+
+		void createCommandList();
+
+		void createFence();
 	};
 }
 

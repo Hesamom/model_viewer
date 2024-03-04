@@ -20,10 +20,10 @@ namespace modelViewer::render {
 	public:
 		virtual ~gfx_device() = default;
 
+		virtual void onStartRender() = 0;
 		virtual void swapBuffers() = 0;
 		virtual void resize(int width, int height) = 0;
 		virtual void setViewport(int width, int height) = 0;
-		virtual void setClearColor(glm::vec4& color) = 0;
 		virtual void setCullFaceMode(cull_face_mode mode) = 0;
 		virtual int getMaxSamplersPerProgram() = 0;
 		virtual void setDepthmap(bool enable) = 0;
@@ -32,7 +32,7 @@ namespace modelViewer::render {
 		virtual void clearDepthBuffer() = 0;
 		virtual void* getDevice() = 0;
 		
-		virtual void onRenderImGUI() = 0;
+		virtual void onPreRenderImGUI() = 0;
 		virtual void onPostRenderImGUI() = 0;
 		virtual void onInitImGUI() =0;
 		virtual void onShutdownImGUI() = 0;

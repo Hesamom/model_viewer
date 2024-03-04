@@ -23,10 +23,6 @@ void gfx_device_gl::setViewport(int width, int height)
 	glViewport(0, 0, width, height);
 }
 
-void gfx_device_gl::setClearColor(glm::vec4& color)
-{
-	glClearColor(color.r, color.g, color.b, 1);
-}
 
 void gfx_device_gl::setCullFaceMode(cull_face_mode mode) {
 	switch (mode) {
@@ -188,7 +184,7 @@ std::shared_ptr<texture> gfx_device_gl::createTextureCube(texture_setup& setup)
 	return texturePtr;
 }
 
-void gfx_device_gl::onRenderImGUI()
+void gfx_device_gl::onPreRenderImGUI()
 {
 	ImGui_ImplOpenGL3_NewFrame();
 }
@@ -212,4 +208,9 @@ void gfx_device_gl::onInitImGUI()
 void gfx_device_gl::onShutdownImGUI()
 {
 	ImGui_ImplOpenGL3_Shutdown();
+}
+
+void gfx_device_gl::onStartRender()
+{
+
 }

@@ -15,7 +15,6 @@ void modelViewer::render::renderer_simple::render(render_scene& scene, camera& c
 void modelViewer::render::renderer_simple::setClearFlag(glm::vec4 color) {
 
     m_Color = color;
-    m_Device->setClearColor(m_Color);
 }
 
 void modelViewer::render::renderer_simple::setReflectionPosition(const glm::vec3& pos) {

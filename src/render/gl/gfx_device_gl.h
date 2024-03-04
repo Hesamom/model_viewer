@@ -11,7 +11,6 @@ namespace modelViewer::render {
 		explicit gfx_device_gl(std::shared_ptr<window_glfw>& window);
 		void swapBuffers() override;
 		void setViewport(int width, int height) override;
-		void setClearColor(glm::vec4& color) override;
 		void setCullFaceMode(cull_face_mode mode) override;
 		void setDepthmap(bool enable) override;
 		void setCullFace(bool enable) override;
@@ -21,8 +20,9 @@ namespace modelViewer::render {
 		void* getDevice() override;
 		void popDebugGroup() override;
 		void pushDebugGroup(const char* label) override;
+		void onStartRender() override;
 		
-		void onRenderImGUI() override;
+		void onPreRenderImGUI() override;
 		void onPostRenderImGUI() override;
 		void onInitImGUI() override;
 		void onShutdownImGUI() override;

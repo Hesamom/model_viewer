@@ -68,7 +68,7 @@ private:
 protected:
     void onRender(float elapsed);
 	void onSizeChanged(int height, int width);
-	void onRenderImGUI();
+	void onPreRenderImGUI();
 	void onPostRenderImGUI();
 	
     void onScrollChanged(int yOffset);
@@ -86,6 +86,7 @@ public:
 	void setTargetFrameRate(int fps);
 
 
+	void onRenderImGUI();
 };
 
 
