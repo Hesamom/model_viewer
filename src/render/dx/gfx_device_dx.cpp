@@ -1,6 +1,9 @@
 ﻿
 #include "gfx_device_dx.h"
 #include "../../error/not_implemented_error.h"
+#include "../../resource/model_loader.h"
+#include "mesh_dx.h"
+#include "buffer_constant_dx.h"
 #include <WindowsX.h>
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_dx12.h>
@@ -8,10 +11,13 @@
 #if defined(DEBUG) || defined(_DEBUG)
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/matrix_clip_space.hpp>
 #endif
 
 using namespace Microsoft::WRL;
 using namespace modelViewer::render;
+
 
 void gfx_device_dx::initContext()
 {
@@ -26,7 +32,33 @@ void gfx_device_dx::initContext()
 	createRenderTargets();
 	createStencilDepthBuffer();
 	createSRVHeap();
+	
+	//for testing
+	createSampleGeometry();
+	createShaderSamples();
+	
 	setViewport(m_Window->getWidth(), m_Window->getHeight());
+	setScissorRect(0,0, m_Window->getWidth(), m_Window->getHeight());
+	
+	m_CommandList->Close();
+	ID3D12CommandList* cmdsLists[] = { m_CommandList.Get() };
+	m_CommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
+
+	m_SwapChain->Present(0,0);
+	mCurrBackBuffer = (mCurrBackBuffer + 1) % SwapChainBufferCount;
+
+	flushCommandQueue();
+	
+}
+
+void gfx_device_dx::createSampleGeometry()
+{
+	modelViewer::res::model_loader loader;
+	auto meshAsset = loader.loadFirstMesh(modelViewer::res::literals::models::primitive_cube);
+	for (int i = 0; i < meshCount; ++i) {
+		auto mesh = std::make_unique<mesh_dx>(meshAsset, m_device, m_CommandList);
+		m_sampleMeshes.push_back(std::move(mesh));
+	}
 }
 
 void gfx_device_dx::createFence()
@@ -41,7 +73,7 @@ void gfx_device_dx::createCommandList()
 	m_device->CreateCommandAllocator( D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_DirectCmdListAlloc));
 	m_device->CreateCommandList( 0,D3D12_COMMAND_LIST_TYPE_DIRECT,
 		m_DirectCmdListAlloc.Get(), nullptr, IID_PPV_ARGS(&m_CommandList));
-	m_CommandList->Close();
+	//m_CommandList->re();
 }
 
 void gfx_device_dx::initMSAA()
@@ -94,14 +126,12 @@ void gfx_device_dx::enableDebugLayer() const
 
 	if (debugController != nullptr)
 	{
-		ID3D12InfoQueue* pInfoQueue = nullptr;
-		debugController->QueryInterface(IID_PPV_ARGS(&pInfoQueue));
-		if(pInfoQueue)
+		ComPtr<ID3D12Debug1> spDebugController1;
+		debugController->QueryInterface(IID_PPV_ARGS(&spDebugController1));
+		if(spDebugController1)
 		{
-			pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
-			pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
-			pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
-			pInfoQueue->Release();
+			spDebugController1->SetEnableSynchronizedCommandQueueValidation(true);
+			spDebugController1->SetEnableGPUBasedValidation(true);
 		}
 	}
 	
@@ -139,7 +169,8 @@ void gfx_device_dx::setScissorRect(int x, int y, int width, int height)
 
 void gfx_device_dx::setViewport(int width, int height)
 {
-	mScreenViewport.MaxDepth = 1;
+	ZeroMemory(&mScreenViewport, sizeof(D3D12_VIEWPORT));
+	mScreenViewport.MaxDepth = 1.0f;
 	mScreenViewport.Width = static_cast<float>(width);
 	mScreenViewport.Height = static_cast<float>(height);
 }
@@ -177,8 +208,9 @@ void gfx_device_dx::createStencilDepthBuffer()
 	m_device->CreateDepthStencilView(mDepthStencilBuffer.Get(), &dsvDesc, getDepthStencilView());
 
 	// Transition the resource from its initial state to be used as a depth buffer.
-	m_CommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(mDepthStencilBuffer.Get(),
-		D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE));
+	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(mDepthStencilBuffer.Get(),
+		D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+	m_CommandList->ResourceBarrier(1, &barrier);
 
 }
 
@@ -235,42 +267,47 @@ D3D12_CPU_DESCRIPTOR_HANDLE gfx_device_dx::getDepthStencilView() const
 	return mDsvHeap->GetCPUDescriptorHandleForHeapStart();
 }
 
-/*void gfx_device_dx::createPipelineState()
-{
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
-	ZeroMemory(&psoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
-	
-	psoDesc.InputLayout = { mInputLayout.data(), (UINT)mInputLayout.size() };
-	psoDesc.pRootSignature = mRootSignature.Get();
-	psoDesc.VS =
-		{
-			reinterpret_cast<BYTE*>(mvsByteCode->GetBufferPointer()),
-			mvsByteCode->GetBufferSize()
-		};
-	psoDesc.PS =
-		{
-			reinterpret_cast<BYTE*>(mpsByteCode->GetBufferPointer()),
-			mpsByteCode->GetBufferSize()
-		};
-	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
-	psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
-	psoDesc.SampleMask = UINT_MAX;
-	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	psoDesc.NumRenderTargets = 1;
-	psoDesc.RTVFormats[0] = mBackBufferFormat;
-	psoDesc.SampleDesc.Count = m4xMsaaState ? 4 : 1;
-	psoDesc.SampleDesc.Quality = m4xMsaaState ? (m4xMsaaQuality - 1) : 0;
-	psoDesc.DSVFormat = mDepthStencilFormat;
-	ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&mPSO)));
-}*/
 
 void gfx_device_dx::swapBuffers()
 {
+	auto viewMatrix = glm::lookAt(
+		glm::vec3(0,0,2),
+		glm::vec3(0),
+		glm::vec3(0,1,0));
+	
+	auto aspectRatio = (float)m_Window->getWidth() / m_Window->getHeight();
+	float fov = 60;
+	auto projection = glm::perspective<float>(fov,aspectRatio,0.1f,100);
+	auto ViewProj = projection * viewMatrix;
+	
+	modelViewer::common::transform transform;
+	transform.setPosition(glm::vec3(0, -1, 0));
+	transform.setScale(glm::vec3(0.3f));
+	
+	for (auto i = 0; i < meshCount; ++i)
+	{
+		auto pos = transform.getPosition();
+		pos.y += 1;
+		transform.setPosition(pos);
+		auto worldMatrix = transform.getMatrix();
+		auto worldViewMatrix = ViewProj * worldMatrix;
+		
+		auto program = m_SamplePrograms[i];
+		program->setUniform("gWorldViewProj", worldViewMatrix);
+		program->setUniform("_color", glm::vec4 (0,pos.y,0,1));
+		program->setUniform("_mul", 1);
+		program->bind();
+		
+		m_sampleMeshes[i]->draw();
+	}
+
+	
+	
 	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(getCurrentBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 	m_CommandList->ResourceBarrier(1, &barrier);
+	
+	
 	m_CommandList->Close();
-
 	ID3D12CommandList* cmdsLists[] = { m_CommandList.Get() };
 	m_CommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
 	
@@ -286,7 +323,7 @@ void gfx_device_dx::onStartRender()
 	m_CommandList->Reset(m_DirectCmdListAlloc.Get(), nullptr);
 
 	m_CommandList->RSSetViewports(1, &mScreenViewport);
-	//m_CommandList->RSSetScissorRects(1, &mScissorRect);
+	m_CommandList->RSSetScissorRects(1, &mScissorRect);
 
 	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(getCurrentBackBuffer(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 	m_CommandList->ResourceBarrier(1, &barrier);
@@ -294,10 +331,9 @@ void gfx_device_dx::onStartRender()
 	auto backBufferView = getCurrentBackBufferView();
 	auto depthBufferView = getDepthStencilView();
 	m_CommandList->OMSetRenderTargets(1, &backBufferView, true, &depthBufferView);
-
-	//ID3D12DescriptorHeap* descriptorHeaps[] = { m_CbvHeap.Get() };
-	//mCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 }
+
+
 
 void gfx_device_dx::flushCommandQueue()
 {
@@ -456,4 +492,29 @@ ID3D12Resource* gfx_device_dx::getCurrentBackBuffer()
 {
 	return m_SwapChainBuffer[mCurrBackBuffer].Get();
 }
+
+void gfx_device_dx::createShaderSamples()
+{
+	res::shader_loader loader;
+	
+	auto fragAsset = loader.load("Shaders/basic.hlsl", res::shaderType::fragment);
+	auto vertAsset = loader.load("Shaders/basic.hlsl", res::shaderType::vertex);
+
+	for (int i = 0; i < meshCount; ++i) {
+
+		auto frag = std::make_shared<shader_dx>(fragAsset);
+		frag->compileToByteCode();
+		auto vert = std::make_shared<shader_dx>(vertAsset);
+		vert->compileToByteCode();
+
+		std::vector<std::shared_ptr<shader_dx>> shaders = {vert,frag};
+		auto program = std::make_shared<dx::shader_program_dx>(shaders, *m_device.Get(), m_CommandList);
+		program->createPipelineState(*m_device.Get(), m_sampleMeshes[i]->getLayout());
+		
+		m_SamplePrograms.push_back(program);
+	}
+
+}
+
+
 

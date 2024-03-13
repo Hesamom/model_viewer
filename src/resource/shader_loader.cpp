@@ -38,10 +38,10 @@ std::string shader_loader::readFile(const std::filesystem::path &path) {
 
 std::shared_ptr<shader_asset> shader_loader::load(const std::string& filePath, shaderType type)
 {
-    if (m_LoadedAssets.contains(filePath))
+    /*if (m_LoadedAssets.contains(filePath))
     {
         return m_LoadedAssets[filePath];
-    }
+    }*/
 
     if (filePath.empty())
     {

@@ -6,11 +6,11 @@ namespace modelViewer::res {
     enum class shaderType
     {
         none,
-        fragment,
-        vertex,
+		vertex,
         tesselation_control,
         tesselation_evaluation,
         geometry,
+		fragment,
         compute
     };
 

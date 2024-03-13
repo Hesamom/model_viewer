@@ -15,9 +15,18 @@
 #include "../../window/window_win32.h"
 #include "../texture.h"
 #include "../../resource/model_info.h"
+#include "shader_dx.h"
+#include "buffer_constant_dx.h"
+#include "mesh_dx.h"
+#include "shader_program_dx.h"
 
 namespace modelViewer::render
 {
+	struct ObjectConstants
+	{
+		glm::mat4 WorldViewProj;
+	};
+	
 	class gfx_device_dx : public gfx_device {
 
 	public:
@@ -57,14 +66,28 @@ namespace modelViewer::render
 		void createSwapChain();
 		void createRenderTargets();
 		void createStencilDepthBuffer();
+		void createShaderSamples();
 		void flushCommandQueue();
+		void setScissorRect(int x, int y, int width, int height);
+		void enableDebugLayer() const;
+		void createDevice();
+		void queryDescriptorSizes();
+		void initMSAA();
+		void createCommandList();
+		void createFence();
+
+		const int meshCount = 2;
+		std::vector<std::shared_ptr<dx::shader_program_dx>> m_SamplePrograms;
+		std::vector<std::unique_ptr<mesh_dx>> m_sampleMeshes;
+		
 		D3D12_CPU_DESCRIPTOR_HANDLE getCurrentBackBufferView() const;
 		D3D12_CPU_DESCRIPTOR_HANDLE getDepthStencilView() const;
 		void createSRVHeap();
 		ID3D12Resource* getCurrentBackBuffer();
 		
-		Microsoft::WRL::ComPtr<ID3D12PipelineState> mPSO = nullptr;
+	
 		std::shared_ptr<window_win32> m_Window;
+
 
 		Microsoft::WRL::ComPtr<IDXGIFactory4> m_dxgiFactory;
 		Microsoft::WRL::ComPtr<ID3D12Device> m_device;
@@ -99,19 +122,8 @@ namespace modelViewer::render
 		bool m4xMsaaState = false;
 		UINT m4xMsaaQuality = 0;
 
-		void setScissorRect(int x, int y, int width, int height);
-
-		void enableDebugLayer() const;
-
-		void createDevice();
-
-		void queryDescriptorSizes();
-
-		void initMSAA();
-
-		void createCommandList();
-
-		void createFence();
+	
+		void createSampleGeometry();
 	};
 }
 
