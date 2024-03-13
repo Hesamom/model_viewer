@@ -726,6 +726,13 @@ void modelviewer_app::loop()
 			//std::this_thread::sleep_for(100);
 			continue;
 		}
+		m_Window->pollEvents();
+		
+		if (m_Window->getWidth() == 0)
+		{
+			m_Window->pollEvents();
+			continue;
+		}
 
 		watch.stop();
 		double elapsed = watch.getSeconds();

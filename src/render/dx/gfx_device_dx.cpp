@@ -275,7 +275,10 @@ void gfx_device_dx::swapBuffers()
 		glm::vec3(0),
 		glm::vec3(0,1,0));
 	
-	auto aspectRatio = (float)m_Window->getWidth() / m_Window->getHeight();
+	auto width = m_Window->getWidth();
+	auto height = m_Window->getHeight();
+	
+	auto aspectRatio = (float)width / height;
 	float fov = 60;
 	auto projection = glm::perspective<float>(fov,aspectRatio,0.1f,100);
 	auto ViewProj = projection * viewMatrix;
