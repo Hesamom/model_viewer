@@ -110,7 +110,7 @@ void shader_program_dx::setUniform(const std::string& name, void* dataPtr, UINT 
 	constant_variable variable;
 
 	getVariableOffset(name, blockIndex, variable);
-	if (variable.size == -1)
+	if (variable.offset == -1)
 	{
 		if (optional)
 		{

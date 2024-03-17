@@ -55,6 +55,13 @@ void gfx_device_dx::createSampleGeometry()
 {
 	modelViewer::res::model_loader loader;
 	auto meshAsset = loader.loadFirstMesh(modelViewer::res::literals::models::primitive_cube);
+
+	std::shared_ptr<std::vector<glm::vec4>> colors = std::make_shared<std::vector<glm::vec4>>();
+	for (int i = 0; i < meshAsset->positions->size(); i++) {
+		colors->emplace_back(1,1,1,1);
+	}
+	meshAsset->colors = colors;
+	
 	for (int i = 0; i < meshCount; ++i) {
 		auto mesh = std::make_unique<mesh_dx>(meshAsset, m_device, m_CommandList);
 		auto program = std::static_pointer_cast<shader_program>(m_SamplePrograms[i]);

@@ -69,20 +69,17 @@ namespace modelViewer::render
 		void initMSAA();
 		void createCommandList();
 		void createFence();
-
-		const int meshCount = 2;
-		std::vector<std::shared_ptr<dx::shader_program_dx>> m_SamplePrograms;
-		std::vector<std::unique_ptr<mesh_dx>> m_sampleMeshes;
-		
 		D3D12_CPU_DESCRIPTOR_HANDLE getCurrentBackBufferView() const;
 		D3D12_CPU_DESCRIPTOR_HANDLE getDepthStencilView() const;
 		void createSRVHeap();
 		ID3D12Resource* getCurrentBackBuffer();
+		void createSampleGeometry();
 		
-	
+
+		const int meshCount = 2;
+		std::vector<std::shared_ptr<dx::shader_program_dx>> m_SamplePrograms;
+		std::vector<std::unique_ptr<mesh_dx>> m_sampleMeshes;
 		std::shared_ptr<window_win32> m_Window;
-
-
 		Microsoft::WRL::ComPtr<IDXGIFactory4> m_dxgiFactory;
 		Microsoft::WRL::ComPtr<ID3D12Device> m_device;
 		Microsoft::WRL::ComPtr<ID3D12Fence> m_Fence;
@@ -114,9 +111,6 @@ namespace modelViewer::render
 		UINT mCurrBackBuffer = 0;
 		bool m4xMsaaState = false;
 		UINT m4xMsaaQuality = 0;
-
-	
-		void createSampleGeometry();
 	};
 }
 

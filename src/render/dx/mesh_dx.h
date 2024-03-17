@@ -12,8 +12,6 @@ namespace modelViewer::render
 		explicit mesh_dx(std::shared_ptr<modelViewer::res::mesh_asset>& asset, Microsoft::WRL::ComPtr<ID3D12Device>& device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> & commandList);
 		std::vector<D3D12_INPUT_ELEMENT_DESC>& getLayout();
 		unsigned int getIndicesCount();
-		D3D12_VERTEX_BUFFER_VIEW getVertexBufferView();
-		D3D12_INDEX_BUFFER_VIEW getIndexBufferView();
 
 		void bindLayout(std::shared_ptr<shader_program>& program) override;
 		void bind() override;
@@ -24,6 +22,9 @@ namespace modelViewer::render
 	private:
 		std::unique_ptr<buffer_vertex_dx<glm::vec3>> m_PositionBuffer;
 		std::unique_ptr<buffer_vertex_dx<glm::vec4>> m_ColorBuffer;
+		std::unique_ptr<buffer_vertex_dx<glm::vec2>> m_UV0Buffer;
+		std::vector<D3D12_VERTEX_BUFFER_VIEW> m_VertexBufferViews;
+		
 		std::unique_ptr<buffer_vertex_dx<unsigned int>> m_IndexBuffer;
 
 		std::shared_ptr<res::mesh_asset> m_Asset;
