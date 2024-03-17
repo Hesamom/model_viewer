@@ -22,6 +22,8 @@ namespace modelViewer::render
 		
 		bool hasUniform(const std::string &name) const override;
     	void setCullFaceMode(res::cull_face_mode mode) override;
+		void setDepthMap(bool enable) override;
+		
         void setUniform(const std::string& name, glm::vec3& vec3, bool optional) override;
         void setUniform(const std::string& name, glm::vec4& vec4, bool optional) override;
         void setUniform(const std::string& name, float value, bool optional) override;
@@ -39,9 +41,10 @@ namespace modelViewer::render
 
     private:
     	unsigned int m_ProgramId = 0;
+		bool m_DepthEnabled = false;
 		res::cull_face_mode m_FaceMode = res::cull_face_mode::back;
 
-		void applyCullingFaceMode();
+		void applyPipelineState();
 	}; 
 }
 

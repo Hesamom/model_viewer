@@ -406,8 +406,6 @@ void gfx_device_dx::resize(int width, int height) {
 	setViewport(width, height);
 }
 
-void gfx_device_dx::setDepthmap(bool enable) {
-}
 
 void gfx_device_dx::clearDepthBuffer()
 {

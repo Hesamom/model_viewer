@@ -33,7 +33,6 @@ namespace modelViewer::render
 		void setViewport(int width, int height) override;
 		void resize(int width, int height) override;
 		
-		void setDepthmap(bool enable) override;
 		void clearDepthBuffer() override;
 		void clearColorBuffer(const glm::vec4& color) override;
 		void* getDevice() override;

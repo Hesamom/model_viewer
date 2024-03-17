@@ -49,8 +49,6 @@ void renderer_forward::renderReflectionMap(render_scene& scene , camera& camera)
 
 	m_ReflectionBuffer->bind();
 	
-	//m_Device->setCullFaceMode(cull_face_mode::front);
-	
 	
 	m_Device->setViewport(REFLECTION_SIZE,REFLECTION_SIZE);
 	m_ReflectionBuffer->attachDepthTexture();
@@ -190,7 +188,6 @@ void renderer_forward::renderSpotShadows(render_scene& scene) {
 void renderer_forward::renderShadows(render_scene& scene)
 {
 	m_shadowBuffer->bind();
-	//m_Device->setCullFaceMode(cull_face_mode::front);
 	m_shadowProgram->bind();
 	
 	renderDirectionalShadows(scene);
@@ -236,8 +233,6 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 	{
 		m_Device->clearColorBuffer(m_ClearFlag);
 	}
-
-	//m_Device->setCullFaceMode(cull_face_mode::back);
 	
 	if (shadowsEnabled)
 	{
@@ -328,6 +323,8 @@ void renderer_forward::initShadowmap(object_factory& objectFactory, shader_loade
 	assets.emplace_back(shaderLoader.load(m_DepthShaderFrag, shaderType::fragment));;
 	
 	m_shadowProgram = m_Device->createProgram(assets);
+	m_shadowProgram->setCullFaceMode(cull_face_mode::front);
+	//BUG why?
 	m_shadowProgram->bind();
 
 	auto shadowDirName = std::string("shadowmap_dir");

@@ -17,6 +17,7 @@ namespace modelViewer::render::dx
 		void bind() override;
 		
 		void setCullFaceMode(res::cull_face_mode mode) override;
+		void setDepthMap(bool enable) override;
 		
 		bool hasUniform(const std::string &name) const override;
 		void setUniform(const std::string& name, float value, bool optional) override;
@@ -51,12 +52,13 @@ namespace modelViewer::render::dx
 		Microsoft::WRL::ComPtr<ID3D12RootSignature> m_RootSignature;
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> m_PSO;
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC m_PsoDescription;
-		D3D12_RASTERIZER_DESC m_RasterizerState;
 
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> m_CommandList;
 		Microsoft::WRL::ComPtr<ID3D12Device> m_Device;
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_Heap;
 		UINT m_DescriptorSize = 0;
+
+		void updatePipeline();
 	};
 }
 

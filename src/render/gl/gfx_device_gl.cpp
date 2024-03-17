@@ -24,10 +24,6 @@ void gfx_device_gl::setViewport(int width, int height)
 }
 
 
-void gfx_device_gl::setDepthmap(bool enable) {
-	glDepthMask(enable);
-}
-
 void gfx_device_gl::clearDepthBuffer() {
 	glClear(GL_DEPTH_BUFFER_BIT);
 }

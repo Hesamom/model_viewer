@@ -128,7 +128,7 @@ void material::setCullingFaceMode(res::cull_face_mode mode)
 void material::bind() {
     m_Program->bind();
 
-	m_Device->setDepthmap(m_Info.propertySet.depthWriteEnabled);
+	m_Program->setDepthMap(m_Info.propertySet.depthWriteEnabled);
 	m_Program->setCullFaceMode(m_Info.propertySet.cullFaceMode);
 	
     int index = 0;

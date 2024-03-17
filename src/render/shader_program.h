@@ -54,6 +54,7 @@ namespace modelViewer::render {
         virtual ~shader_program() = default;
         virtual void bind() = 0;
 		virtual void setCullFaceMode(res::cull_face_mode mode) = 0;
+		virtual void setDepthMap(bool enable) = 0;
 		
         virtual bool hasUniform(const std::string& name) const = 0;
 		

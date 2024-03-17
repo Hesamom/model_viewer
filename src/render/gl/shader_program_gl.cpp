@@ -56,7 +56,7 @@ void shader_program_gl::bind() {
 	
 	//TODO add guards 
     glUseProgram(m_ProgramId);
-	applyCullingFaceMode();
+	applyPipelineState();
 }
 
 shader_program_gl::~shader_program_gl() {
@@ -176,7 +176,7 @@ void shader_program_gl::validateLinking()
 	}
 }
 
-void shader_program_gl::applyCullingFaceMode()
+void shader_program_gl::applyPipelineState()
 {
 	switch (m_FaceMode) {
 		case cull_face_mode::front:
@@ -192,6 +192,8 @@ void shader_program_gl::applyCullingFaceMode()
 		default:
 			throw std::runtime_error("not imp");
 	}
+
+	glDepthMask(m_DepthEnabled);
 }
 
 void shader_program_gl::setCullFaceMode(cull_face_mode mode) {
@@ -201,6 +203,11 @@ void shader_program_gl::setCullFaceMode(cull_face_mode mode) {
 bool shader_program_gl::hasUniform(const std::string& name) const
 {
 	return getUniformLocation(name, true) > -1;
+}
+
+void shader_program_gl::setDepthMap(bool enable)
+{
+	m_DepthEnabled = enable;
 }
 
 

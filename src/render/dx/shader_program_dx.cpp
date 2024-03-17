@@ -26,8 +26,6 @@ shader_program_dx::shader_program_dx(std::vector<std::shared_ptr<shader_dx>>& sh
 	m_DescriptorSize = m_Device->GetDescriptorHandleIncrementSize( D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	createConstantBuffers();
 	createRootSignature();
-	
-	m_RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
 }
 
 
@@ -243,7 +241,7 @@ void shader_program_dx::createPipelineState(std::vector<D3D12_INPUT_ELEMENT_DESC
 			fragmentShader->getByteCode()->GetBufferSize()
 		};
 
-	m_PsoDescription.RasterizerState = m_RasterizerState;
+	m_PsoDescription.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
 	m_PsoDescription.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 	m_PsoDescription.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
 	m_PsoDescription.SampleMask = UINT_MAX;
@@ -319,17 +317,17 @@ void shader_program_dx::setCullFaceMode(modelViewer::res::cull_face_mode mode)
 	switch (mode)
 	{
 		case res::cull_face_mode::disabled:
-			m_RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+			m_PsoDescription.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
 			break;
 		case res::cull_face_mode::front:
-			m_RasterizerState.CullMode = D3D12_CULL_MODE_FRONT;
+			m_PsoDescription.RasterizerState.CullMode = D3D12_CULL_MODE_FRONT;
 			break;
 		case res::cull_face_mode::back:
-			m_RasterizerState.CullMode = D3D12_CULL_MODE_BACK;
+			m_PsoDescription.RasterizerState.CullMode = D3D12_CULL_MODE_BACK;
 			break;
 	}
-	
-	//TODO create a new rasterizer state 
+
+	updatePipeline();
 }
 
 std::vector<shader_uniform_info> shader_program_dx::getActiveUniforms()
@@ -348,6 +346,17 @@ bool shader_program_dx::hasUniform(const std::string& name) const
 	constant_variable var;
 	getVariableOffset(name, blockIndex, var);
 	return blockIndex > -1 && var.offset > -1;
+}
+
+void shader_program_dx::updatePipeline()
+{
+	m_Device->CreateGraphicsPipelineState(&m_PsoDescription, IID_PPV_ARGS(&m_PSO));
+}
+
+void shader_program_dx::setDepthMap(bool enable)
+{
+	m_PsoDescription.DepthStencilState.DepthEnable = enable;
+	updatePipeline();
 }
 
 

@@ -11,7 +11,6 @@ namespace modelViewer::render {
 		explicit gfx_device_gl(std::shared_ptr<window_glfw>& window);
 		void swapBuffers() override;
 		void setViewport(int width, int height) override;
-		void setDepthmap(bool enable) override;
 		void clearDepthBuffer() override;
 		void resize(int width, int height) override;
 		void clearColorBuffer(const glm::vec4& color) override;
