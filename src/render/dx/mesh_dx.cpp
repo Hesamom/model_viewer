@@ -1,5 +1,6 @@
 ﻿
 #include "mesh_dx.h"
+#include "shader_program_dx.h"
 
 modelViewer::render::mesh_dx::mesh_dx(std::shared_ptr<modelViewer::res::mesh_asset>& asset,
 	Microsoft::WRL::ComPtr<ID3D12Device>& device,
@@ -42,11 +43,34 @@ D3D12_INDEX_BUFFER_VIEW modelViewer::render::mesh_dx::getIndexBufferView()
 
 void modelViewer::render::mesh_dx::draw()
 {
-	auto vertexBufferView = getVertexBufferView();
-	m_CommandList->IASetVertexBuffers(0, 1, &vertexBufferView);
-	
-	auto indexBufferView = getIndexBufferView();
-	m_CommandList->IASetIndexBuffer(&indexBufferView);
 	m_CommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	m_CommandList->DrawIndexedInstanced(getIndicesCount(),1, 0, 0, 0);
+}
+
+void modelViewer::render::mesh_dx::bind()
+{
+	auto vertexBufferView = getVertexBufferView();
+	m_CommandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+
+	auto indexBufferView = getIndexBufferView();
+	m_CommandList->IASetIndexBuffer(&indexBufferView);
+}
+
+void modelViewer::render::mesh_dx::drawLines()
+{
+	//TODO gotta confirm this 
+	m_CommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+	m_CommandList->DrawIndexedInstanced(getIndicesCount(),1, 0, 0, 0);
+}
+
+std::shared_ptr<modelViewer::res::mesh_asset> modelViewer::render::mesh_dx::getAsset()
+{
+	return m_Asset;
+}
+
+void modelViewer::render::mesh_dx::bindLayout(std::shared_ptr<shader_program>& program)
+{
+	auto programDX = std::dynamic_pointer_cast<dx::shader_program_dx>(program);
+	assert(programDX != nullptr);
+	programDX->createPipelineState(getLayout());
 }

@@ -4,7 +4,6 @@
 #include "window_glfw.h"
 #include "../resource/model_info.h"
 #include "../render/render_scene.h"
-#include "glm/glm.hpp"
 #include "../render/model_platform_buffer.h"
 #include "file_picker_windows.h"
 #include "../render/object_factory.h"

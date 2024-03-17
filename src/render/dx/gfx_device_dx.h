@@ -1,5 +1,6 @@
 ﻿#ifndef GFX_DEVICE_DX_H
 #define GFX_DEVICE_DX_H
+
 #include "../gfx_device.h"
 
 #include <windows.h>
@@ -22,11 +23,6 @@
 
 namespace modelViewer::render
 {
-	struct ObjectConstants
-	{
-		glm::mat4 WorldViewProj;
-	};
-	
 	class gfx_device_dx : public gfx_device {
 
 	public:
@@ -36,9 +32,8 @@ namespace modelViewer::render
 		void onStartRender() override;
 		void setViewport(int width, int height) override;
 		void resize(int width, int height) override;
-		void setCullFaceMode(cull_face_mode mode) override;
+		
 		void setDepthmap(bool enable) override;
-		void setCullFace(bool enable) override;
 		void clearDepthBuffer() override;
 		void clearColorBuffer(const glm::vec4& color) override;
 		void* getDevice() override;
@@ -109,7 +104,6 @@ namespace modelViewer::render
 
 		UINT mRtvDescriptorSize = 0;
 		UINT mDsvDescriptorSize = 0;
-		UINT mCbvSrvUavDescriptorSize = 0;
 
 
 		const DXGI_FORMAT m_BackBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;

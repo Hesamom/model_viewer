@@ -1,5 +1,4 @@
 ﻿#include <imgui/imgui.h>
-#include "glm/glm.hpp"
 #include "modelviewer_app.h"
 #include "regex"
 #include "../common/stopwatch.h"
@@ -528,7 +527,7 @@ void modelviewer_app::openWallParallaxMap() {
 	material->propertySet.colors.push_back({Literals::SpecularAlbedo, glm::vec3 (0.2f)});
 	material->propertySet.floats.push_back({Literals::Shininess, 10});
 	material->propertySet.floats.push_back({Literals::Opacity, 1});
-	material->propertySet.cullFaceEnabled = false;
+	material->propertySet.cullFaceMode = cull_face_mode::disabled;
 	addModel(wallModel);
 }
 
@@ -562,7 +561,7 @@ void modelviewer_app::openWallNormalMap() {
 	material->propertySet.colors.push_back({Literals::SpecularAlbedo, glm::vec3 (0.2f)});
 	material->propertySet.floats.push_back({Literals::Shininess, 32});
 	material->propertySet.floats.push_back({Literals::Opacity, 1});
-	material->propertySet.cullFaceEnabled = false;
+	material->propertySet.cullFaceMode = cull_face_mode::disabled;
 	addModel(wallModel);
 }
 
@@ -686,7 +685,7 @@ void modelviewer_app::openSpecularMapModel()
 	material->propertySet.colors.push_back({Literals::SpecularAlbedo, glm::vec3 (1.0f)});
 	material->propertySet.floats.push_back({Literals::Shininess, 256});
 	material->propertySet.floats.push_back({Literals::Opacity, 1});
-	material->propertySet.cullFaceEnabled = false;
+	material->propertySet.cullFaceMode = cull_face_mode::disabled;
 	addModel(wallModel);
 }
 

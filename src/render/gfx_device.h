@@ -9,11 +9,6 @@
 #include "mesh.h"
 
 namespace modelViewer::render {
-
-	enum class cull_face_mode {
-		front,
-		back
-	};
 	
 	class gfx_device
 	{
@@ -24,10 +19,8 @@ namespace modelViewer::render {
 		virtual void swapBuffers() = 0;
 		virtual void resize(int width, int height) = 0;
 		virtual void setViewport(int width, int height) = 0;
-		virtual void setCullFaceMode(cull_face_mode mode) = 0;
 		virtual int getMaxSamplersPerProgram() = 0;
 		virtual void setDepthmap(bool enable) = 0;
-		virtual void setCullFace(bool enable) = 0;
 		virtual void clearColorBuffer(const glm::vec4& color) = 0;
 		virtual void clearDepthBuffer() = 0;
 		virtual void* getDevice() = 0;

@@ -13,23 +13,9 @@ material::material(std::shared_ptr<gfx_device>& device, const res::material_asse
 	m_DefaultTextures = defaultTextures;
 
     m_Program->bind();
-	m_ModelUniform.getLocation(*m_Program);
-    m_ModelViewUniform.getLocation(*m_Program);
-	m_MVPUniform.getLocation(*m_Program);
-	m_ProjectionUniform.getLocation(*m_Program);
 	
-	m_LightViewProjectionUniform.getLocation(*m_Program);
-	m_LightAmbientUniform.getLocation(*m_Program);
-	m_LightDiffuseUniform.getLocation(*m_Program);
-	m_CameraPositionUniform.getLocation(*m_Program);
-	m_LightDirUniform.getLocation(*m_Program);
-	
-	m_ShadowMapSamplerLocation = m_Program->getUniformLocation(m_ShadowSampler);
 	setShadowMapSlot(getMaxSupportedTextureUnits());
-	m_SpotShadowMapSamplerLocation = m_Program->getUniformLocation(m_SpotShadowSampler);
 	setSpotShadowMapSlot(getMaxSupportedTextureUnits() - 2);
-
-	m_ReflectionMapSamplerLocation = m_Program->getUniformLocation(m_ReflectionSampler);
 	setReflectionMapSlot(getMaxSupportedTextureUnits() - 3);
 	
     applyMaterialProperties();
@@ -40,61 +26,44 @@ material::material(std::shared_ptr<gfx_device>& device, const res::material_asse
 
 void material::setMVP(glm::mat4 &matrix) 
 {
-    m_MVPUniform.setValue(matrix, *m_Program);
+    m_MVPUniform.setValue(matrix, *m_Program, true);
 }
 
 void material::setModelView( glm::mat4 &matrix) 
 {
-	m_ModelViewUniform.setValue(matrix, *m_Program);
+	m_ModelViewUniform.setValue(matrix, *m_Program, true);
 }
 
 void material::setModel( glm::mat4 &model)
 {
-	m_ModelUniform.setValue(model, *m_Program);
+	m_ModelUniform.setValue(model, *m_Program, true);
 }
 
 void material::setProjection( glm::mat4 &projection)
 {
-	m_ProjectionUniform.setValue(projection, *m_Program);
+	m_ProjectionUniform.setValue(projection, *m_Program, true);
 }
 
 void material::applyMaterialProperties() {
 
 	for (auto& floatProp : m_Info.propertySet.floats)
 	{
-		int loc = m_Program->getUniformLocation(floatProp.name);
-		if (loc > -1)
-		{
-			m_Program->setUniform(loc, floatProp.value);
-		}
+		m_Program->setUniform(floatProp.name, floatProp.value, true);
 	}
 
 	for (auto& intProp : m_Info.propertySet.ints)
 	{
-		int loc = m_Program->getUniformLocation(intProp.name);
-		if (loc > -1)
-		{
-			m_Program->setUniform(loc, intProp.value);
-		}
+		m_Program->setUniform(intProp.name, intProp.value, true);
 	}
 
 	for (auto& colorProp : m_Info.propertySet.colors)
 	{
-		int loc = m_Program->getUniformLocation(colorProp.name);
-		if (loc > -1)
-		{
-			m_Program->setUniform(loc, colorProp.value);
-		}
+		m_Program->setUniform(colorProp.name, colorProp.value, true);
 	}
-
-
+	
 	for (auto& boolProp : m_Info.propertySet.booleans)
 	{
-		int loc = m_Program->getUniformLocation(boolProp.name);
-		if (loc > -1)
-		{
-			m_Program->setUniform(loc, boolProp.value);
-		}
+		m_Program->setUniform(boolProp.name, boolProp.value, true);
 	}
 }
 
@@ -145,18 +114,22 @@ void material::bindTextures(const std::vector<texture_binding>& textures)
 			continue;
 		}
 
-		const auto loc = m_Program->getUniformLocation(uniform.name);
-		m_Program->setUniform(loc, textureUnit);
+		m_Program->setUniform(uniform.name, textureUnit, true);
 		m_ActiveTextures.push_back(texture);
 		textureUnit++;
 	}
+}
+
+void material::setCullingFaceMode(res::cull_face_mode mode)
+{
+	m_Program->setCullFaceMode(m_Info.propertySet.cullFaceMode);
 }
 
 void material::bind() {
     m_Program->bind();
 
 	m_Device->setDepthmap(m_Info.propertySet.depthWriteEnabled);
-	m_Device->setCullFace(m_Info.propertySet.cullFaceEnabled);
+	m_Program->setCullFaceMode(m_Info.propertySet.cullFaceMode);
 	
     int index = 0;
     for (const auto &item: m_ActiveTextures)
@@ -166,16 +139,9 @@ void material::bind() {
     }
 }
 
-int material::getUniformLocation(std::string name) const {
-    return m_Program->getUniformLocation(name);
-}
-
-int material::getAttributeLocation(std::string name) const {
-    return m_Program->getAttributeLocation(name);
-}
 
 void material::setCameraPosition(glm::vec3 position) {
-	 m_CameraPositionUniform.setValue(position, *m_Program);
+	 m_CameraPositionUniform.setValue(position, *m_Program, true);
 }
 
 void material::setDirectionalLight(const light_directional &light) {
@@ -183,47 +149,35 @@ void material::setDirectionalLight(const light_directional &light) {
     m_Program->bind();
 	
 	auto direction = light.direction;
-	m_LightDirUniform.setValue(direction, *m_Program);
+	m_LightDirUniform.setValue(direction, *m_Program, true);
 	auto ambient = light.ambient;
-    m_LightAmbientUniform.setValue(ambient, *m_Program);
+    m_LightAmbientUniform.setValue(ambient, *m_Program, true);
 	auto diffuse = light.diffuse;
-	m_LightDiffuseUniform.setValue(diffuse, *m_Program);
+	m_LightDiffuseUniform.setValue(diffuse, *m_Program, true);
 }
 
 
 void material::setShadowMapSlot(int slot) const {
-	if (m_ShadowMapSamplerLocation < 0)
-	{
-		return;
-	}
-
+	
 	m_Program->bind();
-	m_Program->setUniform(m_ShadowMapSamplerLocation, slot);
+	m_Program->setUniform(m_ShadowSampler, slot, true);
 }
 
 void material::setReflectionMapSlot(int slot) const {
-	if (m_ReflectionMapSamplerLocation < 0)
-	{
-		return;
-	}
 
 	m_Program->bind();
-	m_Program->setUniform(m_ReflectionMapSamplerLocation, slot);
+	m_Program->setUniform(m_ReflectionSampler, slot, true);
 }
 
 void material::setSpotShadowMapSlot(int slot) const {
-	if (m_SpotShadowMapSamplerLocation < 0)
-	{
-		return;
-	}
-
+	
 	m_Program->bind();
-	m_Program->setUniform(m_SpotShadowMapSamplerLocation, slot);
+	m_Program->setUniform(m_SpotShadowSampler, slot, true);
 }
 
 void material::setLightViewProjection(glm::mat4& matrix)
 {
-	m_LightViewProjectionUniform.setValue(matrix, *m_Program);
+	m_LightViewProjectionUniform.setValue(matrix, *m_Program, true);
 }
 
 material_asset& material::getInfo()
@@ -234,40 +188,33 @@ material_asset& material::getInfo()
 void material::setSpotLights(std::vector<light_spot>& lights) {
 	int index = 0;
 	const std::string blockName = "u_spotLights";
-	m_Program->setUniform(m_Program->getUniformLocation("u_spotLightCount"), (int)lights.size());
+	m_Program->setUniform("u_spotLightCount", (int)lights.size(), true);
 	
 	for (auto& item : lights)
 	{
 		shader_uniform<glm::mat4x4> viewTransform{"m_SpotLightViewProjection","", index};
-		viewTransform.getLocation(*m_Program);
-		viewTransform.setValue(item.viewProjection, *m_Program);
+		viewTransform.setValue(item.viewProjection, *m_Program, true);
 
 		shader_uniform<glm::vec3> positionMember{"position",blockName, index};
-		positionMember.getLocation(*m_Program);
-		positionMember.setValue(item.position, *m_Program);
+		positionMember.setValue(item.position, *m_Program, true);
 
 		shader_uniform<glm::vec3> directionMember{"direction",blockName, index};
-		directionMember.getLocation(*m_Program);
-		directionMember.setValue(item.direction, *m_Program);
+		directionMember.setValue(item.direction, *m_Program, true);
 
 		shader_uniform<glm::vec3> ambientMember{"ambient",blockName, index};
-		ambientMember.getLocation(*m_Program);
-		ambientMember.setValue(item.ambient, *m_Program);
+		ambientMember.setValue(item.ambient, *m_Program, true);
 
 		shader_uniform<glm::vec3> diffuseMember{"diffuse",blockName, index};
-		diffuseMember.getLocation(*m_Program);
-		diffuseMember.setValue(item.diffuse, *m_Program);
+		diffuseMember.setValue(item.diffuse, *m_Program, true);
 
 		
 		shader_uniform<float> rangeMember{"innerCutoff",blockName, index};
-		rangeMember.getLocation(*m_Program);
 		auto innerCutoff = cos(glm::radians(item.innerCutoff));
-		rangeMember.setValue(innerCutoff, *m_Program);
+		rangeMember.setValue(innerCutoff, *m_Program, true);
 
 		shader_uniform<float> insideRangeMember{"outerCutoff",blockName, index};
 		auto outterCutoff = cos(glm::radians(item.outerCutoff));
-		insideRangeMember.getLocation(*m_Program);
-		insideRangeMember.setValue(outterCutoff, *m_Program);
+		insideRangeMember.setValue(outterCutoff, *m_Program, true);
 		
 		index++;
 	}
@@ -278,32 +225,27 @@ void material::setPointLights(std::vector<light_point>& lights)
 	//TODO can cache the uniforms here 
 	int index = 0;
 	const std::string blockName = "u_pointLights";
-	m_Program->setUniform(m_Program->getUniformLocation("u_pointLightCount"), (int)lights.size());
+	m_Program->setUniform("u_pointLightCount", (int)lights.size(), true);
 	
 	for (auto& item : lights)
 	{
 		shader_uniform<glm::vec3> positionMember{"position",blockName, index};
-		positionMember.getLocation(*m_Program);
-		positionMember.setValue(item.position, *m_Program);
+		positionMember.setValue(item.position, *m_Program, true);
 
 		shader_uniform<glm::vec3> ambientMember{"ambient",blockName, index};
-		ambientMember.getLocation(*m_Program);
-		ambientMember.setValue(item.ambient, *m_Program);
+		ambientMember.setValue(item.ambient, *m_Program, true);
 
 		shader_uniform<glm::vec3> diffuseMember{"diffuse",blockName, index};
-		diffuseMember.getLocation(*m_Program);
-		diffuseMember.setValue(item.diffuse, *m_Program);
+		diffuseMember.setValue(item.diffuse, *m_Program, true);
 
 		float range = 0;
 		float insideRange = 0;
 		item.getRanges(range, insideRange);
 		shader_uniform<float> rangeMember{"range",blockName, index};
-		rangeMember.getLocation(*m_Program);
-		rangeMember.setValue(range, *m_Program);
+		rangeMember.setValue(range, *m_Program, true);
 
 		shader_uniform<float> insideRangeMember{"insideRange",blockName, index};
-		insideRangeMember.getLocation(*m_Program);
-		insideRangeMember.setValue(insideRange, *m_Program);
+		insideRangeMember.setValue(insideRange, *m_Program, true);
 		
 		index++;
 	}
@@ -311,10 +253,15 @@ void material::setPointLights(std::vector<light_point>& lights)
 
 bool material::isReflective() const
 {
-	return m_ReflectionMapSamplerLocation > 0;
+	return m_Program->hasUniform(m_ReflectionSampler);
 }
 
 const std::vector<std::shared_ptr<texture>>& material::getBoundTextures() const
 {
 	return m_ActiveTextures;
+}
+
+std::shared_ptr<shader_program> material::getShaderProgram()
+{
+	return m_Program;
 }

@@ -1,7 +1,10 @@
 ﻿
 #ifndef SHADER_PROGRAM_H
 #define SHADER_PROGRAM_H
+
+
 #include <glm/glm.hpp>
+#include "../resource/model_info.h"
 
 namespace modelViewer::render {
 
@@ -49,21 +52,20 @@ namespace modelViewer::render {
     class shader_program {
     public:
         virtual ~shader_program() = default;
-        virtual void validateLinking() = 0;
-        virtual std::string getLinkLog() = 0;
-        virtual bool isLinked() = 0;
         virtual void bind() = 0;
-        virtual int getAttributeLocation(const std::string& attributeName) = 0;
-        virtual int getUniformLocation(const std::string& uniformName) = 0;
-        virtual void setUniform(int location, glm::vec3 vec3) = 0;
-        virtual void setUniform(int location, glm::vec4 vec4) = 0;
-        virtual void setUniform(int location, float value) = 0;
-        virtual void setUniform(int location, int value) = 0;
-        virtual void setUniform(int index, glm::mat4& mat) = 0;
+		virtual void setCullFaceMode(res::cull_face_mode mode) = 0;
+		
+        virtual bool hasUniform(const std::string& name) const = 0;
+		
+        virtual void setUniform(const std::string& name, glm::vec3& vec3, bool optional) = 0;
+        virtual void setUniform(const std::string& name, glm::vec4& vec4, bool optional) = 0;
+        virtual void setUniform(const std::string& name, float value, bool optional) = 0;
+        virtual void setUniform(const std::string& name, int value, bool optional) = 0;
+		virtual void setUniform(const std::string& name, bool value, bool optional) = 0;
+        virtual void setUniform(const std::string& name, glm::mat4& mat, bool optional) = 0;
+		
         virtual std::vector<shader_uniform_info> getActiveUniforms() = 0;
         virtual int getActiveUniformsCount() = 0;
-
-        
     };
 }
 #endif //SHADER_PROGRAM_H

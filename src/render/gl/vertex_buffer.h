@@ -3,7 +3,6 @@
 #define MODEL_VIEWER_VERTEXBUFFER_H
 
 #include "glew/include/GL/glew.h"
-#include "glm/glm.hpp"
 
 
 namespace modelViewer::render {

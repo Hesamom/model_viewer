@@ -7,7 +7,7 @@ namespace modelViewer::render::dx
 	struct constant_variable
 	{
 		int size = 0;
-		int offset = 0;
+		int offset = -1;
 		std::string name;
 
 		bool isEqual(constant_variable& other)

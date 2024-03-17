@@ -3,18 +3,23 @@
 #define MESH_DX_H
 #include "buffer_vertex_dx.h"
 #include "../../resource/mesh_asset.h"
+#include "../mesh.h"
 
 namespace modelViewer::render
 {
-	class mesh_dx {
+	class mesh_dx : public mesh {
 	public:
 		explicit mesh_dx(std::shared_ptr<modelViewer::res::mesh_asset>& asset, Microsoft::WRL::ComPtr<ID3D12Device>& device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> & commandList);
 		std::vector<D3D12_INPUT_ELEMENT_DESC>& getLayout();
 		unsigned int getIndicesCount();
-
-		void draw();
 		D3D12_VERTEX_BUFFER_VIEW getVertexBufferView();
 		D3D12_INDEX_BUFFER_VIEW getIndexBufferView();
+
+		void bindLayout(std::shared_ptr<shader_program>& program) override;
+		void bind() override;
+		void draw() override;
+		void drawLines() override;
+		std::shared_ptr<res::mesh_asset> getAsset() override;
 		
 	private:
 		std::unique_ptr<buffer_vertex_dx<glm::vec3>> m_PositionBuffer;

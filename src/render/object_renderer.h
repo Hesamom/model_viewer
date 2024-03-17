@@ -1,7 +1,6 @@
 ﻿#ifndef MODEL_VIEWER_RENDER_OBJECT_H
 #define MODEL_VIEWER_RENDER_OBJECT_H
 
-#include "glm/glm.hpp"
 #include "../common/transform.h"
 #include "../common/aabb.h"
 #include "mesh.h"

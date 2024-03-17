@@ -44,9 +44,6 @@ namespace modelViewer::render
 		shader_uniform<glm::vec3> m_LightDiffuseUniform{"u_lightDiffuse",""};
 		shader_uniform<glm::vec3> m_CameraPositionUniform{"u_camera_pos",""};
 		
-		int m_ShadowMapSamplerLocation = -1;
-    	int m_SpotShadowMapSamplerLocation = -1;
-		int m_ReflectionMapSamplerLocation = -1;
 		std::map<shader_uniform_texture_pair, std::shared_ptr<texture>> m_DefaultTextures;
 
 		const std::set<int> m_AssignedTextureLocations;
@@ -59,13 +56,13 @@ namespace modelViewer::render
     public:
 
     	material(std::shared_ptr<gfx_device>& device, const res::material_asset& info, std::vector<texture_binding>& textures, std::shared_ptr<shader_program>& program, std::map<shader_uniform_texture_pair, std::shared_ptr<texture>>& defaultTextures);
+		
+		std::shared_ptr<shader_program> getShaderProgram();
         void setMVP( glm::mat4& matrix);
         void setModelView( glm::mat4& matrix);
         void setProjection( glm::mat4& projection);
         void setModel( glm::mat4& model);
         void bind();
-        int getUniformLocation(std::string name) const;
-        int getAttributeLocation(std::string name) const;
         void setDirectionalLight(const light_directional& light);
 		void setPointLights(std::vector<light_point>& lights);
 		void bindTextures(const std::vector<texture_binding>& textures);
@@ -84,6 +81,8 @@ namespace modelViewer::render
 		
 		void setReflectionMapSlot(int slot) const;
 		const std::vector<std::shared_ptr<texture>>& getBoundTextures() const;
+
+		void setCullingFaceMode(res::cull_face_mode mode);
 	};
 }
 

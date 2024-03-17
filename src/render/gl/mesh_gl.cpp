@@ -46,52 +46,58 @@ modelViewer::render::mesh_gl::~mesh_gl() {
     
 }
 
-void modelViewer::render::mesh_gl::bindAttributes(const modelViewer::render::material &material) {
-    
-    m_VertexArray.bind();
-    
-    int positionIndex = material.getAttributeLocation("v_position");
-    if (positionIndex >= 0)
-    {
-        m_PositionBuffer->bindBuffer(positionIndex);
-    }
-
-    int uv0Index = material.getAttributeLocation("v_uv0");
-    if (m_UV0 && uv0Index >= 0)
-    {
-        m_UV0->bindBuffer(uv0Index);
-    }
-
-    int colorIndex = material.getAttributeLocation("v_color");
-    if (m_ColorBuffer && colorIndex >= 0)
-    {
-        m_ColorBuffer->bindBuffer(colorIndex);
-    }
-    
-    int normalIndex = material.getAttributeLocation("v_normal");
-    if(m_NormalBuffer && normalIndex >= 0)
-    {
-        m_NormalBuffer->bindBuffer(normalIndex);
-    }
-
-    int tangentIndex = material.getAttributeLocation("v_tangent");
-    if(m_TangentsBuffer && tangentIndex >= 0)
-    {
-        m_TangentsBuffer->bindBuffer(tangentIndex);
-    }
-}
-
 void modelViewer::render::mesh_gl::draw()
 {
+	m_VertexArray.bind();
     m_IndexBuffer->drawShaded();
 }
 
 void modelViewer::render::mesh_gl::drawLines() {
+	m_VertexArray.bind();
     m_IndexBuffer->drawLines();
 }
 
 std::shared_ptr<modelViewer::res::mesh_asset> modelViewer::render::mesh_gl::getAsset() {
     return m_Asset;
+}
+
+void modelViewer::render::mesh_gl::bindLayout(std::shared_ptr<shader_program>& program)
+{
+	auto programGL = std::dynamic_pointer_cast<shader_program_gl>(program);
+	assert(programGL);
+	
+	m_VertexArray.bind();
+	int positionIndex = programGL->getAttributeLocation("v_position");
+	if (positionIndex >= 0)
+	{
+		m_PositionBuffer->bindBuffer(positionIndex);
+	}
+
+	int uv0Index = programGL->getAttributeLocation("v_uv0");
+	if (m_UV0 && uv0Index >= 0)
+	{
+		m_UV0->bindBuffer(uv0Index);
+	}
+
+	int colorIndex = programGL->getAttributeLocation("v_color");
+	if (m_ColorBuffer && colorIndex >= 0)
+	{
+		m_ColorBuffer->bindBuffer(colorIndex);
+	}
+
+	int normalIndex = programGL->getAttributeLocation("v_normal");
+	if(m_NormalBuffer && normalIndex >= 0)
+	{
+		m_NormalBuffer->bindBuffer(normalIndex);
+	}
+
+	int tangentIndex = programGL->getAttributeLocation("v_tangent");
+	if(m_TangentsBuffer && tangentIndex >= 0)
+	{
+		m_TangentsBuffer->bindBuffer(tangentIndex);
+	}
+
+	m_VertexArray.unbind();
 }
 
 

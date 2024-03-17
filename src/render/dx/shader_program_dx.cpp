@@ -6,12 +6,13 @@ using namespace modelViewer::render::dx;
 using namespace Microsoft::WRL;
 
 shader_program_dx::shader_program_dx(std::vector<std::shared_ptr<shader_dx>>& shaders,
-	ID3D12Device& device,
+	Microsoft::WRL::ComPtr<ID3D12Device>& device,
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList)
 {
 	//TODO we need to detect the duplicate constant buffers in multiple shaders and avoid creating duplicate buffers/views 
 	
 	m_Shaders = shaders;
+	m_Device = device;
 	//std::sort(m_Shaders.begin(), m_Shaders.end(), [](std::shared_ptr<shader_dx> shader1, std::shared_ptr<shader_dx> shader2) {return shader1.get()->getType() < shader2.get()->getType();});
 	
 	m_CommandList = commandList;
@@ -22,27 +23,29 @@ shader_program_dx::shader_program_dx(std::vector<std::shared_ptr<shader_dx>>& sh
 
 	//std::sort(m_Constants.begin(), m_Constants.end(), [](constant_block& b1, constant_block& b2) { return b1.bindPoint < b2.bindPoint; });
 	
-	m_DescriptorSize = device.GetDescriptorHandleIncrementSize( D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	createConstantBuffers(device);
-	createRootSignature(device);
+	m_DescriptorSize = m_Device->GetDescriptorHandleIncrementSize( D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	createConstantBuffers();
+	createRootSignature();
+	
+	m_RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
 }
 
 
-void shader_program_dx::createConstantBuffers(ID3D12Device& device)
+void shader_program_dx::createConstantBuffers()
 {
 	D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc;
 	cbvHeapDesc.NumDescriptors = m_Constants.size();
 	cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	cbvHeapDesc.NodeMask = 0;
-	device.CreateDescriptorHeap(&cbvHeapDesc,IID_PPV_ARGS(&m_Heap));
+	m_Device->CreateDescriptorHeap(&cbvHeapDesc,IID_PPV_ARGS(&m_Heap));
 	
 	UINT index = 0;
 	for (auto& block : m_Constants)
 	{
 		std::shared_ptr<buffer_constant_generic_dx> buffer = 
-			std::make_shared<buffer_constant_generic_dx>(device, (UINT)block.size, block.name.data());
-		buffer->createView(device, m_Heap, index, m_DescriptorSize);
+			std::make_shared<buffer_constant_generic_dx>(*m_Device.Get(), (UINT)block.size, block.name.data());
+		buffer->createView(*m_Device.Get(), m_Heap, index, m_DescriptorSize);
 		
 		m_ConstantBuffers.push_back(buffer);
 		index++;
@@ -51,7 +54,7 @@ void shader_program_dx::createConstantBuffers(ID3D12Device& device)
 
 
 //TODO this is based on the assumption that two variables with the same name but different types can not exist in a block, verify that
-void shader_program_dx::getVariableOffset(const std::string& name, int& bufferIndex, UINT& offset)
+void shader_program_dx::getVariableOffset(const std::string& name, int& bufferIndex, constant_variable& var) const
 {
 	int i = 0;
 	for (auto& block : m_Constants)
@@ -61,7 +64,8 @@ void shader_program_dx::getVariableOffset(const std::string& name, int& bufferIn
 			if (variable.name == name)
 			{
 				bufferIndex = i;
-				offset = variable.offset;
+				var = variable;
+				return;
 			}
 		}
 
@@ -70,34 +74,60 @@ void shader_program_dx::getVariableOffset(const std::string& name, int& bufferIn
 }
 
 
-void shader_program_dx::setUniform(const std::string& name, float value)
+void shader_program_dx::setUniform(const std::string& name, bool value, bool optional)
 {
-	setUniform(name, &value, sizeof(float));
+	setUniform(name, &value, sizeof(bool), optional);
 }
 
-void shader_program_dx::setUniform(const std::string& name, glm::mat4 value)
+void shader_program_dx::setUniform(const std::string& name, float value, bool optional)
 {
-	setUniform(name, &value, sizeof(glm::mat4));
+	setUniform(name, &value, sizeof(float), optional);
 }
 
-void shader_program_dx::setUniform(const std::string& name, glm::vec4 value)
+void shader_program_dx::setUniform(const std::string& name, int value, bool optional)
 {
-	setUniform(name, &value, sizeof(glm::vec4));
+	setUniform(name, &value, sizeof(int), optional);
 }
 
-void shader_program_dx::setUniform(const std::string& name, void* dataPtr, UINT size)
+void shader_program_dx::setUniform(const std::string& name, glm::mat4& value, bool optional)
+{
+	auto transpose = glm::transpose(value);
+	setUniform(name, &transpose, sizeof(glm::mat4), optional);
+}
+
+void shader_program_dx::setUniform(const std::string& name, glm::vec3& value, bool optional)
+{
+	setUniform(name, &value, sizeof(glm::vec3), optional);
+}
+
+
+void shader_program_dx::setUniform(const std::string& name, glm::vec4& value, bool optional)
+{
+	setUniform(name, &value, sizeof(glm::vec4), optional);
+}
+
+void shader_program_dx::setUniform(const std::string& name, void* dataPtr, UINT size, bool optional)
 {
 	int blockIndex = -1;
-	UINT variableOffset = 0;
+	constant_variable variable;
 
-	getVariableOffset(name, blockIndex, variableOffset);
-	if (variableOffset == -1)
+	getVariableOffset(name, blockIndex, variable);
+	if (variable.size == -1)
 	{
+		if (optional)
+		{
+			return;
+		}
+		
 		throw std::runtime_error("uniform not found");
+	}
+	if (variable.size != size)
+	{
+		throw std::runtime_error("type mismatch found");
 	}
 
 	auto buffer = m_ConstantBuffers[blockIndex];
-	buffer->set(variableOffset, dataPtr, size);
+	buffer->set(variable.offset, dataPtr, size);
 }
 
 bool shader_program_dx::isDuplicatedConstant(UINT bindPoint)
@@ -193,38 +223,37 @@ std::shared_ptr<shader_dx> shader_program_dx::getShaderByType(modelViewer::res::
 	return nullptr;
 }
 
-void shader_program_dx::createPipelineState(ID3D12Device& device, std::vector<D3D12_INPUT_ELEMENT_DESC>& layout)
+void shader_program_dx::createPipelineState(std::vector<D3D12_INPUT_ELEMENT_DESC>& layout)
 {
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
-	ZeroMemory(&psoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
-	
-	psoDesc.InputLayout = { layout.data(), (UINT)layout.size() };
-	psoDesc.pRootSignature = m_RootSignature.Get();
+	ZeroMemory(&m_PsoDescription, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
+
+	m_PsoDescription.InputLayout = { layout.data(), (UINT)layout.size() };
+	m_PsoDescription.pRootSignature = m_RootSignature.Get();
 	
 	auto vertexShader = getVertexShader();
 	auto fragmentShader = getFragShader();
-	psoDesc.VS =
+	m_PsoDescription.VS =
 		{
 			reinterpret_cast<BYTE*>(vertexShader->getByteCode()->GetBufferPointer()),
 			vertexShader->getByteCode()->GetBufferSize()
 		};
-	psoDesc.PS =
+	m_PsoDescription.PS =
 		{
 			reinterpret_cast<BYTE*>(fragmentShader->getByteCode()->GetBufferPointer()),
 			fragmentShader->getByteCode()->GetBufferSize()
 		};
 
-	psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
-	psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
-	psoDesc.SampleMask = UINT_MAX;
-	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	psoDesc.NumRenderTargets = 1;
-	psoDesc.RTVFormats[0] = m_BackBufferFormat;
-	psoDesc.SampleDesc.Count = 1;
-	psoDesc.SampleDesc.Quality = 0;
-	psoDesc.DSVFormat = mDepthStencilFormat;
-	device.CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_PSO));
+	m_PsoDescription.RasterizerState = m_RasterizerState;
+	m_PsoDescription.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	m_PsoDescription.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+	m_PsoDescription.SampleMask = UINT_MAX;
+	m_PsoDescription.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	m_PsoDescription.NumRenderTargets = 1;
+	m_PsoDescription.RTVFormats[0] = m_BackBufferFormat;
+	m_PsoDescription.SampleDesc.Count = 1;
+	m_PsoDescription.SampleDesc.Quality = 0;
+	m_PsoDescription.DSVFormat = mDepthStencilFormat;
+	m_Device->CreateGraphicsPipelineState(&m_PsoDescription, IID_PPV_ARGS(&m_PSO));
 }
 
 void shader_program_dx::bind()
@@ -232,6 +261,9 @@ void shader_program_dx::bind()
 	ID3D12DescriptorHeap* descriptorHeaps[] = { m_Heap.Get() };
 	m_CommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 	m_CommandList->SetPipelineState(m_PSO.Get());
+	//TODO set rasterizer state 
+	//m_CommandList->RSSetState(m_RasterizerState.Get());
+	
 	m_CommandList->SetGraphicsRootSignature(m_RootSignature.Get());
 	
 	for (int i = 0; i < m_Constants.size(); ++i) {
@@ -244,7 +276,7 @@ void shader_program_dx::bind()
 	
 }
 
-void shader_program_dx::createRootSignature(ID3D12Device& device)
+void shader_program_dx::createRootSignature()
 {
 	UINT baseRegisterIndex = 0;
 	std::vector<CD3DX12_ROOT_PARAMETER> parameters;
@@ -275,9 +307,47 @@ void shader_program_dx::createRootSignature(ID3D12Device& device)
 	}
 
 
-	device.CreateRootSignature(
+	m_Device->CreateRootSignature(
 		0,
 		serializedRootSig->GetBufferPointer(),
 		serializedRootSig->GetBufferSize(),
 		IID_PPV_ARGS(&m_RootSignature));
 }
+
+void shader_program_dx::setCullFaceMode(modelViewer::res::cull_face_mode mode)
+{
+	switch (mode)
+	{
+		case res::cull_face_mode::disabled:
+			m_RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+			break;
+		case res::cull_face_mode::front:
+			m_RasterizerState.CullMode = D3D12_CULL_MODE_FRONT;
+			break;
+		case res::cull_face_mode::back:
+			m_RasterizerState.CullMode = D3D12_CULL_MODE_BACK;
+			break;
+	}
+	
+	//TODO create a new rasterizer state 
+}
+
+std::vector<shader_uniform_info> shader_program_dx::getActiveUniforms()
+{
+	return std::vector<shader_uniform_info>();
+}
+
+int shader_program_dx::getActiveUniformsCount()
+{
+	return 0;
+}
+
+bool shader_program_dx::hasUniform(const std::string& name) const
+{
+	int blockIndex = -1;
+	constant_variable var;
+	getVariableOffset(name, blockIndex, var);
+	return blockIndex > -1 && var.offset > -1;
+}
+
+

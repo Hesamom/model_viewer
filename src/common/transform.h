@@ -1,7 +1,6 @@
 ﻿
 #ifndef MODEL_VIEWER_TRANSFORM_H
 #define MODEL_VIEWER_TRANSFORM_H
-#include "glm/glm.hpp"
 #include "quaternion.h"
 
 namespace modelViewer::common {

@@ -48,7 +48,10 @@ void renderer_forward::renderReflectionMap(render_scene& scene , camera& camera)
 	m_Device->pushDebugGroup("rendering reflection map");
 
 	m_ReflectionBuffer->bind();
-	m_Device->setCullFaceMode(cull_face_mode::front);
+	
+	//m_Device->setCullFaceMode(cull_face_mode::front);
+	
+	
 	m_Device->setViewport(REFLECTION_SIZE,REFLECTION_SIZE);
 	m_ReflectionBuffer->attachDepthTexture();
 	m_EmptyReflectionMap->active(reflectionMapSlot);
@@ -119,7 +122,7 @@ void renderer_forward::renderDirectionalShadows(render_scene& scene) {
 			}
 
 			auto mvp = m_LightViewProjection * object->getTransform().getMatrix();
-			m_shadowProgram->setUniform(m_MVPLocation, mvp);
+			m_shadowProgram->setUniform(m_MVPUniformName, mvp, true);
 			meshRenderer->renderShadow();
 		}
 	}
@@ -175,7 +178,7 @@ void renderer_forward::renderSpotShadows(render_scene& scene) {
 				}
 
 				auto mvp = spot.viewProjection * object->getTransform().getMatrix();
-				m_shadowProgram->setUniform(m_MVPLocation, mvp);
+				m_shadowProgram->setUniform(m_MVPUniformName, mvp, true);
 				meshRenderer->renderShadow();
 			}
 		}
@@ -187,7 +190,7 @@ void renderer_forward::renderSpotShadows(render_scene& scene) {
 void renderer_forward::renderShadows(render_scene& scene)
 {
 	m_shadowBuffer->bind();
-	m_Device->setCullFaceMode(cull_face_mode::front);
+	//m_Device->setCullFaceMode(cull_face_mode::front);
 	m_shadowProgram->bind();
 	
 	renderDirectionalShadows(scene);
@@ -234,7 +237,7 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 		m_Device->clearColorBuffer(m_ClearFlag);
 	}
 
-	m_Device->setCullFaceMode(cull_face_mode::back);
+	//m_Device->setCullFaceMode(cull_face_mode::back);
 	
 	if (shadowsEnabled)
 	{
@@ -326,7 +329,6 @@ void renderer_forward::initShadowmap(object_factory& objectFactory, shader_loade
 	
 	m_shadowProgram = m_Device->createProgram(assets);
 	m_shadowProgram->bind();
-	m_MVPLocation = m_shadowProgram->getUniformLocation(m_MVPUniformName);
 
 	auto shadowDirName = std::string("shadowmap_dir");
 	m_shadowBuffer = m_Device->createFramebuffer();
@@ -391,7 +393,7 @@ void renderer_forward::initSkybox(object_factory& objectFactory)
 	skyboxModel.name = "skybox";
 	skyboxModel.transform.setScale(glm::vec3(100.0));
 	material->propertySet.renderQueue = render_queue_transparent - 1;
-	material->propertySet.cullFaceEnabled = false;
+	material->propertySet.cullFaceMode = cull_face_mode::disabled;
 
 	std::vector<std::shared_ptr<material_asset>> materials;
 	materials.push_back(material);

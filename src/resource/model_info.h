@@ -11,6 +11,11 @@ using color = glm::vec3;
 
 namespace modelViewer::res
 {
+	enum class cull_face_mode {
+		disabled,
+		front,
+		back
+	};
 	
     enum class texture_asset_type
     {
@@ -83,7 +88,7 @@ namespace modelViewer::res
 		
 	   bool depthWriteEnabled = true;
 	   int renderQueue = render_queue_opaque;
-	   bool cullFaceEnabled = true;
+	   cull_face_mode cullFaceMode = cull_face_mode::back;
 	};
     
     struct material_asset

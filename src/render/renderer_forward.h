@@ -56,7 +56,6 @@ namespace modelViewer::render
 
 		std::shared_ptr<gfx_device> m_Device;
 		
-		int m_MVPLocation = -1;
 		glm::mat4 m_LightViewProjection;
 		glm::vec3  m_ReflectionPosition;
 

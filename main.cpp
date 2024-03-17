@@ -1,4 +1,6 @@
-﻿#include "src/window/modelviewer_app.h"
+﻿#define GLM_FORCE_LEFT_HANDED
+
+#include "src/window/modelviewer_app.h"
 #include "src/window/window_win32.h"
 #include "src/render/dx/gfx_device_dx.h"
 #include "src/render/gl/gfx_device_gl.h"

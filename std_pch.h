@@ -2,7 +2,8 @@
 #define MODEL_VIEWER_STD_PCH_H
 
 //TODO add more std headers here when needed 
-
+#define GLM_FORCE_LEFT_HANDED
+#include "glm/glm.hpp"
 
 //streams
 #include <iostream>

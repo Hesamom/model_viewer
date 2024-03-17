@@ -34,8 +34,8 @@ void gfx_device_dx::initContext()
 	createSRVHeap();
 	
 	//for testing
-	createSampleGeometry();
 	createShaderSamples();
+	createSampleGeometry();
 	
 	setViewport(m_Window->getWidth(), m_Window->getHeight());
 	setScissorRect(0,0, m_Window->getWidth(), m_Window->getHeight());
@@ -57,6 +57,8 @@ void gfx_device_dx::createSampleGeometry()
 	auto meshAsset = loader.loadFirstMesh(modelViewer::res::literals::models::primitive_cube);
 	for (int i = 0; i < meshCount; ++i) {
 		auto mesh = std::make_unique<mesh_dx>(meshAsset, m_device, m_CommandList);
+		auto program = std::static_pointer_cast<shader_program>(m_SamplePrograms[i]);
+		mesh->bindLayout(program);
 		m_sampleMeshes.push_back(std::move(mesh));
 	}
 }
@@ -95,7 +97,6 @@ void gfx_device_dx::queryDescriptorSizes()
 {
 	mRtvDescriptorSize = m_device->GetDescriptorHandleIncrementSize( D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	mDsvDescriptorSize = m_device->GetDescriptorHandleIncrementSize( D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
-	mCbvSrvUavDescriptorSize = m_device->GetDescriptorHandleIncrementSize( D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 }
 
 void gfx_device_dx::createDevice()
@@ -270,8 +271,8 @@ D3D12_CPU_DESCRIPTOR_HANDLE gfx_device_dx::getDepthStencilView() const
 
 void gfx_device_dx::swapBuffers()
 {
-	auto viewMatrix = glm::lookAt(
-		glm::vec3(0,0,2),
+	auto view = glm::lookAt(
+		glm::vec3(0,0,-5),
 		glm::vec3(0),
 		glm::vec3(0,1,0));
 	
@@ -279,32 +280,39 @@ void gfx_device_dx::swapBuffers()
 	auto height = m_Window->getHeight();
 	
 	auto aspectRatio = (float)width / height;
-	float fov = 60;
-	auto projection = glm::perspective<float>(fov,aspectRatio,0.1f,100);
-	auto ViewProj = projection * viewMatrix;
+	float fov = 90;
+	auto projection = glm::perspective<float>(glm::radians(fov),aspectRatio,0.1f,100);
 	
+	glm::vec4  colors[4] = {
+		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+		glm::vec4(0.0f, 1.0f, 0.0f, 1.0f),
+		glm::vec4(0.0f, 0.0f, 1.0f, 1.0f),
+		glm::vec4(1.0f, 0.0f, 1.0f, 1.0f)
+	};
 	modelViewer::common::transform transform;
-	transform.setPosition(glm::vec3(0, -1, 0));
-	transform.setScale(glm::vec3(0.3f));
+	transform.setPosition(glm::vec3(0, 0, 0));
+	transform.setScale(glm::vec3(1.0));
 	
 	for (auto i = 0; i < meshCount; ++i)
 	{
-		auto pos = transform.getPosition();
-		pos.y += 1;
-		transform.setPosition(pos);
-		auto worldMatrix = transform.getMatrix();
-		auto worldViewMatrix = ViewProj * worldMatrix;
+		auto model = transform.getMatrix();
+		auto mvp = projection * view * model;
 		
+		//auto tMvp = transpose(mvp);
 		auto program = m_SamplePrograms[i];
-		program->setUniform("gWorldViewProj", worldViewMatrix);
-		program->setUniform("_color", glm::vec4 (0,pos.y,0,1));
-		program->setUniform("_mul", 1);
+		program->setUniform("gWorldViewProj", mvp, true);
+		program->setUniform("_color", colors[i], true);
+		program->setUniform("_mul", 1.0f, true);
 		program->bind();
-		
-		m_sampleMeshes[i]->draw();
-	}
 
-	
+		m_sampleMeshes[i]->bind();
+		m_sampleMeshes[i]->draw();
+
+		auto pos = transform.getPosition();
+		pos.x += 3;
+		pos.y += 2;
+		transform.setPosition(pos);
+	}
 	
 	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(getCurrentBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 	m_CommandList->ResourceBarrier(1, &barrier);
@@ -398,13 +406,7 @@ void gfx_device_dx::resize(int width, int height) {
 	setViewport(width, height);
 }
 
-void gfx_device_dx::setCullFaceMode(cull_face_mode mode) {
-}
-
 void gfx_device_dx::setDepthmap(bool enable) {
-}
-
-void gfx_device_dx::setCullFace(bool enable) {
 }
 
 void gfx_device_dx::clearDepthBuffer()
@@ -450,11 +452,22 @@ std::shared_ptr<texture> gfx_device_dx::createTexture2D(texture_setup& setup)
 
 std::shared_ptr<mesh> gfx_device_dx::createMesh(
 	std::shared_ptr<res::mesh_asset>& asset) {
-	throw std::runtime_error("not imp");
+	
+	auto mesh = std::make_shared<mesh_dx>(asset, m_device, m_CommandList);
+	return mesh;
 }
 
 std::shared_ptr<shader_program> gfx_device_dx::createProgram(std::vector<std::shared_ptr<res::shader_asset>>& assets) {
-	throw std::runtime_error("not imp");
+
+	std::vector<std::shared_ptr<shader_dx>> shaders;
+	for (auto& asset : assets) {
+		auto shader = std::make_shared<shader_dx>(asset);
+		shader->compileToByteCode();
+		shaders.push_back(shader);
+	}
+	
+	auto program = std::make_shared<dx::shader_program_dx>(shaders, m_device, m_CommandList);
+	return program;
 }
 
 std::shared_ptr<framebuffer> gfx_device_dx::createFramebuffer() {
@@ -511,9 +524,7 @@ void gfx_device_dx::createShaderSamples()
 		vert->compileToByteCode();
 
 		std::vector<std::shared_ptr<shader_dx>> shaders = {vert,frag};
-		auto program = std::make_shared<dx::shader_program_dx>(shaders, *m_device.Get(), m_CommandList);
-		program->createPipelineState(*m_device.Get(), m_sampleMeshes[i]->getLayout());
-		
+		auto program = std::make_shared<dx::shader_program_dx>(shaders, m_device, m_CommandList);
 		m_SamplePrograms.push_back(program);
 	}
 

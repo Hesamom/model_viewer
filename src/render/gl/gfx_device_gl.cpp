@@ -24,25 +24,8 @@ void gfx_device_gl::setViewport(int width, int height)
 }
 
 
-void gfx_device_gl::setCullFaceMode(cull_face_mode mode) {
-	switch (mode) {
-		case cull_face_mode::front:
-			glCullFace(GL_FRONT);
-		break;
-		case cull_face_mode::back:
-			glCullFace(GL_BACK);
-		break;
-		default:
-			throw std::runtime_error("not imp");
-	}
-}
-
 void gfx_device_gl::setDepthmap(bool enable) {
 	glDepthMask(enable);
-}
-
-void gfx_device_gl::setCullFace(bool enable) {
-	enable ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
 }
 
 void gfx_device_gl::clearDepthBuffer() {

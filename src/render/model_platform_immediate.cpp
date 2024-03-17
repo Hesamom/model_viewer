@@ -1,7 +1,6 @@
 ﻿
 #include "model_platform_immediate.h"
 #include "gl/glew.h"
-#include "glm/glm.hpp"
 
 void modelViewer::render::model_platform_immediate::draw() {
     
