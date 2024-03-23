@@ -76,7 +76,7 @@ namespace modelViewer::render
 		void createSampleGeometry();
 		
 
-		const int meshCount = 2;
+		const int meshCount = 1;
 		std::vector<std::shared_ptr<dx::shader_program_dx>> m_SamplePrograms;
 		std::vector<std::unique_ptr<mesh_dx>> m_sampleMeshes;
 		std::shared_ptr<window_win32> m_Window;
@@ -111,6 +111,7 @@ namespace modelViewer::render
 		UINT mCurrBackBuffer = 0;
 		bool m4xMsaaState = false;
 		UINT m4xMsaaQuality = 0;
+		std::shared_ptr<dx::texture_2D_dx> m_SampleTexture;
 	};
 }
 

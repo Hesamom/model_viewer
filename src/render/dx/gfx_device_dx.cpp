@@ -516,10 +516,16 @@ ID3D12Resource* gfx_device_dx::getCurrentBackBuffer()
 
 void gfx_device_dx::createShaderSamples()
 {
+	texture_setup setup;
+	res::textureInfo info;
+	auto asset = std::make_shared<res::texture_asset>(nullptr, info, res::literals::textures::uv_checker_dds);
+	setup.assets.push_back(asset);
+	
+	m_SampleTexture = std::make_shared<dx::texture_2D_dx>(setup, m_device, m_CommandList);
 	res::shader_loader loader;
 	
-	auto fragAsset = loader.load("Shaders/basic.hlsl", res::shaderType::fragment);
-	auto vertAsset = loader.load("Shaders/basic.hlsl", res::shaderType::vertex);
+	auto fragAsset = loader.load("Shaders/texture.hlsl", res::shaderType::fragment);
+	auto vertAsset = loader.load("Shaders/texture.hlsl", res::shaderType::vertex);
 
 	for (int i = 0; i < meshCount; ++i) {
 
@@ -530,6 +536,7 @@ void gfx_device_dx::createShaderSamples()
 
 		std::vector<std::shared_ptr<shader_dx>> shaders = {vert,frag};
 		auto program = std::make_shared<dx::shader_program_dx>(shaders, m_device, m_CommandList);
+		program->bindTexture(m_SampleTexture);
 		m_SamplePrograms.push_back(program);
 	}
 

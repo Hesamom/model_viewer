@@ -5,6 +5,26 @@ using namespace modelViewer::render;
 using namespace modelViewer::render::dx;
 using namespace Microsoft::WRL;
 
+CD3DX12_STATIC_SAMPLER_DESC shader_program_dx::staticSamplers[6]
+	{
+		{0, D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_TEXTURE_ADDRESS_MODE_WRAP, D3D12_TEXTURE_ADDRESS_MODE_WRAP,D3D12_TEXTURE_ADDRESS_MODE_WRAP},
+		{ 1,
+			D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+			D3D12_TEXTURE_ADDRESS_MODE_CLAMP},
+		{ 2,
+			D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_TEXTURE_ADDRESS_MODE_WRAP, D3D12_TEXTURE_ADDRESS_MODE_WRAP,
+			D3D12_TEXTURE_ADDRESS_MODE_WRAP},
+		{ 3,
+			D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+			D3D12_TEXTURE_ADDRESS_MODE_CLAMP},
+		{ 4,
+			D3D12_FILTER_ANISOTROPIC, D3D12_TEXTURE_ADDRESS_MODE_WRAP, D3D12_TEXTURE_ADDRESS_MODE_WRAP,
+			D3D12_TEXTURE_ADDRESS_MODE_WRAP},
+		{5,
+			D3D12_FILTER_ANISOTROPIC, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+			D3D12_TEXTURE_ADDRESS_MODE_CLAMP},
+	};
+
 shader_program_dx::shader_program_dx(std::vector<std::shared_ptr<shader_dx>>& shaders,
 	Microsoft::WRL::ComPtr<ID3D12Device>& device,
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList)
@@ -17,13 +37,17 @@ shader_program_dx::shader_program_dx(std::vector<std::shared_ptr<shader_dx>>& sh
 	
 	m_CommandList = commandList;
 	
+	//TODO we need to get input layout info from the vertex shader and make sure the mesh can satisfy the 
+	// requirements when building the pipeline state 
+	
 	for (auto& shader : m_Shaders) {
-		reflectConstants(shader->getByteCode());
+		reflectShader(shader);
 	}
 
 	//std::sort(m_Constants.begin(), m_Constants.end(), [](constant_block& b1, constant_block& b2) { return b1.bindPoint < b2.bindPoint; });
 	
-	m_DescriptorSize = m_Device->GetDescriptorHandleIncrementSize( D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	m_Heap = std::make_shared<descriptor_heap>(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 
+		D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, 4);
 	createConstantBuffers();
 	createRootSignature();
 }
@@ -31,19 +55,13 @@ shader_program_dx::shader_program_dx(std::vector<std::shared_ptr<shader_dx>>& sh
 
 void shader_program_dx::createConstantBuffers()
 {
-	D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc;
-	cbvHeapDesc.NumDescriptors = m_Constants.size();
-	cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	cbvHeapDesc.NodeMask = 0;
-	m_Device->CreateDescriptorHeap(&cbvHeapDesc,IID_PPV_ARGS(&m_Heap));
-	
 	UINT index = 0;
 	for (auto& block : m_Constants)
 	{
 		std::shared_ptr<buffer_constant_generic_dx> buffer = 
 			std::make_shared<buffer_constant_generic_dx>(*m_Device.Get(), (UINT)block.size, block.name.data());
-		buffer->createView(*m_Device.Get(), m_Heap, index, m_DescriptorSize);
+		auto view = buffer->getView();
+		m_Heap->addConstantBufferView(view);
 		
 		m_ConstantBuffers.push_back(buffer);
 		index++;
@@ -141,19 +159,38 @@ bool shader_program_dx::isDuplicatedConstant(UINT bindPoint)
 	return false;
 }
 
-void shader_program_dx::reflectConstants(Microsoft::WRL::ComPtr<ID3DBlob> byteCode)
+void shader_program_dx::reflectShader(std::shared_ptr<shader_dx>& shader)
 {
+	std::cout << "Shader reflection info for shader " << shader->getTypeName() << ":" << std::endl;
+	auto shaderByteCode = shader->getByteCode();
 	// Create shader reflection interface
-	ID3D12ShaderReflection* shaderReflection = nullptr;
-	D3DReflect(byteCode->GetBufferPointer(), byteCode->GetBufferSize(), IID_PPV_ARGS(&shaderReflection));
+	ID3D12ShaderReflection* reflection = nullptr;
+	D3DReflect(shaderByteCode->GetBufferPointer(), shaderByteCode->GetBufferSize(), IID_PPV_ARGS(&reflection));
 
 	// Enumerate constant buffers
 	D3D12_SHADER_DESC shaderDesc;
-	shaderReflection->GetDesc(&shaderDesc);
+	reflection->GetDesc(&shaderDesc);
+
+
+	for (UINT i = 0; i < shaderDesc.BoundResources; ++i) {
+		D3D12_SHADER_INPUT_BIND_DESC bindDesc;
+		reflection->GetResourceBindingDesc(i, &bindDesc);
+		
+		if (bindDesc.Type == D3D_SIT_TEXTURE) {
+			// Process sampler or texture
+			// bindDesc.Name contains the name of the resource
+			texture_slot slot;
+			slot.name = bindDesc.Name;
+			slot.slot = bindDesc.BindPoint;
+			m_Textures.push_back(slot);
+
+			std::cout << "Texture" << i << ": " << slot.name << " #t" << bindDesc.BindPoint << std::endl;
+		}
+	}
 
 	for (UINT i = 0; i < shaderDesc.ConstantBuffers; ++i) {
 		
-		ID3D12ShaderReflectionConstantBuffer* constantBuffer = shaderReflection->GetConstantBufferByIndex(i);
+		ID3D12ShaderReflectionConstantBuffer* constantBuffer = reflection->GetConstantBufferByIndex(i);
 		D3D12_SHADER_BUFFER_DESC bufferDesc;
 		constantBuffer->GetDesc(&bufferDesc);
 
@@ -162,8 +199,7 @@ void shader_program_dx::reflectConstants(Microsoft::WRL::ComPtr<ID3DBlob> byteCo
 		block.name = std::wstring (bufferDesc.Name, bufferDesc.Name + strlen(bufferDesc.Name));
 
 		D3D12_SHADER_INPUT_BIND_DESC bindDesc;
-		shaderReflection->GetResourceBindingDescByName(bufferDesc.Name, &bindDesc);
-
+		reflection->GetResourceBindingDescByName(bufferDesc.Name, &bindDesc);
 		block.bindPoint = bindDesc.BindPoint;
 
 		bool duplicate = isDuplicatedConstant(block.bindPoint);
@@ -256,27 +292,19 @@ void shader_program_dx::createPipelineState(std::vector<D3D12_INPUT_ELEMENT_DESC
 
 void shader_program_dx::bind()
 {
-	ID3D12DescriptorHeap* descriptorHeaps[] = { m_Heap.Get() };
+	ID3D12DescriptorHeap* descriptorHeaps[] = { m_Heap->getHeap() };
 	m_CommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 	m_CommandList->SetPipelineState(m_PSO.Get());
-	//TODO set rasterizer state 
-	//m_CommandList->RSSetState(m_RasterizerState.Get());
 	
 	m_CommandList->SetGraphicsRootSignature(m_RootSignature.Get());
 	
-	for (int i = 0; i < m_Constants.size(); ++i) {
-
-		auto handle = CD3DX12_GPU_DESCRIPTOR_HANDLE( m_Heap->GetGPUDescriptorHandleForHeapStart()); 
-		handle.Offset(i, m_DescriptorSize);
-		
-		m_CommandList->SetGraphicsRootDescriptorTable(i, handle);
+	for (int i = 0; i < m_Constants.size() + m_Textures.size(); ++i) {
+		m_CommandList->SetGraphicsRootDescriptorTable(i, m_Heap->getHandle(i));
 	}
-	
 }
 
 void shader_program_dx::createRootSignature()
 {
-	UINT baseRegisterIndex = 0;
 	std::vector<CD3DX12_ROOT_PARAMETER> parameters;
 	
 	for (auto& block : m_Constants)
@@ -287,11 +315,19 @@ void shader_program_dx::createRootSignature()
 		CD3DX12_ROOT_PARAMETER parameter;
 		parameter.InitAsDescriptorTable(1, cbvTable);
 		parameters.push_back(parameter);
-		
-		baseRegisterIndex++;
 	}
 	
-	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(parameters.size(), parameters.data(), 0, nullptr,
+	for (auto& texture : m_Textures)
+	{
+		auto texTable = new CD3DX12_DESCRIPTOR_RANGE();
+		texTable->Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, texture.slot);
+
+		CD3DX12_ROOT_PARAMETER parameter;
+		parameter.InitAsDescriptorTable(1, texTable);
+		parameters.push_back(parameter);
+	}
+	
+	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(parameters.size(), parameters.data(), 6, staticSamplers,
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 	
 	ComPtr<ID3DBlob> serializedRootSig = nullptr;
@@ -357,6 +393,13 @@ void shader_program_dx::setDepthMap(bool enable)
 {
 	m_PsoDescription.DepthStencilState.DepthEnable = enable;
 	updatePipeline();
+}
+
+void shader_program_dx::bindTexture(std::shared_ptr<texture_2D_dx> texture)
+{
+	auto view = texture->getView();
+	auto res = texture->getResource();
+	m_Heap->addTextureView(view, *res);
 }
 
 

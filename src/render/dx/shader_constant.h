@@ -4,6 +4,12 @@
 
 namespace modelViewer::render::dx
 {
+	struct texture_slot
+	{
+		std::string name;
+		UINT slot;
+	};
+	
 	struct constant_variable
 	{
 		int size = 0;

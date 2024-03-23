@@ -67,5 +67,18 @@ modelViewer::res::shaderType shader_dx::getType() const
 	return m_Asset->getType();
 }
 
+std::string shader_dx::getTypeName() const
+{
+	switch(m_Asset->getType())
+	{
+		case modelViewer::res::shaderType::fragment:
+			return "fragment";
+		case modelViewer::res::shaderType::vertex:
+				return "vertex";
+		default:
+			return "undefined";
+	}
+}
+
 
 

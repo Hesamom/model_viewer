@@ -6,6 +6,7 @@ using namespace modelViewer::res;
 
 byte * readFile(const std::string &path, textureInfo* info) {
     
+	//TODO we need to disable force flip for dx API
     stbi_set_flip_vertically_on_load(info->forceFlip);
     
     byte* content = stbi_load(path.c_str(), &(info->width), &(info->height), &(info->channels), info->channels);

@@ -5,6 +5,8 @@
 #include "shader_dx.h"
 #include "shader_constant.h"
 #include "../shader_program.h"
+#include "descriptor_heap.h"
+#include "texture_2D_dx.h"
 
 namespace modelViewer::render::dx
 {
@@ -13,6 +15,8 @@ namespace modelViewer::render::dx
 		explicit shader_program_dx(std::vector<std::shared_ptr<shader_dx>>& shaders,
 			Microsoft::WRL::ComPtr<ID3D12Device>& device,
 			Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList);
+		
+		void bindTexture(std::shared_ptr<texture_2D_dx> texture);
 	
 		void bind() override;
 		
@@ -34,7 +38,7 @@ namespace modelViewer::render::dx
 		
 	private:
 		void createRootSignature();
-		void reflectConstants(Microsoft::WRL::ComPtr<ID3DBlob> byteCode);
+		void reflectShader(std::shared_ptr<shader_dx>& shader);
 		void createConstantBuffers();
 		void getVariableOffset(const std::string& name, int& bufferIndex, constant_variable& offset) const;
 		void setUniform(const std::string& name, void* dataPtr, UINT size, bool optional = true);
@@ -42,12 +46,15 @@ namespace modelViewer::render::dx
 		std::shared_ptr<shader_dx> getShaderByType(res::shaderType type);
 		std::shared_ptr<shader_dx> getVertexShader();
 		std::shared_ptr<shader_dx> getFragShader();
+		void updatePipeline();
 		
 		const DXGI_FORMAT m_BackBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 		const DXGI_FORMAT mDepthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 		
 		std::vector<std::shared_ptr<shader_dx>> m_Shaders;
 		std::vector<constant_block> m_Constants;
+		std::vector<texture_slot> m_Textures;
+		
 		std::vector<std::shared_ptr<buffer_constant_generic_dx>> m_ConstantBuffers;
 		Microsoft::WRL::ComPtr<ID3D12RootSignature> m_RootSignature;
 		Microsoft::WRL::ComPtr<ID3D12PipelineState> m_PSO;
@@ -55,10 +62,11 @@ namespace modelViewer::render::dx
 
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> m_CommandList;
 		Microsoft::WRL::ComPtr<ID3D12Device> m_Device;
-		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_Heap;
-		UINT m_DescriptorSize = 0;
+		std::shared_ptr<descriptor_heap> m_Heap;
 
-		void updatePipeline();
+		
+		
+		static CD3DX12_STATIC_SAMPLER_DESC staticSamplers[6];
 	};
 }
 

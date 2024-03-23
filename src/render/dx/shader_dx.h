@@ -13,6 +13,7 @@ namespace modelViewer::render
 		void compileToByteCode();
 		Microsoft::WRL::ComPtr<ID3DBlob> getByteCode() const;
 		modelViewer::res::shaderType getType() const;
+		std::string getTypeName() const;
 		
 	private:
 		

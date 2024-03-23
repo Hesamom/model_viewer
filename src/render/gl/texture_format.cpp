@@ -59,6 +59,7 @@ modelViewer::render::texture_format::getOptimalFormat(texture_channel_type chann
 {
     if (!compress)
     {
+		//TODO maybe we should use sized internal formats to be more precise 
         switch (channelType) {
 
             case texture_channel_type::RGB:

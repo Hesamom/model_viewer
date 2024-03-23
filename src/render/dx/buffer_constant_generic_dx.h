@@ -27,19 +27,14 @@ namespace modelViewer::render
 			
 			mUploadBuffer->Map(0, nullptr, reinterpret_cast<void**>(&mMappedData));
 		}
-		
-		void createView(ID3D12Device& device, const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& heap, UINT viewIndex, UINT viewSize)
+
+		D3D12_CONSTANT_BUFFER_VIEW_DESC getView()
 		{
 			D3D12_GPU_VIRTUAL_ADDRESS address = mUploadBuffer.Get()->GetGPUVirtualAddress();
-
 			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 			cbvDesc.BufferLocation = address;
 			cbvDesc.SizeInBytes = m_Size;
-
-			auto handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(heap->GetCPUDescriptorHandleForHeapStart());
-			handle.Offset(viewIndex, viewSize);
-
-			device.CreateConstantBufferView(&cbvDesc, handle);
+			return cbvDesc;
 		}
 
 		ID3D12Resource* Resource()const
