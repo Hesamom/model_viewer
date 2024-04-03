@@ -25,7 +25,6 @@ namespace modelViewer::render
     {
     private:
         res::material_asset m_Info;
-        std::vector<std::shared_ptr<texture>> m_ActiveTextures;
         std::shared_ptr<shader_program> m_Program;
     	
         //TODO consider using a uniform block
@@ -50,9 +49,10 @@ namespace modelViewer::render
     	std::shared_ptr<gfx_device> m_Device;
         void applyMaterialProperties();
 
-        std::shared_ptr<texture> getTextureForSampler(const shader_uniform_info& info, const std::vector<texture_binding>& textures);
-
+        std::shared_ptr<texture> getTextureForSampler(const shader_texture_slot& slot, const std::vector<texture_binding>& bindings);
     	int getMaxSupportedTextureUnits();
+		static shader_texture_usage getUsageByName(const std::string& basicString);
+		
     public:
 
     	material(std::shared_ptr<gfx_device>& device, const res::material_asset& info, std::vector<texture_binding>& textures, std::shared_ptr<shader_program>& program, std::map<shader_uniform_texture_pair, std::shared_ptr<texture>>& defaultTextures);
@@ -78,9 +78,7 @@ namespace modelViewer::render
 
 		void setCameraPosition(glm::vec3 position);
 		bool isReflective() const;
-		
 		void setReflectionMapSlot(int slot) const;
-		const std::vector<std::shared_ptr<texture>>& getBoundTextures() const;
 
 		void setCullingFaceMode(res::cull_face_mode mode);
 	};

@@ -19,7 +19,7 @@ std::shared_ptr<texture_asset> object_factory::createEmbeddedTexture(std::shared
 	}
 		
 	textureInfo info;
-	info.channels = embedded->channelsCount;
+	info.desiredChannels = embedded->channelsCount;
 	info.width = embedded->width;
 	info.height = embedded->height;
 	info.forceFlip = true;
@@ -33,7 +33,7 @@ std::shared_ptr<texture> object_factory::createTexture(const texture_asset_info&
 	texture_setup setup;
 	//TODO set wrap mode
 	setup.isMipMapActive = true;
-	setup.isHightMap = info.isHightMap;
+	setup.isHeightMap = info.isHightMap;
 	setup.mipMapMaxLevel = 1000;
 	setup.mipMapMinLevel = 0;
 	setup.type = info.type;
@@ -168,13 +168,13 @@ object_factory::object_factory(std::shared_ptr<gfx_device>& device) {
 
 	m_Device = device;
 	std::vector<std::pair<shader_uniform_texture_pair, std::string>> assets;
-	shader_uniform_texture_pair diffuseSampler { shader_uniform_type::sampler2D, shader_texture_usage::diffuse};
+	shader_uniform_texture_pair diffuseSampler { shader_texture_type::texture2D, shader_texture_usage::diffuse};
 	assets.emplace_back(diffuseSampler, res::literals::textures::default_white);
 
-	shader_uniform_texture_pair specularSampler { shader_uniform_type::sampler2D, shader_texture_usage::specular};
+	shader_uniform_texture_pair specularSampler { shader_texture_type::texture2D, shader_texture_usage::specular};
 	assets.emplace_back(specularSampler, res::literals::textures::default_white);
 
-	shader_uniform_texture_pair normalSampler { shader_uniform_type::sampler2D, shader_texture_usage::normal};
+	shader_uniform_texture_pair normalSampler { shader_texture_type::texture2D, shader_texture_usage::normal};
 	assets.emplace_back(normalSampler, res::literals::textures::default_normal);
 
 	for (const auto & asset : assets) {
@@ -182,7 +182,7 @@ object_factory::object_factory(std::shared_ptr<gfx_device>& device) {
 		info.paths.push_back(asset.second);
 		switch (asset.first.type) {
 			
-			case shader_uniform_type::sampler2D:
+			case shader_texture_type::texture2D:
 				info.type = texture_asset_type::texture2D;
 				break;
 			default:

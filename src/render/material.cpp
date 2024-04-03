@@ -65,6 +65,9 @@ void material::applyMaterialProperties() {
 	{
 		m_Program->setUniform(boolProp.name, boolProp.value, true);
 	}
+
+	m_Program->setDepthMap(m_Info.propertySet.depthWriteEnabled);
+	m_Program->setCullFaceMode(m_Info.propertySet.cullFaceMode);
 }
 
 int material::getMaxSupportedTextureUnits() {
@@ -77,45 +80,56 @@ int material::getMaxSupportedTextureUnits() {
 	return maxTexturesFrag;
 }
 
-std::shared_ptr<texture> material::getTextureForSampler(const shader_uniform_info& info, const std::vector<texture_binding>& textures) {
+std::shared_ptr<texture> material::getTextureForSampler(const shader_texture_slot& slot, const std::vector<texture_binding>& bindings) {
 
-	for (const auto& texture : textures) {
-		//current convention has ".mat" prefix 
-		if (texture.samplerName == info.name || "u_mat." + texture.samplerName == info.name) {
-			return texture.texture;
+	for (const auto& binding : bindings) 
+	{
+		if (binding.samplerName == slot.name && binding.texture->getType() == slot.type)
+		{
+			return binding.texture;
 		}
 	}
 
-	
-	shader_uniform_texture_pair pair = {info.type, info.textureUsage};
-	if (m_DefaultTextures.contains(pair)) {
+	//TODO fix this later 
+	shader_uniform_texture_pair pair = {slot.type, getUsageByName(slot.name)};
+	if (m_DefaultTextures.contains(pair))
+	{
 		return m_DefaultTextures[pair];
 	}
 
 	return nullptr;
 }
 
+shader_texture_usage material::getUsageByName(const std::string& textureName)
+{
+	if (textureName.ends_with("_diffuse")) {
+		return shader_texture_usage::diffuse;
+	}
+	if (textureName.ends_with("_normal")) {
+		return shader_texture_usage::normal;
+	}
+	if (textureName.ends_with("_sec")) {
+		return shader_texture_usage::specular;
+	}
+	
+	return shader_texture_usage::none;
+}
+
+
 void material::bindTextures(const std::vector<texture_binding>& textures)
 {
-	const auto activeUniforms = m_Program->getActiveUniforms();
+	const auto textureSlots = m_Program->getTextureSlots();
 	int textureUnit = 0;
-	for (const auto & uniform : activeUniforms)
+	for (const auto & slot : textureSlots)
 	{
-		if (!uniform.isSampler())
-			continue;
-		
-		if (uniform.isShadowSampler()) {
-			continue;
-		}
-		
-		auto texture = getTextureForSampler(uniform, textures);
-		if (texture == nullptr) {
-			std::cerr << "Failed to select a texture for uniform with name: " << uniform.name << "\n";
+		auto texture = getTextureForSampler(slot, textures);
+		if (texture == nullptr)
+		{
+			std::cerr << "Failed to select a texture for slot with name: " << slot.name << "\n";
 			continue;
 		}
-
-		m_Program->setUniform(uniform.name, textureUnit, true);
-		m_ActiveTextures.push_back(texture);
+		
+		m_Program->bindTexture(textureUnit, texture);
 		textureUnit++;
 	}
 }
@@ -126,17 +140,8 @@ void material::setCullingFaceMode(res::cull_face_mode mode)
 }
 
 void material::bind() {
-    m_Program->bind();
-
-	m_Program->setDepthMap(m_Info.propertySet.depthWriteEnabled);
-	m_Program->setCullFaceMode(m_Info.propertySet.cullFaceMode);
 	
-    int index = 0;
-    for (const auto &item: m_ActiveTextures)
-    {
-        item->active(index);
-        index++;
-    }
+    m_Program->bind();
 }
 
 
@@ -256,12 +261,10 @@ bool material::isReflective() const
 	return m_Program->hasUniform(m_ReflectionSampler);
 }
 
-const std::vector<std::shared_ptr<texture>>& material::getBoundTextures() const
-{
-	return m_ActiveTextures;
-}
 
 std::shared_ptr<shader_program> material::getShaderProgram()
 {
 	return m_Program;
 }
+
+

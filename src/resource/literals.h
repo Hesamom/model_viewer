@@ -29,6 +29,9 @@ namespace modelViewer::res::literals
 		const std::string default_shadowmap = default_white;
 		const std::string uv_checker = base_path + "/uv_checker.png";
 		const std::string uv_checker_dds = base_path + "/uv_checker.dds";
+
+		const std::string cat = base_path + "/sample.png";
+		const std::string bar = base_path + "/bar_test.png";
 		
 		const std::string parallax_diffuse = base_path + "/parallax/diffuse.jpg";
 		const std::string parallax_displacement = base_path + "/parallax/displacement.jpg";

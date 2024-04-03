@@ -5,6 +5,8 @@ using namespace modelViewer::render;
 using namespace modelViewer::render::dx;
 using namespace Microsoft::WRL;
 
+std::shared_ptr<descriptor_heap> shader_program_dx::m_CBV_SRV_UAV_GPUHeap;
+
 CD3DX12_STATIC_SAMPLER_DESC shader_program_dx::staticSamplers[6]
 	{
 		{0, D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_TEXTURE_ADDRESS_MODE_WRAP, D3D12_TEXTURE_ADDRESS_MODE_WRAP,D3D12_TEXTURE_ADDRESS_MODE_WRAP},
@@ -46,8 +48,17 @@ shader_program_dx::shader_program_dx(std::vector<std::shared_ptr<shader_dx>>& sh
 
 	//std::sort(m_Constants.begin(), m_Constants.end(), [](constant_block& b1, constant_block& b2) { return b1.bindPoint < b2.bindPoint; });
 	
-	m_Heap = std::make_shared<descriptor_heap>(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 
-		D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, 4);
+	m_CBVHeap = std::make_shared<descriptor_heap>(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+		D3D12_DESCRIPTOR_HEAP_FLAG_NONE, 4);
+	m_TexturesHeap = std::make_shared<descriptor_heap>(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+		D3D12_DESCRIPTOR_HEAP_FLAG_NONE, m_TextureSlots.size());
+	
+	if(m_CBV_SRV_UAV_GPUHeap == nullptr)
+	{
+		m_CBV_SRV_UAV_GPUHeap = std::make_shared<descriptor_heap>(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+			D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, 256);
+	}
+	
 	createConstantBuffers();
 	createRootSignature();
 }
@@ -61,7 +72,7 @@ void shader_program_dx::createConstantBuffers()
 		std::shared_ptr<buffer_constant_generic_dx> buffer = 
 			std::make_shared<buffer_constant_generic_dx>(*m_Device.Get(), (UINT)block.size, block.name.data());
 		auto view = buffer->getView();
-		m_Heap->addConstantBufferView(view);
+		m_CBVHeap->pushBack(view);
 		
 		m_ConstantBuffers.push_back(buffer);
 		index++;
@@ -183,6 +194,11 @@ void shader_program_dx::reflectShader(std::shared_ptr<shader_dx>& shader)
 			slot.name = bindDesc.Name;
 			slot.slot = bindDesc.BindPoint;
 			m_Textures.push_back(slot);
+			
+			shader_texture_slot textureSlot;
+			textureSlot.name = bindDesc.Name;
+			textureSlot.type = getTextureType(bindDesc.Dimension);
+			m_TextureSlots.push_back(textureSlot);
 
 			std::cout << "Texture" << i << ": " << slot.name << " #t" << bindDesc.BindPoint << std::endl;
 		}
@@ -292,14 +308,15 @@ void shader_program_dx::createPipelineState(std::vector<D3D12_INPUT_ELEMENT_DESC
 
 void shader_program_dx::bind()
 {
-	ID3D12DescriptorHeap* descriptorHeaps[] = { m_Heap->getHeap() };
-	m_CommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-	m_CommandList->SetPipelineState(m_PSO.Get());
+	auto start = m_CBV_SRV_UAV_GPUHeap->getSize();
+	m_CBVHeap->copyTo(0, m_CBVHeap->getSize(), start, *m_CBV_SRV_UAV_GPUHeap);
+	m_TexturesHeap->copyTo(0, m_TexturesHeap->getSize(), start + m_CBVHeap->getSize(), *m_CBV_SRV_UAV_GPUHeap);
 	
+	m_CommandList->SetPipelineState(m_PSO.Get());
 	m_CommandList->SetGraphicsRootSignature(m_RootSignature.Get());
 	
 	for (int i = 0; i < m_Constants.size() + m_Textures.size(); ++i) {
-		m_CommandList->SetGraphicsRootDescriptorTable(i, m_Heap->getHandle(i));
+		m_CommandList->SetGraphicsRootDescriptorTable(i, m_CBV_SRV_UAV_GPUHeap->getGPUHandle(start + i));
 	}
 }
 
@@ -366,16 +383,6 @@ void shader_program_dx::setCullFaceMode(modelViewer::res::cull_face_mode mode)
 	updatePipeline();
 }
 
-std::vector<shader_uniform_info> shader_program_dx::getActiveUniforms()
-{
-	return std::vector<shader_uniform_info>();
-}
-
-int shader_program_dx::getActiveUniformsCount()
-{
-	return 0;
-}
-
 bool shader_program_dx::hasUniform(const std::string& name) const
 {
 	int blockIndex = -1;
@@ -395,11 +402,61 @@ void shader_program_dx::setDepthMap(bool enable)
 	updatePipeline();
 }
 
-void shader_program_dx::bindTexture(std::shared_ptr<texture_2D_dx> texture)
+const std::vector<shader_texture_slot>& shader_program_dx::getTextureSlots()
 {
-	auto view = texture->getView();
-	auto res = texture->getResource();
-	m_Heap->addTextureView(view, *res);
+	return m_TextureSlots;
+}
+
+shader_texture_type shader_program_dx::getTextureType(D3D_SRV_DIMENSION dimension)
+{
+	switch (dimension) {
+		case D3D_SRV_DIMENSION_TEXTURE1D:
+			return shader_texture_type::texture1D;
+		case D3D_SRV_DIMENSION_TEXTURE2D:
+			return shader_texture_type::texture2D;
+		case D3D_SRV_DIMENSION_TEXTURE3D:
+			return shader_texture_type::texture3D;
+		case D3D_SRV_DIMENSION_TEXTURECUBE:
+			return shader_texture_type::textureCube;
+		case D3D_SRV_DIMENSION_TEXTURE1DARRAY:
+			return shader_texture_type::texture1DArray;
+		case D3D_SRV_DIMENSION_TEXTURE2DARRAY:
+			return shader_texture_type::texture2DArray;
+		default:
+			throw std::runtime_error("Unsupported texture dimension");
+	}
+}
+
+void shader_program_dx::bindTexture(int slotIndex, std::shared_ptr<render::texture>& texture)
+{
+	auto texture_dx = std::dynamic_pointer_cast<texture_2D_dx>(texture);
+	if (texture_dx == nullptr)
+	{
+		throw std::runtime_error("texture_2D_dx is nullptr");
+	}
+	
+	auto view = texture_dx->getView();
+	auto res = texture_dx->getResource();
+	if(m_TextureDesc.contains(slotIndex))
+	{
+		auto heapSlot = m_TexturesHeap->insertTextureView(view, *res, m_TextureDesc.at(slotIndex));
+		m_TextureDesc[slotIndex] = heapSlot;
+		return;
+	}
+	
+	auto heapSlot = m_TexturesHeap->pushBack(view, *res);
+	m_TextureDesc[slotIndex] = heapSlot;
+}
+
+void shader_program_dx::clearHeap()
+{
+	m_CBV_SRV_UAV_GPUHeap->clear();
+}
+
+void shader_program_dx::setGPUHeap(ComPtr<ID3D12GraphicsCommandList>& commandList)
+{
+	ID3D12DescriptorHeap* descriptorHeaps[] = {m_CBV_SRV_UAV_GPUHeap->getHeap() };
+	commandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 }
 
 

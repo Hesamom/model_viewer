@@ -1,5 +1,6 @@
 ﻿#include "shader_program_gl.h"
 #include "glew/include/GL/glew.h"
+#include "texture_gl.h"
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace modelViewer::render;
@@ -30,6 +31,7 @@ shader_program_gl::shader_program_gl(std::initializer_list<shader_gl> shaders) {
     }
     
     glLinkProgram(m_ProgramId);
+	reflectTextures();
 }
 
 
@@ -57,6 +59,7 @@ void shader_program_gl::bind() {
 	//TODO add guards 
     glUseProgram(m_ProgramId);
 	applyPipelineState();
+	bindTextures();
 }
 
 shader_program_gl::~shader_program_gl() {
@@ -104,16 +107,23 @@ void shader_program_gl::setUniform(const std::string& name, bool value, bool opt
 }
 
 
-shader_uniform_type getUniformType(GLenum internalType) {
+shader_texture_type getUniformType(GLenum internalType) {
     switch (internalType) {
+		case GL_SAMPLER_1D:
+			return shader_texture_type::texture1D;
         case GL_SAMPLER_2D:
-            return shader_uniform_type::sampler2D;
         case GL_SAMPLER_2D_SHADOW:
-            return shader_uniform_type::sampler2DShadow;
+            return shader_texture_type::texture2D;
+		case GL_SAMPLER_3D:
+			return shader_texture_type::texture3D;
+		case GL_SAMPLER_1D_ARRAY:
+			return shader_texture_type::texture1DArray;
+		case GL_SAMPLER_2D_ARRAY:
+			return shader_texture_type::texture2DArray;
         case GL_SAMPLER_CUBE:
-            return shader_uniform_type::samplerCube;
+            return shader_texture_type::textureCube;
         default:
-            return shader_uniform_type::none;
+            throw std::runtime_error("unsupported internal type");
     }
 }
 
@@ -135,9 +145,8 @@ shader_texture_usage getSamplerUsage(std::string& name) {
 	return shader_texture_usage::none;
 }
 
-std::vector<shader_uniform_info> shader_program_gl::getActiveUniforms() {
-    
-
+void shader_program_gl::reflectTextures() {
+	
     const int uniformsCount = getActiveUniformsCount();
     const int bufSize = 64;
     GLchar nameBuffer[bufSize];
@@ -145,14 +154,12 @@ std::vector<shader_uniform_info> shader_program_gl::getActiveUniforms() {
     GLint size;
     GLenum type;
 
-    std::vector<shader_uniform_info> uniforms;
     for (int i = 0; i < uniformsCount; ++i) {
         glGetActiveUniform(m_ProgramId, i, bufSize, &length, &size, &type, nameBuffer);
 		auto name = std::string(nameBuffer);
-        uniforms.push_back({name,getUniformType(type), getSamplerUsage(name)});
+        m_TextureSlots.push_back({name,getUniformType(type)});
+		m_BoundTextures.push_back(nullptr);
     }
-
-    return uniforms;
 }
 
 int shader_program_gl::getActiveUniformsCount() {
@@ -210,5 +217,38 @@ void shader_program_gl::setDepthMap(bool enable)
 	m_DepthEnabled = enable;
 }
 
+const std::vector<shader_texture_slot>& shader_program_gl::getTextureSlots()
+{
+	return m_TextureSlots;
+}
+
+void shader_program_gl::bindTexture(int slotIndex, std::shared_ptr<render::texture>& texture)
+{
+	if (m_TextureSlots.size() >= slotIndex)
+	{
+		throw std::runtime_error("texture slot is out of bounds");
+	}
+	
+	auto texture_gl = std::dynamic_pointer_cast<render::texture_gl>(texture);
+	if (texture_gl == nullptr)
+	{
+		throw std::runtime_error("texture slot is not a opengl texture");
+	}
+	
+	m_BoundTextures[slotIndex] = texture_gl;
+}
+
+void shader_program_gl::bindTextures()
+{
+	for (int i = 0; i < m_BoundTextures.size(); ++i)
+	{
+		auto texture = m_BoundTextures[i];
+		if (texture == nullptr)
+		{
+			throw std::runtime_error("texture slot is not bound");
+		}
+		texture->active(i);
+	}
+}
 
 

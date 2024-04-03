@@ -16,8 +16,8 @@ namespace modelViewer::render::dx
 			Microsoft::WRL::ComPtr<ID3D12Device>& device,
 			Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList);
 		
-		void bindTexture(std::shared_ptr<texture_2D_dx> texture);
-	
+		void bindTexture(int slotIndex, std::shared_ptr<render::texture> &texture) override;
+		const std::vector<shader_texture_slot> & getTextureSlots() override;
 		void bind() override;
 		
 		void setCullFaceMode(res::cull_face_mode mode) override;
@@ -30,11 +30,10 @@ namespace modelViewer::render::dx
 		void setUniform(const std::string& name, glm::mat4& value, bool optional) override;
 		void setUniform(const std::string& name, glm::vec4& value, bool optional) override;
 		void setUniform(const std::string& name, glm::vec3& value, bool optional) override;
-		
-		std::vector<shader_uniform_info> getActiveUniforms() override;
-		int getActiveUniformsCount() override;
 
 		void createPipelineState(std::vector<D3D12_INPUT_ELEMENT_DESC>& layout);
+		static void clearHeap();
+		static void setGPUHeap(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList);
 		
 	private:
 		void createRootSignature();
@@ -62,11 +61,16 @@ namespace modelViewer::render::dx
 
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> m_CommandList;
 		Microsoft::WRL::ComPtr<ID3D12Device> m_Device;
-		std::shared_ptr<descriptor_heap> m_Heap;
-
+		std::shared_ptr<descriptor_heap> m_CBVHeap;
+		std::shared_ptr<descriptor_heap> m_TexturesHeap;
+	
+		std::vector<shader_texture_slot> m_TextureSlots;
+		std::map<int, int> m_TextureDesc;
 		
-		
+		static std::shared_ptr<descriptor_heap> m_CBV_SRV_UAV_GPUHeap;
 		static CD3DX12_STATIC_SAMPLER_DESC staticSamplers[6];
+
+		shader_texture_type getTextureType(D3D_SRV_DIMENSION dimension);
 	};
 }
 

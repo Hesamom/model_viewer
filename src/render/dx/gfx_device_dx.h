@@ -76,7 +76,7 @@ namespace modelViewer::render
 		void createSampleGeometry();
 		
 
-		const int meshCount = 1;
+		const int meshCount = 2;
 		std::vector<std::shared_ptr<dx::shader_program_dx>> m_SamplePrograms;
 		std::vector<std::unique_ptr<mesh_dx>> m_sampleMeshes;
 		std::shared_ptr<window_win32> m_Window;

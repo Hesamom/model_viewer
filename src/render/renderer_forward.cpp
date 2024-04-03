@@ -52,7 +52,8 @@ void renderer_forward::renderReflectionMap(render_scene& scene , camera& camera)
 	
 	m_Device->setViewport(REFLECTION_SIZE,REFLECTION_SIZE);
 	m_ReflectionBuffer->attachDepthTexture();
-	m_EmptyReflectionMap->active(reflectionMapSlot);
+	
+	//m_EmptyReflectionMap->active(reflectionMapSlot);
 	
 	auto meshes = getSortedObjects(scene, m_ReflectionClearMode == clear_mode::skybox);
 	const glm::vec3  up (0.01f, -1.0f, 0.01f);
@@ -239,14 +240,14 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 		//TODO consider using another approach that would not be overriden by material, this is safe by now since we dont have 31 textures yet
 		m_shadowBuffer->activateDepthMap(shadowmapDirSlot);
 		m_shadowBuffer->activateDepthMapArray(shadowmapSpotSlot);
-		m_EmptyShadowmap->active(emptyShadowmapSlot);
+		//m_EmptyShadowmap->active(emptyShadowmapSlot);
 	}
 
 	if (reflectionEnabled)
 	{
-		m_SkyboxCubeMap->active(skyboxReflectionMapSlot);
+		//m_SkyboxCubeMap->active(skyboxReflectionMapSlot);
 		m_ReflectionBuffer->activateCubeMap(reflectionMapSlot);
-		m_EmptyReflectionMap->active(emptyReflectionMapSlot);
+		//m_EmptyReflectionMap->active(emptyReflectionMapSlot);
 	}
 	
 
@@ -397,7 +398,7 @@ void renderer_forward::initSkybox(object_factory& objectFactory)
 
 	skyboxModel.materials = materials;
 	m_Skybox = objectFactory.createObject(skyboxModel);
-	m_SkyboxCubeMap = m_Skybox->getRenderers().at(0)->getMaterial()->getBoundTextures().at(0);
+	//m_SkyboxCubeMap = m_Skybox->getRenderers().at(0)->getMaterial()->getShaderProgram().at(0);
 	m_Skybox->setCastReflection(true);
 	m_Skybox->setReflectionMode(reflection_mode::disabled);
 }

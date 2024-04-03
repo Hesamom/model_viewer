@@ -2,6 +2,7 @@
 #include "texture_format.h"
 #include <GL/glew.h>
 
+using namespace modelViewer::res;
 using namespace modelViewer::render;
 
 GLint getFormat(int channelsCount)
@@ -27,12 +28,12 @@ texture_2D_gl::texture_2D_gl(texture_setup& texture_setup)
     glGenTextures(1, &m_TextureId);
     setBind(true);
 
-    if (m_Setup.isHightMap) {
+    if (m_Setup.isHeightMap) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, textureAsset->getWidth(), m_Setup.assets[0]->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
     textureAsset->getContent());
     }
     else {
-        auto optimalFormat = texture_format::getOptimalFormat(textureAsset->getChannelType(), m_Setup.compress);
+        auto optimalFormat = texture_format::getOptimalFormat(textureAsset->getChannelType(), false);
 
         glTexImage2D(GL_TEXTURE_2D, 0, optimalFormat, textureAsset->getWidth(), m_Setup.assets[0]->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
         textureAsset->getContent());
@@ -207,4 +208,9 @@ void texture_2D_gl::setMipMapLevels(unsigned int min, unsigned int max) {
         m_Setup.mipMapMaxLevel = max;
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, max);
     }
+}
+
+shader_texture_type texture_2D_gl::getType() const
+{
+	return shader_texture_type::texture2D;
 }

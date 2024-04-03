@@ -4,6 +4,7 @@
 #include "../../resource/shader_loader.h"
 #include "shader_gl.h"
 #include "../shader_program.h"
+#include "texture_gl.h"
 
 namespace modelViewer::render
 {
@@ -17,6 +18,8 @@ namespace modelViewer::render
 
      
         void bind() override;
+		void bindTexture(int slotIndex, std::shared_ptr<render::texture> &texture) override;
+		const std::vector<shader_texture_slot> & getTextureSlots() override;
         int getAttributeLocation(const std::string& attributeName);
         int getUniformLocation(const std::string& uniformName, bool optional = true) const;
 		
@@ -30,10 +33,6 @@ namespace modelViewer::render
         void setUniform(const std::string& name, int value, bool optional) override;
 		void setUniform(const std::string& name, bool value, bool optional) override;
         void setUniform(const std::string& name, glm::mat4& mat, bool optional) override;
-		
-		
-        std::vector<shader_uniform_info> getActiveUniforms() override;
-        int getActiveUniformsCount() override;
 
 		void validateLinking();
 		std::string getLinkLog();
@@ -43,8 +42,15 @@ namespace modelViewer::render
     	unsigned int m_ProgramId = 0;
 		bool m_DepthEnabled = false;
 		res::cull_face_mode m_FaceMode = res::cull_face_mode::back;
-
+		std::vector<shader_texture_slot> m_TextureSlots;
+		std::vector<std::shared_ptr<texture_gl>> m_BoundTextures;
+		
 		void applyPipelineState();
+		void reflectTextures();
+	
+		int getActiveUniformsCount();
+
+		void bindTextures();
 	}; 
 }
 

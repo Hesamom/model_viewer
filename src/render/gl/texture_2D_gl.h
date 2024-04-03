@@ -21,6 +21,7 @@ namespace modelViewer::render {
         texture_filtering_mode  getFilteringModeMin() const;
         texture_filtering_mode  getFilteringModeMag() const;
         texture_wrapping_mode getWrappingMode() const;
+		render::shader_texture_type getType() const override;
         unsigned int getMipMapMinLevel();
         unsigned int getMipMapMaxLevel();
         void setMipMapLevels(unsigned int min, unsigned int max);

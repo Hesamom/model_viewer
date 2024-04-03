@@ -20,7 +20,7 @@ byte* texture_asset::getContent() {
 }
 
 int texture_asset::getChannelCount() {
-    return m_Info.channels;
+    return m_Info.desiredChannels;
 }
 
 std::string &texture_asset::getName() {
@@ -29,7 +29,7 @@ std::string &texture_asset::getName() {
 
 texture_channel_type
 texture_asset::getChannelType() {
-    switch (m_Info.channels) {
+    switch (m_Info.desiredChannels) {
         case 3:
             return texture_channel_type::RGB;
         case 4:

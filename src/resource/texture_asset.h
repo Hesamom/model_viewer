@@ -14,10 +14,12 @@ namespace modelViewer::res
     
     struct textureInfo
     {
+		//TODO need to specify the coordinate system instead for clarity
         bool forceFlip = true;
         int width = 0;
         int height = 0;
-        int channels = 0;
+        int desiredChannels = 0;
+		int actualChannels = 0;
     };
     
     class texture_asset {

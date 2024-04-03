@@ -6,7 +6,7 @@ modelViewer::render::texture_cube::texture_cube(texture_setup& textureSetup) {
     glGenTextures(1, &m_TextureId);
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_TextureId);
 
-    auto optimalFormat = texture_format::getOptimalFormat(textureSetup.assets[0]->getChannelType(), textureSetup.compress);
+    auto optimalFormat = texture_format::getOptimalFormat(textureSetup.assets[0]->getChannelType(), false);
 
 	assert(textureSetup.assets.size() == 6);
 	
@@ -25,4 +25,9 @@ modelViewer::render::texture_cube::texture_cube(texture_setup& textureSetup) {
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+}
+
+modelViewer::render::shader_texture_type modelViewer::render::texture_cube::getType() const
+{
+	return modelViewer::render::shader_texture_type::textureCube;
 }

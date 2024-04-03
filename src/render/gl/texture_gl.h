@@ -22,16 +22,12 @@ namespace modelViewer::render {
         virtual res::texture_asset_type GetTextureAssetType() const = 0;
  
     public:
-        void active(const int index) override
+        void active(const int index)
         {
             constexpr int firstIndex = GL_TEXTURE0;
             const int slotIndex = firstIndex + index;
             glActiveTexture(slotIndex);
             setBind(true);
-        }
-
-        res::texture_asset_type getType() const {
-            return GetTextureAssetType();
         }
     };
 }

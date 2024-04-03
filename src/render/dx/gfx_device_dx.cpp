@@ -7,6 +7,7 @@
 #include <WindowsX.h>
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_dx12.h>
+#include "../../resource/texture_loader.h"
 
 #if defined(DEBUG) || defined(_DEBUG)
 #define _CRTDBG_MAP_ALLOC
@@ -278,6 +279,9 @@ D3D12_CPU_DESCRIPTOR_HANDLE gfx_device_dx::getDepthStencilView() const
 
 void gfx_device_dx::swapBuffers()
 {
+	dx::shader_program_dx::clearHeap();
+	dx::shader_program_dx::setGPUHeap(m_CommandList);
+	
 	auto view = glm::lookAt(
 		glm::vec3(0,0,-5),
 		glm::vec3(0),
@@ -300,7 +304,7 @@ void gfx_device_dx::swapBuffers()
 	transform.setPosition(glm::vec3(0, 0, 0));
 	transform.setScale(glm::vec3(1.0));
 	
-	for (auto i = 0; i < meshCount; ++i)
+	for (auto i = 0; i < 2; ++i)
 	{
 		auto model = transform.getMatrix();
 		auto mvp = projection * view * model;
@@ -308,8 +312,6 @@ void gfx_device_dx::swapBuffers()
 		//auto tMvp = transpose(mvp);
 		auto program = m_SamplePrograms[i];
 		program->setUniform("gWorldViewProj", mvp, true);
-		program->setUniform("_color", colors[i], true);
-		program->setUniform("_mul", 1.0f, true);
 		program->bind();
 
 		m_sampleMeshes[i]->bind();
@@ -452,7 +454,8 @@ std::shared_ptr<texture> gfx_device_dx::createTextureCube(texture_setup& setup)
 
 std::shared_ptr<texture> gfx_device_dx::createTexture2D(texture_setup& setup)
 {
-	return std::shared_ptr<texture>();
+	auto texture = std::make_shared<dx::texture_2D_dx>(setup, m_device, m_CommandList);
+	return texture;
 }
 
 std::shared_ptr<mesh> gfx_device_dx::createMesh(
@@ -518,7 +521,8 @@ void gfx_device_dx::createShaderSamples()
 {
 	texture_setup setup;
 	res::textureInfo info;
-	auto asset = std::make_shared<res::texture_asset>(nullptr, info, res::literals::textures::uv_checker_dds);
+	res::texture_loader tloader;
+	auto asset = tloader.load(res::literals::textures::uv_checker, 4, false);
 	setup.assets.push_back(asset);
 	
 	m_SampleTexture = std::make_shared<dx::texture_2D_dx>(setup, m_device, m_CommandList);
@@ -536,7 +540,8 @@ void gfx_device_dx::createShaderSamples()
 
 		std::vector<std::shared_ptr<shader_dx>> shaders = {vert,frag};
 		auto program = std::make_shared<dx::shader_program_dx>(shaders, m_device, m_CommandList);
-		program->bindTexture(m_SampleTexture);
+		auto text = std::shared_ptr<texture>(m_SampleTexture);
+		program->bindTexture(0, text);
 		m_SamplePrograms.push_back(program);
 	}
 
