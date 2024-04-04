@@ -49,14 +49,14 @@ shader_program_dx::shader_program_dx(std::vector<std::shared_ptr<shader_dx>>& sh
 	//std::sort(m_Constants.begin(), m_Constants.end(), [](constant_block& b1, constant_block& b2) { return b1.bindPoint < b2.bindPoint; });
 	
 	m_CBVHeap = std::make_shared<descriptor_heap>(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-		D3D12_DESCRIPTOR_HEAP_FLAG_NONE, 4);
+		D3D12_DESCRIPTOR_HEAP_FLAG_NONE, 4, "constant desc heap");
 	m_TexturesHeap = std::make_shared<descriptor_heap>(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-		D3D12_DESCRIPTOR_HEAP_FLAG_NONE, m_TextureSlots.size());
+		D3D12_DESCRIPTOR_HEAP_FLAG_NONE, m_TextureSlots.size(), "texture desc heap");
 	
 	if(m_CBV_SRV_UAV_GPUHeap == nullptr)
 	{
 		m_CBV_SRV_UAV_GPUHeap = std::make_shared<descriptor_heap>(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-			D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, 256);
+			D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, 256, "shared cbv_srv heap");
 	}
 	
 	createConstantBuffers();
@@ -429,14 +429,14 @@ shader_texture_type shader_program_dx::getTextureType(D3D_SRV_DIMENSION dimensio
 
 void shader_program_dx::bindTexture(int slotIndex, std::shared_ptr<render::texture>& texture)
 {
-	auto texture_dx = std::dynamic_pointer_cast<texture_2D_dx>(texture);
-	if (texture_dx == nullptr)
+	auto text = std::dynamic_pointer_cast<texture_dx>(texture);
+	if (text == nullptr)
 	{
-		throw std::runtime_error("texture_2D_dx is nullptr");
+		throw std::runtime_error("texture_dx is nullptr");
 	}
 	
-	auto view = texture_dx->getView();
-	auto res = texture_dx->getResource();
+	auto view = text->getView();
+	auto res = text->getResource();
 	if(m_TextureDesc.contains(slotIndex))
 	{
 		auto heapSlot = m_TexturesHeap->insertTextureView(view, *res, m_TextureDesc.at(slotIndex));

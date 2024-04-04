@@ -14,7 +14,7 @@ namespace modelViewer::render::dx
 		descriptor_heap(Microsoft::WRL::ComPtr<ID3D12Device>& device,
 			D3D12_DESCRIPTOR_HEAP_TYPE type,
 			D3D12_DESCRIPTOR_HEAP_FLAGS flags,
-			UINT capacity);
+			UINT capacity, const std::string& name);
 
 		int pushBack(D3D12_CONSTANT_BUFFER_VIEW_DESC& bufferDesc);
 		int pushBack(D3D12_SHADER_RESOURCE_VIEW_DESC& desc,
@@ -43,7 +43,8 @@ namespace modelViewer::render::dx
 		
 		void resizeHeap();
 
-	
+
+		std::string m_Name;
 	};
 }
 

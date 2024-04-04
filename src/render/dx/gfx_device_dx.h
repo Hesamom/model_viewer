@@ -111,7 +111,9 @@ namespace modelViewer::render
 		UINT mCurrBackBuffer = 0;
 		bool m4xMsaaState = false;
 		UINT m4xMsaaQuality = 0;
-		std::shared_ptr<dx::texture_2D_dx> m_SampleTexture;
+		std::shared_ptr<dx::texture_dx> m_SampleTexture;
+		std::shared_ptr<texture> m_SkyBoxTexture;
+		void createSkyboxShaderSamples();
 	};
 }
 

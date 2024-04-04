@@ -6,7 +6,7 @@
 #include "shader_constant.h"
 #include "../shader_program.h"
 #include "descriptor_heap.h"
-#include "texture_2D_dx.h"
+#include "texture_dx.h"
 
 namespace modelViewer::render::dx
 {

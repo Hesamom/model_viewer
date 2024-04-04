@@ -167,15 +167,20 @@ std::shared_ptr<shader_program> object_factory::getProgram(std::shared_ptr<mater
 object_factory::object_factory(std::shared_ptr<gfx_device>& device) {
 
 	m_Device = device;
+	//createDefaultTetxures();
+}
+
+void object_factory::createDefaultTextures()
+{
 	std::vector<std::pair<shader_uniform_texture_pair, std::string>> assets;
 	shader_uniform_texture_pair diffuseSampler { shader_texture_type::texture2D, shader_texture_usage::diffuse};
-	assets.emplace_back(diffuseSampler, res::literals::textures::default_white);
+	assets.emplace_back(diffuseSampler, literals::textures::default_white);
 
 	shader_uniform_texture_pair specularSampler { shader_texture_type::texture2D, shader_texture_usage::specular};
-	assets.emplace_back(specularSampler, res::literals::textures::default_white);
+	assets.emplace_back(specularSampler, literals::textures::default_white);
 
 	shader_uniform_texture_pair normalSampler { shader_texture_type::texture2D, shader_texture_usage::normal};
-	assets.emplace_back(normalSampler, res::literals::textures::default_normal);
+	assets.emplace_back(normalSampler, literals::textures::default_normal);
 
 	for (const auto & asset : assets) {
 		texture_asset_info info;

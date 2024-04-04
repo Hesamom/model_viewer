@@ -8,6 +8,8 @@
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_dx12.h>
 #include "../../resource/texture_loader.h"
+#include "texture_cube_dx.h"
+#include "texture_2D_dx.h"
 
 #if defined(DEBUG) || defined(_DEBUG)
 #define _CRTDBG_MAP_ALLOC
@@ -35,7 +37,8 @@ void gfx_device_dx::initContext()
 	createSRVHeap();
 	
 	//for testing
-	createShaderSamples();
+	//createShaderSamples();
+	createSkyboxShaderSamples();
 	createSampleGeometry();
 	
 	setViewport(m_Window->getWidth(), m_Window->getHeight());
@@ -449,7 +452,8 @@ gfx_device_dx::gfx_device_dx(std::shared_ptr<window_win32>& window)
 
 std::shared_ptr<texture> gfx_device_dx::createTextureCube(texture_setup& setup)
 {
-	return std::shared_ptr<texture>();
+	auto texture = std::make_shared<dx::texture_cube_dx>(setup, m_device, m_CommandList);
+	return texture;
 }
 
 std::shared_ptr<texture> gfx_device_dx::createTexture2D(texture_setup& setup)
@@ -546,6 +550,47 @@ void gfx_device_dx::createShaderSamples()
 	}
 
 }
+
+void gfx_device_dx::createSkyboxShaderSamples()
+{
+	res::texture_asset_info skyboxTexture;
+	skyboxTexture.type = res::texture_asset_type::textureCube;
+	skyboxTexture.paths.emplace_back(res::literals::textures::skybox_right);
+	skyboxTexture.paths.emplace_back(res::literals::textures::skybox_left);
+	skyboxTexture.paths.emplace_back(res::literals::textures::skybox_top);
+	skyboxTexture.paths.emplace_back(res::literals::textures::skybox_bottom);
+	skyboxTexture.paths.emplace_back(res::literals::textures::skybox_front);
+	skyboxTexture.paths.emplace_back(res::literals::textures::skybox_back);
+	texture_setup setup;
+	setup.type = skyboxTexture.type;
+	res::texture_loader tloader;
+	for (auto& path: skyboxTexture.paths) {
+		auto asset = tloader.load(path, 4, false);
+		setup.assets.push_back(asset);
+	}
+
+
+	m_SkyBoxTexture = createTextureCube(setup);
+	res::shader_loader loader;
+
+	auto fragAsset = loader.load("Shaders/texture_cube.hlsl", res::shaderType::fragment);
+	auto vertAsset = loader.load("Shaders/texture_cube.hlsl", res::shaderType::vertex);
+
+	for (int i = 0; i < meshCount; ++i) {
+
+		auto frag = std::make_shared<shader_dx>(fragAsset);
+		frag->compileToByteCode();
+		auto vert = std::make_shared<shader_dx>(vertAsset);
+		vert->compileToByteCode();
+
+		std::vector<std::shared_ptr<shader_dx>> shaders = {vert,frag};
+		auto program = std::make_shared<dx::shader_program_dx>(shaders, m_device, m_CommandList);
+		auto text = std::shared_ptr<texture>(m_SkyBoxTexture);
+		program->bindTexture(0, text);
+		m_SamplePrograms.push_back(program);
+	}
+}
+
 
 
 

@@ -41,6 +41,8 @@ namespace modelViewer::render
 
 		std::vector<std::shared_ptr<material>> getMaterials(res::model_info& info);
 		std::shared_ptr<material> getMaterial(const std::shared_ptr<res::material_asset>& asset);
+
+		void createDefaultTextures();
 	};
 
 
