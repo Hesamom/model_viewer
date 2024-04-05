@@ -24,17 +24,6 @@ namespace modelViewer::render
 		const unsigned int SUPPORTED_SPOT_LIGHTS = 4;
 		const unsigned int SHADOW_SPOT_WIDTH = 1024;
 		const unsigned int SHADOW_SPOT_HEIGHT = SHADOW_SPOT_WIDTH;
-
-		//TODO need to get max supported texture units instead of assuming we have 32 units available 
-		const int maxTextureSlot = 31;
-		const int emptyShadowmapSlot = maxTextureSlot;
-		const int shadowmapDirSlot = maxTextureSlot - 1;
-		const int shadowmapSpotSlot = maxTextureSlot - 2;
-
-
-		const int emptyReflectionMapSlot = maxTextureSlot - 3;
-		const int reflectionMapSlot = maxTextureSlot - 4;
-		const int skyboxReflectionMapSlot = maxTextureSlot - 5;
 		
 		const std::string m_EmptyShadowmapTexture = modelViewer::res::literals::textures::default_shadowmap;
 		const std::string m_EmptyReflectionTexturePath = modelViewer::res::literals::textures::default_white;

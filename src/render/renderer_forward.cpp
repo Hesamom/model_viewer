@@ -46,9 +46,6 @@ void renderer_forward::renderReflectionMap(render_scene& scene , camera& camera)
 	}
 
 	m_Device->pushDebugGroup("rendering reflection map");
-
-	m_ReflectionBuffer->bind();
-	
 	
 	m_Device->setViewport(REFLECTION_SIZE,REFLECTION_SIZE);
 	m_ReflectionBuffer->attachDepthTexture();
@@ -188,7 +185,6 @@ void renderer_forward::renderSpotShadows(render_scene& scene) {
 
 void renderer_forward::renderShadows(render_scene& scene)
 {
-	m_shadowBuffer->bind();
 	m_shadowProgram->bind();
 	
 	renderDirectionalShadows(scene);
@@ -234,25 +230,12 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 	{
 		m_Device->clearColorBuffer(m_ClearFlag);
 	}
-	
-	if (shadowsEnabled)
-	{
-		//TODO consider using another approach that would not be overriden by material, this is safe by now since we dont have 31 textures yet
-		m_shadowBuffer->activateDepthMap(shadowmapDirSlot);
-		m_shadowBuffer->activateDepthMapArray(shadowmapSpotSlot);
-		//m_EmptyShadowmap->active(emptyShadowmapSlot);
-	}
-
-	if (reflectionEnabled)
-	{
-		//m_SkyboxCubeMap->active(skyboxReflectionMapSlot);
-		m_ReflectionBuffer->activateCubeMap(reflectionMapSlot);
-		//m_EmptyReflectionMap->active(emptyReflectionMapSlot);
-	}
-	
 
 	auto viewMatrix = camera.getView();
 	auto projection = camera.getProjection();
+	auto directionalShadowMap = m_shadowBuffer->getDepthMap();
+	auto spotShadowMap = m_shadowBuffer->getDepthMapArray();
+	auto reflectionMap = m_ReflectionBuffer->getDepthMapArray();
 	
 	for (auto& renderer : getSortedObjects(scene, m_ClearMode == clear_mode::skybox))
 	{
@@ -260,14 +243,15 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 		{
 			if (renderer->getReceiveShadows())
 			{
-				renderer->getMaterial()->setShadowMapSlot(shadowmapDirSlot);
-				renderer->getMaterial()->setSpotShadowMapSlot(shadowmapSpotSlot);
+				renderer->getMaterial()->setDirectionalShadowMap(directionalShadowMap);
+				renderer->getMaterial()->setSpotShadowMap(spotShadowMap);
 				renderer->getMaterial()->setLightViewProjection(m_LightViewProjection);
 			}
 			else
 			{
-				renderer->getMaterial()->setShadowMapSlot(emptyShadowmapSlot);
-				renderer->getMaterial()->setSpotShadowMapSlot(shadowmapSpotSlot);
+				renderer->getMaterial()->setDirectionalShadowMap(m_EmptyShadowmap);
+				//TODO not sure about passing a 2D texture instead of 2D array!
+				renderer->getMaterial()->setSpotShadowMap(m_EmptyShadowmap);
 			}
 		}
 		
@@ -276,13 +260,13 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 			auto mode = renderer->getReflectionMode();
 			switch (mode) {
 				case reflection_mode::environment:
-					renderer->getMaterial()->setReflectionMapSlot(reflectionMapSlot);
+					renderer->getMaterial()->setReflectionMap(reflectionMap);
 					break;
 				case  reflection_mode::skybox:
-					renderer->getMaterial()->setReflectionMapSlot(skyboxReflectionMapSlot);
+					renderer->getMaterial()->setReflectionMap(m_SkyboxCubeMap);
 					break;
 				case reflection_mode::disabled:
-					renderer->getMaterial()->setReflectionMapSlot(emptyReflectionMapSlot);
+					renderer->getMaterial()->setReflectionMap(m_EmptyReflectionMap);
 					
 			}
 		}
@@ -292,7 +276,7 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 		renderer->getMaterial()->setDirectionalLight(scene.getDirectionalLight());
 		renderer->getMaterial()->setPointLights(scene.getPointLights());
 		renderer->getMaterial()->setSpotLights(scene.getSpotLights());
-
+		
 		m_Device->pushDebugGroup(renderer->getName().c_str());
 		renderer->render(viewMatrix, projection);
 		m_Device->popDebugGroup();
@@ -329,9 +313,8 @@ void renderer_forward::initShadowmap(object_factory& objectFactory, shader_loade
 	m_shadowProgram->bind();
 
 	auto shadowDirName = std::string("shadowmap_dir");
-	m_shadowBuffer = m_Device->createFramebuffer();
-	m_shadowBuffer->bind();
-	m_shadowBuffer->createDepthTexture(SHADOW_DIR_WIDTH, SHADOW_DIR_HEIGHT, true, shadowDirName);
+	m_shadowBuffer = m_Device->createFramebuffer(shadowDirName);
+	m_shadowBuffer->createDepthTexture(SHADOW_DIR_WIDTH, SHADOW_DIR_HEIGHT, true);
 	m_shadowBuffer->createArrayDepthTexture(SHADOW_SPOT_WIDTH, SHADOW_SPOT_HEIGHT,SUPPORTED_SPOT_LIGHTS, true);
 	m_shadowBuffer->unbind();
 
@@ -345,13 +328,11 @@ void renderer_forward::initShadowmap(object_factory& objectFactory, shader_loade
 
 void renderer_forward::initReflectionMap(object_factory& objectFactory)
 {
-	auto reflectionMapName = std::string("reflection_cubeMap");
-	auto reflectionMapDepthName = std::string("reflection_depth");
-
-	m_ReflectionBuffer = m_Device->createFramebuffer();
-	m_ReflectionBuffer->bind();
-	m_ReflectionBuffer->createCubeMap(REFLECTION_SIZE, reflectionMapName);
-	m_ReflectionBuffer->createDepthTexture(REFLECTION_SIZE, REFLECTION_SIZE, false, reflectionMapDepthName);
+	using namespace std::string_literals;
+	auto name = "reflection_cube"s;
+	m_ReflectionBuffer = m_Device->createFramebuffer(name);
+	m_ReflectionBuffer->createCubeMap(REFLECTION_SIZE);
+	m_ReflectionBuffer->createDepthTexture(REFLECTION_SIZE, REFLECTION_SIZE, false);
 	m_ReflectionBuffer->unbind();
 	
 	texture_setup setup;

@@ -17,6 +17,8 @@ namespace modelViewer::render::dx
 			Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList);
 		
 		void bindTexture(int slotIndex, std::shared_ptr<render::texture> &texture) override;
+		bool bindTexture(const std::string &name, std::shared_ptr<render::texture> &texture) override;
+		int getTextureSlot(const std::string &textureName) override;
 		const std::vector<shader_texture_slot> & getTextureSlots() override;
 		void bind() override;
 		

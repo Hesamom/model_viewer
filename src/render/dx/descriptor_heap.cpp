@@ -53,7 +53,7 @@ int modelViewer::render::dx::descriptor_heap::pushBack(D3D12_CONSTANT_BUFFER_VIE
 int modelViewer::render::dx::descriptor_heap::pushBack(D3D12_SHADER_RESOURCE_VIEW_DESC& desc,
 	ID3D12Resource& resource)
 {
-	return insertTextureView(desc, resource, m_Size);
+	return insert(desc, resource, m_Size);
 }
 
 void modelViewer::render::dx::descriptor_heap::resizeHeap()
@@ -150,28 +150,54 @@ void modelViewer::render::dx::descriptor_heap::copyTo(UINT start,
 	destination.m_Size = std::max((int)lastElement, destination.m_Size);
 }
 
-int modelViewer::render::dx::descriptor_heap::insertTextureView(D3D12_SHADER_RESOURCE_VIEW_DESC& desc,
+int modelViewer::render::dx::descriptor_heap::insert(D3D12_DEPTH_STENCIL_VIEW_DESC& desc,
 	ID3D12Resource& resource,
 	UINT slot)
+{
+	checkSlot(slot);
+
+	CD3DX12_CPU_DESCRIPTOR_HANDLE handle(m_Heap->GetCPUDescriptorHandleForHeapStart());
+	handle.Offset(slot, m_DescriptorSize);
+	m_Device->CreateDepthStencilView(&resource, &desc, handle);
+
+	checkSize(slot);
+
+	return slot;
+}
+
+void modelViewer::render::dx::descriptor_heap::checkSize(UINT slot)
+{
+	if(slot == m_Size)
+	{
+		m_Size++;
+	}
+
+	if(m_Size >= m_Capacity)
+	{
+		resizeHeap();
+	}
+}
+
+void modelViewer::render::dx::descriptor_heap::checkSlot(UINT slot) const
 {
 	if(slot > m_Size)
 	{
 		throw std::invalid_argument("slot index out of range");
 	}
+}
+
+int modelViewer::render::dx::descriptor_heap::insert(D3D12_SHADER_RESOURCE_VIEW_DESC& desc,
+	ID3D12Resource& resource,
+	UINT slot)
+{
+	checkSlot(slot);
 	
 	CD3DX12_CPU_DESCRIPTOR_HANDLE handle(m_Heap->GetCPUDescriptorHandleForHeapStart());
 	handle.Offset(slot, m_DescriptorSize);
 	m_Device->CreateShaderResourceView(&resource, &desc, handle);
-	
-	if(slot == m_Size)
-	{
-		m_Size++;
-	}
-	
-	if(m_Size >= m_Capacity)
-	{
-		resizeHeap();
-	}
+
+	checkSize(slot);
+
 	return slot;
 }
 
@@ -184,3 +210,10 @@ int modelViewer::render::dx::descriptor_heap::getCapacity() const
 {
 	return m_Capacity;
 }
+
+int modelViewer::render::dx::descriptor_heap::pushBack(D3D12_DEPTH_STENCIL_VIEW_DESC& desc, ID3D12Resource& resource)
+{
+	return insert(desc, resource, m_Size);
+}
+
+

@@ -251,4 +251,28 @@ void shader_program_gl::bindTextures()
 	}
 }
 
+int shader_program_gl::getTextureSlot(const std::string& textureName)
+{
+	int slotIndex = 0;
+	for (auto& slot : m_TextureSlots) {
+		if(slot.name == textureName)
+		{
+			return slotIndex;
+		}
+		slotIndex++;
+	}
+	return -1;
+}
+
+bool shader_program_gl::bindTexture(const std::string& name, std::shared_ptr<render::texture>& texture)
+{
+	auto slot = getTextureSlot(name);
+	if (slot >= 0)
+	{
+		bindTexture(slot, texture);
+		return true;
+	}
+	return false;
+}
+
 

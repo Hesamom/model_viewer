@@ -7,7 +7,7 @@
 #include "shader_gl.h"
 #include "shader_program_gl.h"
 #include "texture_gl.h"
-#include "texture_cube.h"
+#include "texture_cube_gl.h"
 #include "texture_2D_gl.h"
 
 using namespace modelViewer::render;
@@ -152,14 +152,14 @@ std::shared_ptr<shader_program> gfx_device_gl::createProgram(std::vector<std::sh
 	return program;
 }
 
-std::shared_ptr<framebuffer> gfx_device_gl::createFramebuffer() {
-	auto buffer = std::make_shared<framebuffer_gl>();
+std::shared_ptr<framebuffer> gfx_device_gl::createFramebuffer(std::string& name) {
+	auto buffer = std::make_shared<framebuffer_gl>(name);
 	return buffer;
 }
 
 std::shared_ptr<texture> gfx_device_gl::createTextureCube(texture_setup& setup)
 {
-	std::shared_ptr<texture_gl> texturePtr = std::make_shared<texture_cube>(setup);;
+	std::shared_ptr<texture_gl> texturePtr = std::make_shared<texture_cube_gl>(setup);;
 	return texturePtr;
 }
 

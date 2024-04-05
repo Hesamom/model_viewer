@@ -3,37 +3,43 @@
 #define FRAMEBUFFER_GL_H
 
 #include "../framebuffer.h"
+#include "texture_2D_gl.h"
+#include "texture_cube_gl.h"
+#include "texture_2D_array_gl.h"
 
 namespace modelViewer::render
 {
 	class framebuffer_gl : public framebuffer {
 		
 	public:
-		framebuffer_gl();
+		framebuffer_gl(std::string& name);
 		~framebuffer_gl() override;
 		
-		void bind() override;
 		void unbind() override;
 
 		void createArrayDepthTexture(int width, int height, int layers, bool enableDepthCompare) override;
-		void createDepthTexture(int width, int height, bool enableDepthCompare, std::string& name) override;
-		void createCubeMap(int size, std::string& name) override;
+		void createDepthTexture(int width, int height, bool enableDepthCompare) override;
+		void createCubeMap(int size) override;
+		void createColorBuffer(int width, int height) override;
+		
 		void attachCubeMapFace(int index) override;
-		void attachDepthTexture() override;
 		void attachDepthTextureArray(int layer) override;
+		void attachDepthTexture() override;
+		
 		void clearColorBuffer(const glm::vec4& color) override;
 		void clearDepthBuffer() override;
 	
-		void activateDepthMap(int slot) override;
-		void activateDepthMapArray(int slot) override;
-		void activateCubeMap(int slot) const override;
+		std::shared_ptr<texture> getDepthMap() override;
+		std::shared_ptr<texture> getDepthMapArray() override;
+		std::shared_ptr<texture> getColorCubeMap() override;
 
 	private:
+		std::string  m_Name;
 		unsigned int m_BufferId = -1;
-		unsigned int m_depthRenderBuffer = -1;
-		unsigned int m_CubeMapId = -1;
-		unsigned int m_DepthTextureId = -1;
-		unsigned int m_ArrayDepthTextureId = -1;
+		
+		std::shared_ptr<texture_2D_gl> m_DepthTexture;
+		std::shared_ptr<texture_cube_gl> m_ColorCubeTexture;
+		std::shared_ptr<texture_2D_array_gl> m_DepthArrayTexture;
 	};
 
 }

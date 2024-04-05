@@ -1,185 +1,111 @@
-﻿
-#include <GL/glew.h>
+﻿#include <GL/glew.h>
 #include "framebuffer_gl.h"
 
-//TODO use Texture_2D and Texture_Array classes instead of manual creation, need new Texture_Array and new ctor for Texture_2D
+using namespace modelViewer::render;
 
-modelViewer::render::framebuffer_gl::framebuffer_gl()
+framebuffer_gl::framebuffer_gl(std::string& name)
 {
+	m_Name = name; 
 	glGenFramebuffers(1, &m_BufferId);
 }
 
-void modelViewer::render::framebuffer_gl::bind()
+void framebuffer_gl::createArrayDepthTexture(int width, int height, int layers, bool enableDepthCompare)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, m_BufferId);
+	texture_2D_array_gl_desc desc;
+	desc.width = width;
+	desc.height = height;
+	desc.layers = layers;
+	desc.format = GL_DEPTH_COMPONENT;
+	desc.type = GL_UNSIGNED_BYTE;
+	desc.enableDepthCompare = enableDepthCompare;
+	desc.name = m_Name + "_depth_array";
+	m_DepthArrayTexture = std::make_shared<texture_2D_array_gl>(desc);
 }
 
-void modelViewer::render::framebuffer_gl::createArrayDepthTexture(int width, int height, int layers, bool enableDepthCompare)
+void framebuffer_gl::createDepthTexture(int width, int height, bool enableDepthCompare)
 {
-	glGenTextures(1, &m_ArrayDepthTextureId);
-	glBindTexture(GL_TEXTURE_2D_ARRAY, m_ArrayDepthTextureId);
-	
-	glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT, width, height, layers, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
-	
-	
-	if (enableDepthCompare)
-	{
-		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_COMPARE_MODE , GL_COMPARE_REF_TO_TEXTURE);
-		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_COMPARE_FUNC  , GL_GREATER);
-		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	}
-	else
-	{
-		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	}
-	
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, borderColor);
-
-	glBindTexture(GL_TEXTURE_2D_ARRAY,0);
+	auto textureName = m_Name + "_depth_texture";
+	m_DepthTexture = std::make_shared<texture_2D_gl>(width, height, GL_DEPTH_COMPONENT, enableDepthCompare, textureName);
 }
 
-
-void modelViewer::render::framebuffer_gl::createDepthTexture(int width, int height, bool enableDepthCompare, std::string& name)
+void framebuffer_gl::createCubeMap(int size)
 {
-	glGenTextures(1, &m_DepthTextureId);
-	glBindTexture(GL_TEXTURE_2D, m_DepthTextureId);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-		width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-	
-	
-
-	if(enableDepthCompare)
+	if (size < 1)
 	{
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE , GL_COMPARE_REF_TO_TEXTURE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC  , GL_GREATER);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	}
-	else
-	{
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	}
-	
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-
-	glObjectLabel(GL_TEXTURE, m_DepthTextureId, -1, name.data());
-	glBindTexture(GL_TEXTURE_2D,0);
-}
-
-void modelViewer::render::framebuffer_gl::createCubeMap(int size, std::string& name){
-	if (size < 1) {
 		throw std::length_error("size is smaller than 1");
 	}
 
-	glGenTextures(1, &m_CubeMapId);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, m_CubeMapId);
+	auto textureName = m_Name + "_cube_texture";
+	m_ColorCubeTexture = std::make_shared<texture_cube_gl>(size,textureName);
+}
 
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-	for (GLuint i = 0; i < 6; ++i)
+void framebuffer_gl::attachDepthTexture()
+{
+	if (m_DepthTexture)
 	{
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, size,
-			size, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+		glBindFramebuffer(GL_FRAMEBUFFER, m_BufferId);
+		m_DepthTexture->BindAsDepthBuffer();
 	}
-	glObjectLabel(GL_TEXTURE, m_CubeMapId, -1, name.c_str());
 }
 
-void modelViewer::render::framebuffer_gl::attachCubeMapFace(int index){
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_TEXTURE_CUBE_MAP_POSITIVE_X + index, m_CubeMapId, 0);
-	glDrawBuffer(GL_COLOR_ATTACHMENT0 + index);
-	glReadBuffer(GL_COLOR_ATTACHMENT0 + index);
+void framebuffer_gl::attachCubeMapFace(int index)
+{
+	if (m_ColorCubeTexture)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, m_BufferId);
+		m_ColorCubeTexture->BindAsFrameBuffer(index);
+	}
 }
 
-void modelViewer::render::framebuffer_gl::attachDepthTexture() {
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_DepthTextureId, 0);
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
+void framebuffer_gl::attachDepthTextureArray(int layer)
+{
+	if (m_DepthArrayTexture)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, m_BufferId);
+		m_DepthArrayTexture->BindAsFrameBuffer(layer);
+	}
 }
 
-void modelViewer::render::framebuffer_gl::attachDepthTextureArray(int layer) {
-	glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_ArrayDepthTextureId, 0, layer);
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
-}
-
-void modelViewer::render::framebuffer_gl::clearColorBuffer(const glm::vec4& color) {
+void framebuffer_gl::clearColorBuffer(const glm::vec4& color) 
+{
 	glClearBufferfv(GL_COLOR, 0, &color.x);
 }
 
-void modelViewer::render::framebuffer_gl::clearDepthBuffer() {
+void framebuffer_gl::clearDepthBuffer()
+{
 	glClear(GL_DEPTH_BUFFER_BIT);
 }
 
-void modelViewer::render::framebuffer_gl::unbind()
+void framebuffer_gl::unbind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-modelViewer::render::framebuffer_gl::~framebuffer_gl()
+framebuffer_gl::~framebuffer_gl()
 {
-	//TODO unbind them first 
-	if (m_DepthTextureId > -1)
-	{
-		glDeleteTextures(1, &m_DepthTextureId);
-	}
-	if (m_ArrayDepthTextureId > -1)
-	{
-		glDeleteTextures(1, &m_ArrayDepthTextureId);
-	}
-
-	unbind();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glDeleteFramebuffers(1, &m_BufferId);
 }
 
-void modelViewer::render::framebuffer_gl::activateDepthMap(int slot)
+std::shared_ptr<texture> framebuffer_gl::getDepthMap()
 {
-	if (m_DepthTextureId < 0)
-	{
-		throw std::runtime_error("no depth map to activate!");
-	}
-	
-	int firstIndex = GL_TEXTURE0;
-	int slotIndex = firstIndex + slot;
-	glActiveTexture(slotIndex);
-	glBindTexture(GL_TEXTURE_2D, m_DepthTextureId);
+	return m_DepthTexture;
 }
 
-void modelViewer::render::framebuffer_gl::activateDepthMapArray(int slot)
+std::shared_ptr<texture> framebuffer_gl::getDepthMapArray()
 {
-	if (m_ArrayDepthTextureId < 0)
-	{
-		throw std::runtime_error("no depth map to activate!");
-	}
-	
-	int firstIndex = GL_TEXTURE0;
-	int slotIndex = firstIndex + slot;
-	glActiveTexture(slotIndex);
-	glBindTexture(GL_TEXTURE_2D_ARRAY, m_ArrayDepthTextureId);
+	return m_DepthArrayTexture;
 }
 
-void modelViewer::render::framebuffer_gl::activateCubeMap(int slot) const
+std::shared_ptr<texture> framebuffer_gl::getColorCubeMap()
 {
-	if (m_CubeMapId < 0)
-	{
-		throw std::runtime_error("no cube map to activate!");
-	}
-
-	int firstIndex = GL_TEXTURE0;
-	int slotIndex = firstIndex + slot;
-	glActiveTexture(slotIndex);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, m_CubeMapId);
+	return m_ColorCubeTexture;
 }
+
+void framebuffer_gl::createColorBuffer(int width, int height)
+{
+	throw std::runtime_error("Not implemented");
+}
+
+
 

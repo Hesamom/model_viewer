@@ -11,7 +11,7 @@
 namespace modelViewer::render::dx
 {
 	class texture_dx : public texture {
-	public:;
+	public:
 		virtual ~texture_dx() = default;
 		D3D12_SHADER_RESOURCE_VIEW_DESC getView() const;
 		ID3D12Resource* getResource() const;
@@ -27,12 +27,11 @@ namespace modelViewer::render::dx
 			Microsoft::WRL::ComPtr<ID3D12Device>& comPtr,
 			Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& comPtr1);
 
-	private:
 		Microsoft::WRL::ComPtr<ID3D12Resource> m_Resource = nullptr;
 		Microsoft::WRL::ComPtr<ID3D12Resource> m_UploadHeap = nullptr;
-
+		
+	private:
 		DXGI_FORMAT getTextureFormat(std::shared_ptr<modelViewer::res::texture_asset>& sharedPtr, bool compressed);
-
 		int getBytesPerPixel(const DXGI_FORMAT& format);
 	};
 };

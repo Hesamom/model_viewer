@@ -9,7 +9,10 @@ namespace modelViewer::render {
     
     class texture_gl : public texture {
     protected:
-        ~texture_gl() override = default;
+		
+		~texture_gl() override {
+			glDeleteTextures(1, &m_TextureId);
+		}
 
         unsigned int m_TextureId = -1;
 

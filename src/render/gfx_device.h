@@ -36,7 +36,7 @@ namespace modelViewer::render {
 		virtual std::shared_ptr<texture> createTextureCube(texture_setup& setup) = 0;
 		virtual std::shared_ptr<mesh> createMesh(std::shared_ptr<res::mesh_asset>& asset) = 0;
 		virtual std::shared_ptr<shader_program> createProgram(std::vector<std::shared_ptr<res::shader_asset>>& assets) = 0;
-		virtual std::shared_ptr<framebuffer> createFramebuffer() = 0;
+		virtual std::shared_ptr<framebuffer> createFramebuffer(std::string& name) = 0;
 	};
 
 

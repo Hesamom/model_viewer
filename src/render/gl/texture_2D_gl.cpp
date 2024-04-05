@@ -56,9 +56,6 @@ texture_2D_gl::texture_2D_gl(texture_setup& texture_setup)
     setBind(false);
 }
 
-texture_2D_gl::~texture_2D_gl() {
-    glDeleteTextures(1, &m_TextureId);
-}
 
 texture_filtering_mode
 texture_2D_gl::getFilteringModeMin() const {
@@ -213,4 +210,38 @@ void texture_2D_gl::setMipMapLevels(unsigned int min, unsigned int max) {
 shader_texture_type texture_2D_gl::getType() const
 {
 	return shader_texture_type::texture2D;
+}
+
+texture_2D_gl::texture_2D_gl(int width, int height, int format, bool enableDepthCompare, std::string& name)
+{
+	glGenTextures(1, &m_TextureId);
+	glBindTexture(GL_TEXTURE_2D, m_TextureId);
+	glTexImage2D(GL_TEXTURE_2D, 0, format,
+		width, height, 0, format, GL_FLOAT, nullptr);
+
+	if(enableDepthCompare)
+	{
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE , GL_COMPARE_REF_TO_TEXTURE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC  , GL_GREATER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	}
+	else
+	{
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	}
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+	glObjectLabel(GL_TEXTURE, m_TextureId, -1, name.data());
+	glBindTexture(GL_TEXTURE_2D,0);
+}
+
+void texture_2D_gl::BindAsDepthBuffer()
+{
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_TextureId, 0);
 }

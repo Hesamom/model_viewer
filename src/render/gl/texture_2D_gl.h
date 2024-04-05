@@ -17,7 +17,7 @@ namespace modelViewer::render {
         modelViewer::res::texture_asset_type GetTextureAssetType()const override{return m_Setup.type;};
     public:
         texture_2D_gl(texture_setup& texture_setup);
-        ~texture_2D_gl();
+		texture_2D_gl(int width, int height, int format, bool enableDepthCompare, std::string& name);
         texture_filtering_mode  getFilteringModeMin() const;
         texture_filtering_mode  getFilteringModeMag() const;
         texture_wrapping_mode getWrappingMode() const;
@@ -27,6 +27,7 @@ namespace modelViewer::render {
         void setMipMapLevels(unsigned int min, unsigned int max);
         void setFilteringMode(texture_filtering_mode textureFilteringMin, texture_filtering_mode textureFilteringMag);
         void setWrappingMode(texture_wrapping_mode textureWrapping);
+		void BindAsDepthBuffer();
     };
 }
 

@@ -65,10 +65,11 @@ namespace modelViewer::render
         void bind();
         void setDirectionalLight(const light_directional& light);
 		void setPointLights(std::vector<light_point>& lights);
-		void bindTextures(const std::vector<texture_binding>& textures);
+		void bindAllTextures(const std::vector<texture_binding>& textures);
 
-		void setShadowMapSlot(int slot) const;
-        void setSpotShadowMapSlot(int slot) const;
+		void setDirectionalShadowMap(std::shared_ptr<texture>& texture);
+        void setSpotShadowMap(std::shared_ptr<texture>& texture);
+		void setReflectionMap(std::shared_ptr<texture>& texture);
 
         void setLightViewProjection(glm::mat4& matrix);
 
@@ -78,9 +79,10 @@ namespace modelViewer::render
 
 		void setCameraPosition(glm::vec3 position);
 		bool isReflective() const;
-		void setReflectionMapSlot(int slot) const;
 
 		void setCullingFaceMode(res::cull_face_mode mode);
+
+		void bindTexture(texture_binding& binding);
 	};
 }
 

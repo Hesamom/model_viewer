@@ -8,6 +8,7 @@
 namespace modelViewer::render::dx {
 	class texture_2D_dx : public texture_dx {
 	public:
+		texture_2D_dx(int width, int height, std::string& name, Microsoft::WRL::ComPtr<ID3D12Device>& device);
 		texture_2D_dx(texture_setup& texture_setup, Microsoft::WRL::ComPtr<ID3D12Device>& device,
 			Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList);
 		~texture_2D_dx();

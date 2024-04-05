@@ -23,8 +23,10 @@ namespace modelViewer::render {
 		virtual void setDepthMap(bool enable) = 0;
 		
 		virtual const std::vector<shader_texture_slot>& getTextureSlots() = 0;
+		virtual int getTextureSlot(const std::string& textureName) = 0;
         virtual bool hasUniform(const std::string& name) const = 0;
 		virtual void bindTexture(int slotIndex, std::shared_ptr<render::texture>& texture) = 0;
+		virtual bool bindTexture(const std::string& name, std::shared_ptr<render::texture>& texture) = 0;
 		
         virtual void setUniform(const std::string& name, glm::vec3& vec3, bool optional) = 0;
         virtual void setUniform(const std::string& name, glm::vec4& vec4, bool optional) = 0;

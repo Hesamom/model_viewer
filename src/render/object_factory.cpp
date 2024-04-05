@@ -167,7 +167,7 @@ std::shared_ptr<shader_program> object_factory::getProgram(std::shared_ptr<mater
 object_factory::object_factory(std::shared_ptr<gfx_device>& device) {
 
 	m_Device = device;
-	//createDefaultTetxures();
+	createDefaultTextures();
 }
 
 void object_factory::createDefaultTextures()

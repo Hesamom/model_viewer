@@ -51,7 +51,7 @@ namespace modelViewer::render
 		std::shared_ptr<texture> createTexture2D(texture_setup &setup) override ;
 		std::shared_ptr<mesh> createMesh(std::shared_ptr<res::mesh_asset>& asset) override;
 		std::shared_ptr<shader_program> createProgram(std::vector<std::shared_ptr<res::shader_asset>>& assets) override;
-		std::shared_ptr<framebuffer> createFramebuffer() override;
+		std::shared_ptr<framebuffer> createFramebuffer(std::string& name) override;
 
 	private:
 

@@ -439,7 +439,7 @@ void shader_program_dx::bindTexture(int slotIndex, std::shared_ptr<render::textu
 	auto res = text->getResource();
 	if(m_TextureDesc.contains(slotIndex))
 	{
-		auto heapSlot = m_TexturesHeap->insertTextureView(view, *res, m_TextureDesc.at(slotIndex));
+		auto heapSlot = m_TexturesHeap->insert(view, *res, m_TextureDesc.at(slotIndex));
 		m_TextureDesc[slotIndex] = heapSlot;
 		return;
 	}
@@ -457,6 +457,30 @@ void shader_program_dx::setGPUHeap(ComPtr<ID3D12GraphicsCommandList>& commandLis
 {
 	ID3D12DescriptorHeap* descriptorHeaps[] = {m_CBV_SRV_UAV_GPUHeap->getHeap() };
 	commandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+}
+
+int shader_program_dx::getTextureSlot(const std::string& textureName)
+{
+	int slotIndex = 0;
+	for (auto& slot : m_TextureSlots) {
+		if(slot.name == textureName)
+		{
+			return slotIndex;
+		}
+		slotIndex++;
+	}
+	return -1;
+}
+
+bool shader_program_dx::bindTexture(const std::string& name, std::shared_ptr<render::texture>& texture)
+{
+	auto slot = getTextureSlot(name);
+	if (slot >= 0)
+	{
+		bindTexture(slot, texture);
+		return true;
+	}
+	return false;
 }
 
 

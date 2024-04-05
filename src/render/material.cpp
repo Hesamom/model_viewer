@@ -1,6 +1,5 @@
 ﻿#include "material.h"
 
-
 using namespace modelViewer::render;
 using namespace modelViewer::res;
 
@@ -14,15 +13,9 @@ material::material(std::shared_ptr<gfx_device>& device, const res::material_asse
 
     m_Program->bind();
 	
-	setShadowMapSlot(getMaxSupportedTextureUnits());
-	setSpotShadowMapSlot(getMaxSupportedTextureUnits() - 2);
-	setReflectionMapSlot(getMaxSupportedTextureUnits() - 3);
-	
     applyMaterialProperties();
-    bindTextures(textures);
+	bindAllTextures(textures);
 }
-
-
 
 void material::setMVP(glm::mat4 &matrix) 
 {
@@ -115,8 +108,16 @@ shader_texture_usage material::getUsageByName(const std::string& textureName)
 	return shader_texture_usage::none;
 }
 
+void material::bindTexture(texture_binding& binding)
+{
+	int slotIndex = m_Program->getTextureSlot(binding.samplerName);
+	if (slotIndex >= 0)
+	{
+		m_Program->bindTexture(slotIndex, binding.texture);
+	}
+}
 
-void material::bindTextures(const std::vector<texture_binding>& textures)
+void material::bindAllTextures(const std::vector<texture_binding>& textures)
 {
 	const auto textureSlots = m_Program->getTextureSlots();
 	int textureUnit = 0;
@@ -162,22 +163,19 @@ void material::setDirectionalLight(const light_directional &light) {
 }
 
 
-void material::setShadowMapSlot(int slot) const {
-	
-	m_Program->bind();
-	m_Program->setUniform(m_ShadowSampler, slot, true);
+void material::setDirectionalShadowMap(std::shared_ptr<texture>& texture)
+{
+	m_Program->bindTexture(m_ShadowSampler, texture);
 }
 
-void material::setReflectionMapSlot(int slot) const {
-
-	m_Program->bind();
-	m_Program->setUniform(m_ReflectionSampler, slot, true);
+void material::setSpotShadowMap(std::shared_ptr<texture>& texture)
+{
+	m_Program->bindTexture(m_SpotShadowSampler, texture);
 }
 
-void material::setSpotShadowMapSlot(int slot) const {
-	
-	m_Program->bind();
-	m_Program->setUniform(m_SpotShadowSampler, slot, true);
+void material::setReflectionMap(std::shared_ptr<texture>& texture)
+{
+	m_Program->bindTexture(m_ReflectionSampler, texture);
 }
 
 void material::setLightViewProjection(glm::mat4& matrix)

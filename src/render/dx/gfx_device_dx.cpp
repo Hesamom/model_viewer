@@ -10,6 +10,7 @@
 #include "../../resource/texture_loader.h"
 #include "texture_cube_dx.h"
 #include "texture_2D_dx.h"
+#include "framebuffer_dx.h"
 
 #if defined(DEBUG) || defined(_DEBUG)
 #define _CRTDBG_MAP_ALLOC
@@ -482,8 +483,10 @@ std::shared_ptr<shader_program> gfx_device_dx::createProgram(std::vector<std::sh
 	return program;
 }
 
-std::shared_ptr<framebuffer> gfx_device_dx::createFramebuffer() {
-	throw std::runtime_error("not imp");
+std::shared_ptr<framebuffer> gfx_device_dx::createFramebuffer(std::string& name) {
+	
+	auto frameBuffer = std::make_shared<dx::framebuffer_dx>(m_device, m_CommandList, name);
+	return frameBuffer;
 }
 
 void gfx_device_dx::onPreRenderImGUI()

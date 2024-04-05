@@ -20,7 +20,8 @@ namespace modelViewer::res
     enum class texture_asset_type
     {
         texture2D,
-        textureCube
+        textureCube,
+		texture2DArray
     };
     
     enum class texture_asset_mapping_mode

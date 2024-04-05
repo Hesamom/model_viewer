@@ -158,3 +158,4 @@ DXGI_FORMAT texture_dx::getTextureFormat(std::shared_ptr<modelViewer::res::textu
 			return DXGI_FORMAT_R8G8B8A8_UNORM;
 	}
 }
+
