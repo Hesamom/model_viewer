@@ -52,7 +52,7 @@ void renderer_forward::renderReflectionMap(render_scene& scene , camera& camera)
 	
 	//m_EmptyReflectionMap->active(reflectionMapSlot);
 	
-	auto meshes = getSortedObjects(scene, m_ReflectionClearMode == clear_mode::skybox);
+	auto items = getSortedObjects(scene, camera, m_ReflectionClearMode == clear_mode::skybox);
 	const glm::vec3  up (0.01f, -1.0f, 0.01f);
 	glm::mat4 projection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 500.0f);
 	
@@ -70,8 +70,9 @@ void renderer_forward::renderReflectionMap(render_scene& scene , camera& camera)
 		
 		glm::mat4 view = glm::lookAt(m_ReflectionPosition, m_ReflectionPosition + m_CubeMapFacesDirection[index], up);
 		
-		for (auto& mesh : meshes) {
+		for (auto& item : items) {
 			
+			auto mesh = item.renderer;
 			if (mesh->getCastReflection() && mesh->getReflectionMode() == reflection_mode::disabled)
 			{
 				//TODO we can use a simple lit shader such as gouraud instead of the object's original shader to improve performance
@@ -112,6 +113,7 @@ void renderer_forward::renderDirectionalShadows(render_scene& scene) {
 
 		for (auto& meshRenderer : object->getRenderers()) {
 			
+			//TODO currently we dont support shadows for semi transparent objects 
 			if (meshRenderer->getMaterial()->getInfo().propertySet.renderQueue >= render_queue_transparent)
 			{
 				continue;
@@ -193,29 +195,59 @@ void renderer_forward::renderShadows(render_scene& scene)
 	m_shadowBuffer->unbind();
 }
 
-bool compareRenderQueue(std::shared_ptr<mesh_renderer> o1, std::shared_ptr<mesh_renderer> o2)
+
+
+bool renderer_forward::compareRenderQueue(render_object_order_item& o1, render_object_order_item& o2)
 {
-	return o1->getMaterial()->getInfo().propertySet.renderQueue < o2->getMaterial()->getInfo().propertySet.renderQueue;
+	if (o1.queue == o2.queue)
+	{
+		//sort semi transparent object back to front
+		if (o1.queue >= render_queue_transparent)
+		{
+			return o1.cameraDistance < o2.cameraDistance;
+		}
+		else //sort opaque object front to back
+		{
+			return o1.cameraDistance > o2.cameraDistance;
+		}
+	}
+	
+	return  o1.queue < o2.queue;
 }
 
-std::vector<std::shared_ptr<mesh_renderer>> renderer_forward::getSortedObjects(render_scene& scene, bool includeSkybox)
+std::vector<render_object_order_item> renderer_forward::getSortedObjects(render_scene& scene,
+	camera& camera,
+	bool includeSkybox)
 {
-	std::vector<std::shared_ptr<mesh_renderer>> renderers;
-	for (auto& object : scene.getObjects()) {
-		for (auto& mesh : object->getRenderers()) {
-			renderers.push_back(mesh);
+	m_Renderers.clear();
+	for (auto& object : scene.getObjects())
+	{
+		auto distance = glm::distance(camera.getPosition(), object->getTransform().getPosition());
+		
+		for (auto& mesh : object->getRenderers()) 
+		{
+			render_object_order_item item;
+			item.renderer = mesh;
+			item.cameraDistance = distance;
+			item.queue = mesh->getMaterial()->getInfo().propertySet.renderQueue;
+			m_Renderers.push_back(item);
 		}
 	}
 
 	if(includeSkybox)
 	{
-		renderers.push_back(m_Skybox->getRenderers().at(0));
+		render_object_order_item item;
+		item.renderer = m_Skybox->getRenderers().at(0);
+		item.cameraDistance = 100000;
+		item.queue = item.renderer->getMaterial()->getInfo().propertySet.renderQueue;
+		m_Renderers.push_back(item);
 	}
 	
-	std::sort(renderers.begin(), renderers.end(), compareRenderQueue);
+	std::sort(m_Renderers.begin(), m_Renderers.end(), compareRenderQueue);
 	
-	return renderers;
+	return m_Renderers;
 }
+
 
 void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool shadowsEnabled, bool reflectionEnabled)
 {
@@ -237,8 +269,9 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 	auto spotShadowMap = m_shadowBuffer->getDepthMapArray();
 	auto reflectionMap = m_ReflectionBuffer->getDepthMapArray();
 	
-	for (auto& renderer : getSortedObjects(scene, m_ClearMode == clear_mode::skybox))
+	for (auto& item : getSortedObjects(scene, camera, m_ClearMode == clear_mode::skybox))
 	{
+		auto renderer = item.renderer;
 		if (shadowsEnabled)
 		{
 			if (renderer->getReceiveShadows())

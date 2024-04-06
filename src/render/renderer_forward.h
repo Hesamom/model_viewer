@@ -9,6 +9,13 @@
 
 namespace modelViewer::render
 {
+	struct render_object_order_item
+	{
+		std::shared_ptr<mesh_renderer> renderer;
+		int queue;
+		float cameraDistance;
+	};
+	
 	class renderer_forward : public renderer_pipeline {
 		
 	private:
@@ -47,14 +54,19 @@ namespace modelViewer::render
 		
 		glm::mat4 m_LightViewProjection;
 		glm::vec3  m_ReflectionPosition;
+		
+		std::vector<render_object_order_item> m_Renderers;
 
+		static bool compareRenderQueue(render_object_order_item& o1, render_object_order_item& o2);
 		void renderSpotShadows(render_scene& scene);
 		void renderDirectionalShadows(render_scene& scene);
 		void renderShadows(render_scene& scene);
 		static bool requiresReflectionMapUpdate(render_scene& scene, camera& camera);
 		void renderReflectionMap(render_scene& scene, camera& camera);
 
-		std::vector<std::shared_ptr<mesh_renderer>> getSortedObjects(render_scene& scene, bool includeSkybox);
+		std::vector<render_object_order_item> getSortedObjects(render_scene& scene,
+			camera& camera,
+			bool includeSkybox);
 		void initReflectionMap(object_factory& objectFactory);
 		void initShadowmap(object_factory& objectFactory, res::shader_loader& shaderLoader);
 		void initSkybox(object_factory& objectFactory);
