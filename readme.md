@@ -69,4 +69,10 @@
 | Depth of Field | Planned | Planned |
 | Motion Blur | Planned | Planned | 
 
+### Blending  
+| Feature/API      | OpenGL | DX12 |
+| ----------- | ----------- | ----------- |
+| Geometry based      | Planned       | Planned |
+| Order independent |  Planned       | Planned |
+
 
