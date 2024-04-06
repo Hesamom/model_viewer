@@ -383,6 +383,28 @@ void shader_program_dx::setCullFaceMode(modelViewer::res::cull_face_mode mode)
 	updatePipeline();
 }
 
+void shader_program_dx::setAlphaBlending(bool enabled)
+{
+	auto blendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	if (!enabled)
+	{
+		m_PsoDescription.BlendState = blendState;
+		updatePipeline();
+		return;
+	}
+	
+	blendState.AlphaToCoverageEnable = false;
+	blendState.IndependentBlendEnable = false;
+	blendState.RenderTarget[0].BlendEnable = true;
+	blendState.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	blendState.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	blendState.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	blendState.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;
+	blendState.RenderTarget[0].DestBlend = D3D12_BLEND_ZERO;
+	updatePipeline();
+}
+
+
 bool shader_program_dx::hasUniform(const std::string& name) const
 {
 	int blockIndex = -1;
@@ -482,5 +504,6 @@ bool shader_program_dx::bindTexture(const std::string& name, std::shared_ptr<ren
 	}
 	return false;
 }
+
 
 

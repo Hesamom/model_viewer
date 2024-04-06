@@ -28,6 +28,7 @@ namespace modelViewer::render
 		
 		bool hasUniform(const std::string &name) const override;
     	void setCullFaceMode(res::cull_face_mode mode) override;
+		void setAlphaBlending(bool enabled) override;
 		void setDepthMap(bool enable) override;
 		
         void setUniform(const std::string& name, glm::vec3& vec3, bool optional) override;
@@ -54,6 +55,8 @@ namespace modelViewer::render
 		int getActiveUniformsCount();
 
 		void bindTextures();
+
+		bool m_AlphaBlending;
 	}; 
 }
 

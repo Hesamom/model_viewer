@@ -21,7 +21,7 @@ shader_program_gl::shader_program_gl(std::vector<shader_gl> &shaders) {
 }
 
 shader_program_gl::shader_program_gl(std::initializer_list<shader_gl> shaders) {
-    
+	
     m_ProgramId = glCreateProgram();
     
     for(auto& shader : shaders)
@@ -201,6 +201,16 @@ void shader_program_gl::applyPipelineState()
 	}
 
 	glDepthMask(m_DepthEnabled);
+
+	if (m_DepthEnabled)
+	{
+		glEnable(GL_BLEND);
+		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
+	}
+	else
+	{
+		glDisable(GL_BLEND);
+	}
 }
 
 void shader_program_gl::setCullFaceMode(cull_face_mode mode) {
@@ -273,6 +283,11 @@ bool shader_program_gl::bindTexture(const std::string& name, std::shared_ptr<ren
 		return true;
 	}
 	return false;
+}
+
+void shader_program_gl::setAlphaBlending(bool enabled)
+{
+	m_AlphaBlending = enabled;
 }
 
 

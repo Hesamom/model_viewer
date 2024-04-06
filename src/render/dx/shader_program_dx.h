@@ -23,6 +23,7 @@ namespace modelViewer::render::dx
 		void bind() override;
 		
 		void setCullFaceMode(res::cull_face_mode mode) override;
+		void setAlphaBlending(bool enabled) override;
 		void setDepthMap(bool enable) override;
 		
 		bool hasUniform(const std::string &name) const override;

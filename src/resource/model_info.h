@@ -79,6 +79,7 @@ namespace modelViewer::res
 		std::string  name;
 		T value;
 	};
+	
     
     struct material_property_set
     {
@@ -88,6 +89,7 @@ namespace modelViewer::res
 		std::vector<material_property<int>> ints;
 		
 	   bool depthWriteEnabled = true;
+	   bool alphaBlendingEnabled = false;
 	   int renderQueue = render_queue_opaque;
 	   cull_face_mode cullFaceMode = cull_face_mode::back;
 	};
