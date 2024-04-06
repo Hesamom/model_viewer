@@ -11,12 +11,12 @@
 #include "texture_cube_dx.h"
 #include "texture_2D_dx.h"
 #include "framebuffer_dx.h"
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/matrix_clip_space.hpp>
 
 #if defined(DEBUG) || defined(_DEBUG)
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
-#include <glm/ext/matrix_transform.hpp>
-#include <glm/ext/matrix_clip_space.hpp>
 #endif
 
 using namespace Microsoft::WRL;
