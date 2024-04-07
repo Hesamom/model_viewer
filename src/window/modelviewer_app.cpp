@@ -47,9 +47,12 @@ modelviewer_app::modelviewer_app(std::shared_ptr<window>& window, std::shared_pt
 		info.lineSpace = 1;
 
 		auto plane = m_Platform.generatePlane(m_ObjectFactory, info, m_Device);
-		//auto grid = m_Platform.generateGrid(m_ObjectFactory, info, m_Device);
 		m_Scene.addStaticObject(plane);
-		//m_Scene.addStaticObject(grid);
+		
+		auto grid = m_Platform.generateGrid(m_ObjectFactory, info, m_Device);
+		m_Scene.addStaticObject(grid);
+
+		openDemoModel("cube");
 	}
 
 	m_Window->setOnMouseButtonCallback(std::bind(&modelviewer_app::onMouseButtonCallback, this, std::placeholders::_1));

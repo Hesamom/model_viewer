@@ -399,10 +399,13 @@ void shader_program_dx::setAlphaBlending(bool enabled)
 	blendState.RenderTarget[0].BlendEnable = true;
 	blendState.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
 	blendState.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	
 	blendState.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-	blendState.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;
-	blendState.RenderTarget[0].DestBlend = D3D12_BLEND_ZERO;
-	updatePipeline();
+	
+	blendState.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+	blendState.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	m_PsoDescription.BlendState = blendState;
+	//updatePipeline();
 }
 
 
@@ -416,7 +419,8 @@ bool shader_program_dx::hasUniform(const std::string& name) const
 
 void shader_program_dx::updatePipeline()
 {
-	attempt(m_Device->CreateGraphicsPipelineState(&m_PsoDescription, IID_PPV_ARGS(&m_PSO)));
+	auto temp = m_PsoDescription;
+	attempt(m_Device->CreateGraphicsPipelineState(&temp, IID_PPV_ARGS(&m_PSO)));
 }
 
 void shader_program_dx::setDepthMap(bool enable)
@@ -526,6 +530,7 @@ void shader_program_dx::setTopology(topology_mode topology)
 			break;
 		case topology_mode::lines:
 			m_PsoDescription.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+			break;
 		case topology_mode::point:
 			m_PsoDescription.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
 			break;

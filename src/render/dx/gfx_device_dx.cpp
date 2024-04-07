@@ -13,6 +13,7 @@
 #include "framebuffer_dx.h"
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
+#include <WinPixEventRuntime/pix3.h>
 
 #if defined(DEBUG) || defined(_DEBUG)
 #define _CRTDBG_MAP_ALLOC
@@ -457,9 +458,12 @@ void* gfx_device_dx::getDevice() {
 }
 
 void gfx_device_dx::popDebugGroup() {
+	PIXEndEvent(m_CommandList.Get());
 }
 
 void gfx_device_dx::pushDebugGroup(const char* label) {
+	auto color = PIX_COLOR(1,1,1);
+	PIXBeginEvent(m_CommandList.Get(), color, label);
 }
 
 int gfx_device_dx::getMaxSamplersPerProgram() {

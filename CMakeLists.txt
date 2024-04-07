@@ -45,10 +45,12 @@ endif ()
 
 target_include_directories(model_viewer PRIVATE libs/include)
 find_library(ASSIMP_LIB assimp libs/libs)
+find_library(WinPix WinPixEventRuntime libs/libs)
 #add dx libraries only when using dx_12 
-target_link_libraries(model_viewer PRIVATE glfw glm ${ASSIMP_LIB} libglew_static imgui Comdlg32.dll d3dcompiler.lib D3D12.lib dxgi.lib)
+target_link_libraries(model_viewer PRIVATE glfw glm ${ASSIMP_LIB} libglew_static imgui Comdlg32.dll d3dcompiler.lib D3D12.lib dxgi.lib ${WinPix})
 
 
 install(FILES ${CMAKE_SOURCE_DIR}/libs/libs/assimp-vc143-mt.dll DESTINATION  ${CMAKE_BINARY_DIR})
+install(FILES ${CMAKE_SOURCE_DIR}/libs/libs/WinPixEventRuntime.dll DESTINATION  ${CMAKE_BINARY_DIR})
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/res DESTINATION  ${CMAKE_BINARY_DIR})
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/Shaders DESTINATION  ${CMAKE_BINARY_DIR})

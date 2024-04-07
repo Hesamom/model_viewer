@@ -223,7 +223,7 @@ void shader_program_gl::applyPipelineState() const {
 
 	glDepthMask(m_DepthEnabled);
 
-	if (m_DepthEnabled)
+	if (m_AlphaBlending)
 	{
 		glEnable(GL_BLEND);
 		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);

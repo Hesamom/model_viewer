@@ -137,7 +137,9 @@ std::shared_ptr<object_renderer> model_platform_buffer::generateGrid(object_fact
 	std::vector<texture_binding> textures;
 	materialInfo.propertySet.floats.push_back({Literals::Opacity, 0.5f});
 	materialInfo.propertySet.renderQueue = (render_queue_transparent + 1);
-
+	materialInfo.propertySet.alphaBlendingEnabled = true;
+	materialInfo.propertySet.cullFaceMode = cull_face_mode::disabled;
+		
 	auto defaults = objectFactory.getDefaultTextures();
 	auto mat = std::make_shared<material>(device, materialInfo, textures, program, defaults);
 	auto grid = std::make_shared<object_renderer>(mat, mesh, "platform_grid");

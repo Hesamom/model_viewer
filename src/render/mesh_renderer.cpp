@@ -12,6 +12,7 @@ mesh_renderer::mesh_renderer(std::shared_ptr <material>& material, std::shared_p
 	
 	auto program = m_Material->getShaderProgram();
 	m_Mesh->bindLayout(program);
+	m_Material->bindProgram();
 }
 
 void mesh_renderer::render(glm::mat4 view, glm::mat4 projection)

@@ -72,8 +72,6 @@ object_renderer::object_renderer(std::shared_ptr<material>& material,
 {
 	m_Name = name;
 	std::string meshName = m_Name + "_0";
-	mesh_1->bindLayout(material->getShaderProgram());
-	material->bindProgram();
 	auto meshRender = std::make_shared<mesh_renderer>(material, mesh_1, m_Transform, meshName);
 	m_MeshRenders.push_back(meshRender);
 

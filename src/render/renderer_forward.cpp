@@ -353,7 +353,7 @@ renderer_forward::renderer_forward(const std::shared_ptr<gfx_device>& device, ob
 	
 	//initShadowmap(factory, shaderLoader);
 	//initReflectionMap(factory);
-	initSkybox(factory);
+	//initSkybox(factory);
 }
 
 void renderer_forward::setClearFlag(glm::vec4 color)

@@ -1,11 +1,3 @@
-SamplerState samPointWrap : register(s0);
-SamplerState samPointClamp : register(s1);
-SamplerState samLinearWrap : register(s2);
-SamplerState samLinearClamp : register(s3);
-SamplerState samAnisotropicWrap : register(s4);
-SamplerState samAnisotropicClamp : register(s5);
-
-
 cbuffer globals_vert : register(b0)
 {
 	float4x4 m_MV;
@@ -31,7 +23,8 @@ VertexOut VS(VertexIn vin)
 	VertexOut vout;
 
 	// Transform to homogeneous clip space.
-	vout.Pos = mul(float4(vin.Pos, 1.0f), m_Projection * m_MV);
+	vout.Pos = mul(float4(vin.Pos, 1.0f), m_MV);
+	vout.Pos = mul(vout.Pos,  m_Projection);
 	vout.Color = vin.Color;
 	return vout;
 }
