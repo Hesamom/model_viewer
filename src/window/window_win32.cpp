@@ -230,7 +230,8 @@ void window_win32::setOnMouseScrollCallback(std::function<void(int)> callback)
 
 void window_win32::onMouseScrollChanged(int offset)
 {
-	m_MouseScrollCallback(offset);
+	auto normalized = std::clamp(offset, -1, 1);
+	m_MouseScrollCallback(normalized);
 }
 
 void window_win32::onNewImGUIFrame()

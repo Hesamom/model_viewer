@@ -8,6 +8,13 @@
 #include "texture.h"
 
 namespace modelViewer::render {
+
+	enum class topology_mode
+	{
+		triangles,
+		lines,
+		point
+	};
 	
 	struct shader_texture_slot
 	{
@@ -22,6 +29,8 @@ namespace modelViewer::render {
 		virtual void setCullFaceMode(res::cull_face_mode mode) = 0;
 		virtual void setAlphaBlending(bool enabled) = 0;
 		virtual void setDepthMap(bool enable) = 0;
+		virtual void setTopology(topology_mode topology) = 0;
+		virtual topology_mode getTopology() = 0;
 		
 		virtual const std::vector<shader_texture_slot>& getTextureSlots() = 0;
 		virtual int getTextureSlot(const std::string& textureName) = 0;

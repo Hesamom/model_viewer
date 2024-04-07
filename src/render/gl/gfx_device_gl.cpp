@@ -78,10 +78,7 @@ void gfx_device_gl::initDevice() {
 	glewInit();
 
 	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_FRONT);
-	glEnable(GL_DEPTH_TEST);
+	glFrontFace(GL_CW);
 	
 	if (GLEW_KHR_debug) {
 		glEnable(GL_DEBUG_OUTPUT);

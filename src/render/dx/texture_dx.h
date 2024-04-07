@@ -8,6 +8,7 @@
 #include "../texture_setup.h"
 #include "../texture.h"
 
+
 namespace modelViewer::render::dx
 {
 	class texture_dx : public texture {

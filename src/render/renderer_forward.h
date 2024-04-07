@@ -83,6 +83,12 @@ namespace modelViewer::render
 		void setReflectionClearMode(clear_mode mode) override;
 		void setReflectionClearFlag(const glm::vec4& color) override;
 		~renderer_forward() override;
+
+		std::shared_ptr<texture> getDirShadowMap();
+
+		std::shared_ptr<texture> getSpotShadowMap();
+
+		std::shared_ptr<texture> getReflectionMap();
 	};
 }
 

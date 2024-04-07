@@ -249,6 +249,31 @@ std::vector<render_object_order_item> renderer_forward::getSortedObjects(render_
 }
 
 
+std::shared_ptr<texture> renderer_forward::getDirShadowMap()
+{
+	if (m_shadowBuffer)
+	{
+		return m_shadowBuffer->getDepthMap();
+	}
+	return nullptr;
+}
+std::shared_ptr<texture> renderer_forward::getSpotShadowMap()
+{
+	if (m_shadowBuffer)
+	{
+		return m_shadowBuffer->getDepthMapArray();
+	}
+	return nullptr;
+}
+std::shared_ptr<texture> renderer_forward::getReflectionMap()
+{
+	if (m_ReflectionBuffer)
+	{
+		return m_ReflectionBuffer->getColorCubeMap();
+	}
+	return nullptr;
+}
+
 void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool shadowsEnabled, bool reflectionEnabled)
 {
 	m_Device->pushDebugGroup("rendering objects");
@@ -265,9 +290,11 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 
 	auto viewMatrix = camera.getView();
 	auto projection = camera.getProjection();
-	auto directionalShadowMap = m_shadowBuffer->getDepthMap();
-	auto spotShadowMap = m_shadowBuffer->getDepthMapArray();
-	auto reflectionMap = m_ReflectionBuffer->getDepthMapArray();
+	
+	
+	auto directionalShadowMap = getDirShadowMap();
+	auto spotShadowMap = getSpotShadowMap();
+	auto reflectionMap = getReflectionMap();
 	
 	for (auto& item : getSortedObjects(scene, camera, m_ClearMode == clear_mode::skybox))
 	{
@@ -324,8 +351,8 @@ renderer_forward::renderer_forward(const std::shared_ptr<gfx_device>& device, ob
 
 	auto shaderLoader = factory.getShaderLoader();
 	
-	initShadowmap(factory, shaderLoader);
-	initReflectionMap(factory);
+	//initShadowmap(factory, shaderLoader);
+	//initReflectionMap(factory);
 	initSkybox(factory);
 }
 

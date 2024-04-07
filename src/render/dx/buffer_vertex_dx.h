@@ -14,13 +14,6 @@ namespace modelViewer::render
 	public:
 		explicit buffer_vertex_dx(std::vector<T> data, ID3D12Device& device, ID3D12GraphicsCommandList& commandList)
 		{
-			//TODO create a blob, don't know why tho [done]
-			//TODO create a upload buffer [done]
-			//TODO create a default buffer for fast access [done]
-			//TODO copy from upload buffer to default buffer [done]
-			//TODO set barriers for default buffer [done]
-			//TODO release upload buffer as its not required at the moment
-
 			m_ElementSize = sizeof(T);
 			m_TotalSize = m_ElementSize * data.size();
 			

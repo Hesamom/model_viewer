@@ -39,8 +39,8 @@ void gfx_device_dx::initContext()
 	
 	//for testing
 	//createShaderSamples();
-	createSkyboxShaderSamples();
-	createSampleGeometry();
+	//createSkyboxShaderSamples();
+	//createSampleGeometry();
 	
 	setViewport(m_Window->getWidth(), m_Window->getHeight());
 	setScissorRect(0,0, m_Window->getWidth(), m_Window->getHeight());
@@ -53,6 +53,7 @@ void gfx_device_dx::initContext()
 	mCurrBackBuffer = (mCurrBackBuffer + 1) % SwapChainBufferCount;
 
 	flushCommandQueue();
+	openCommandList();
 	
 }
 
@@ -280,34 +281,67 @@ D3D12_CPU_DESCRIPTOR_HANDLE gfx_device_dx::getDepthStencilView() const
 	return mDsvHeap->GetCPUDescriptorHandleForHeapStart();
 }
 
+void gfx_device_dx::openCommandList()
+{
+	if (m_IsCommandListOpen) {
+		return;
+	}
+	
+	m_DirectCmdListAlloc->Reset();
+	m_CommandList->Reset(m_DirectCmdListAlloc.Get(), nullptr);
+	m_IsCommandListOpen = true;
+}
+
+void gfx_device_dx::closeCommandList()
+{
+	if (!m_IsCommandListOpen) {
+		return;
+	}
+	
+	m_CommandList->Close();
+	ID3D12CommandList* cmdsLists[] = { m_CommandList.Get() };
+	m_CommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
+	m_IsCommandListOpen = false;
+}
+
 
 void gfx_device_dx::swapBuffers()
 {
-	dx::shader_program_dx::clearHeap();
-	dx::shader_program_dx::setGPUHeap(m_CommandList);
+	//testRender();
 	
+	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(getCurrentBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+	m_CommandList->ResourceBarrier(1, &barrier);
+	closeCommandList();
+	m_SwapChain->Present(0,0);
+	mCurrBackBuffer = (mCurrBackBuffer + 1) % SwapChainBufferCount;
+	
+	flushCommandQueue();
+}
+
+void gfx_device_dx::testRender()
+{
 	auto view = glm::lookAt(
 		glm::vec3(0,0,-5),
 		glm::vec3(0),
 		glm::vec3(0,1,0));
-	
+
 	auto width = m_Window->getWidth();
 	auto height = m_Window->getHeight();
-	
+
 	auto aspectRatio = (float)width / height;
 	float fov = 90;
 	auto projection = glm::perspective<float>(glm::radians(fov),aspectRatio,0.1f,100);
-	
+
 	glm::vec4  colors[4] = {
 		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
 		glm::vec4(0.0f, 1.0f, 0.0f, 1.0f),
 		glm::vec4(0.0f, 0.0f, 1.0f, 1.0f),
 		glm::vec4(1.0f, 0.0f, 1.0f, 1.0f)
 	};
-	modelViewer::common::transform transform;
+	common::transform transform;
 	transform.setPosition(glm::vec3(0, 0, 0));
 	transform.setScale(glm::vec3(1.0));
-	
+
 	for (auto i = 0; i < 2; ++i)
 	{
 		auto model = transform.getMatrix();
@@ -319,33 +353,18 @@ void gfx_device_dx::swapBuffers()
 		program->bind();
 
 		m_sampleMeshes[i]->bind();
-		m_sampleMeshes[i]->draw();
+		m_sampleMeshes[i]->drawTriangles();
 
 		auto pos = transform.getPosition();
 		pos.x += 3;
 		pos.y += 2;
 		transform.setPosition(pos);
 	}
-	
-	auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(getCurrentBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-	m_CommandList->ResourceBarrier(1, &barrier);
-	
-	
-	m_CommandList->Close();
-	ID3D12CommandList* cmdsLists[] = { m_CommandList.Get() };
-	m_CommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
-	
-	m_SwapChain->Present(0,0);
-	mCurrBackBuffer = (mCurrBackBuffer + 1) % SwapChainBufferCount;
-	
-	flushCommandQueue();
 }
 
 void gfx_device_dx::onStartRender()
 {
-	m_DirectCmdListAlloc->Reset();
-	m_CommandList->Reset(m_DirectCmdListAlloc.Get(), nullptr);
-
+	openCommandList();
 	m_CommandList->RSSetViewports(1, &mScreenViewport);
 	m_CommandList->RSSetScissorRects(1, &mScissorRect);
 
@@ -355,6 +374,8 @@ void gfx_device_dx::onStartRender()
 	auto backBufferView = getCurrentBackBufferView();
 	auto depthBufferView = getDepthStencilView();
 	m_CommandList->OMSetRenderTargets(1, &backBufferView, true, &depthBufferView);
+	dx::shader_program_dx::clearHeap();
+	dx::shader_program_dx::setGPUHeap(m_CommandList);
 }
 
 

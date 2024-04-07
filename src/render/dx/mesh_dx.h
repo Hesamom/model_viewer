@@ -13,14 +13,15 @@ namespace modelViewer::render
 		std::vector<D3D12_INPUT_ELEMENT_DESC>& getLayout();
 		unsigned int getIndicesCount();
 
-		void bindLayout(std::shared_ptr<shader_program>& program) override;
+		void bindLayout(const std::shared_ptr<shader_program>& program) override;
 		void bind() override;
-		void draw() override;
+		void drawTriangles() override;
 		void drawLines() override;
 		std::shared_ptr<res::mesh_asset> getAsset() override;
 		
 	private:
 		std::unique_ptr<buffer_vertex_dx<glm::vec3>> m_PositionBuffer;
+		std::unique_ptr<buffer_vertex_dx<glm::vec3>> m_NormalBuffer;
 		std::unique_ptr<buffer_vertex_dx<glm::vec4>> m_ColorBuffer;
 		std::unique_ptr<buffer_vertex_dx<glm::vec2>> m_UV0Buffer;
 		std::vector<D3D12_VERTEX_BUFFER_VIEW> m_VertexBufferViews;

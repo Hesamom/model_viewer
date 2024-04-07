@@ -10,11 +10,19 @@ material::material(std::shared_ptr<gfx_device>& device, const res::material_asse
     m_Info = info;
     m_Program = program;
 	m_DefaultTextures = defaultTextures;
+	m_ToBindTextures = textures;
+}
 
-    m_Program->bind();
+void material::bindProgram()
+{
+	if (m_ProgramBound)
+	{
+		return;
+	}
 	
-    applyMaterialProperties();
-	bindAllTextures(textures);
+	applyMaterialProperties();
+	bindAllTextures(m_ToBindTextures);
+	m_ProgramBound = true;
 }
 
 void material::setMVP(glm::mat4 &matrix) 
@@ -137,10 +145,6 @@ void material::bindAllTextures(const std::vector<texture_binding>& textures)
 	}
 }
 
-void material::setCullingFaceMode(res::cull_face_mode mode)
-{
-	m_Program->setCullFaceMode(m_Info.propertySet.cullFaceMode);
-}
 
 void material::bind() {
 	
@@ -153,8 +157,6 @@ void material::setCameraPosition(glm::vec3 position) {
 }
 
 void material::setDirectionalLight(const light_directional &light) {
-    
-    m_Program->bind();
 	
 	auto direction = light.direction;
 	m_LightDirUniform.setValue(direction, *m_Program, true);

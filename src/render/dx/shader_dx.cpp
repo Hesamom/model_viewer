@@ -53,16 +53,17 @@ void shader_dx::compileToByteCode()
 	
 	if(errors != nullptr)
 	{
-		std::cerr << ((char*)errors->GetBufferPointer());
+		std::cerr << "Shader compilation Error, asset:" << m_Asset->getPath() << "," << ((char*)errors->GetBufferPointer());
+		throw std::runtime_error("Shader compilation Error");
 	}
 }
 
-Microsoft::WRL::ComPtr<ID3DBlob> shader_dx::getByteCode() const
+ComPtr<ID3DBlob> shader_dx::getByteCode() const
 {
 	return m_ByteCode;
 }
 
-modelViewer::res::shaderType shader_dx::getType() const
+shaderType shader_dx::getType() const
 {
 	return m_Asset->getType();
 }

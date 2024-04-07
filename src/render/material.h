@@ -80,9 +80,12 @@ namespace modelViewer::render
 		void setCameraPosition(glm::vec3 position);
 		bool isReflective() const;
 
-		void setCullingFaceMode(res::cull_face_mode mode);
-
 		void bindTexture(texture_binding& binding);
+
+		void bindProgram();
+
+		bool m_ProgramBound = false;
+		std::vector<texture_binding> m_ToBindTextures;
 	};
 }
 

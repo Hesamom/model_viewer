@@ -71,39 +71,59 @@ int shader_program_gl::getAttributeLocation(const std::string& attributeName)
     return glGetAttribLocation(m_ProgramId, attributeName.c_str());
 }
 
+//TODO refactor this to query the uniforms at the ctor and use a map for fast check 
 int shader_program_gl::getUniformLocation(const std::string& uniformName, bool optional) const {
-	
+
+	glUseProgram(m_ProgramId);
     int loc = glGetUniformLocation(m_ProgramId, uniformName.c_str());
 	if(loc == -1 && !optional)
 	{
 		throw std::runtime_error("uniform: " + uniformName + " not found");
 	}
+	return loc;
 }
 
 void shader_program_gl::setUniform(const std::string& name, glm::vec3& vec3, bool optional) {
-     glUniform3f(getUniformLocation(name, optional), vec3.x,vec3.y,vec3.z);
+	const int loc = getUniformLocation(name, optional);
+	if (loc > -1) {
+		glUniform3f(loc, vec3.x,vec3.y,vec3.z);
+	}
 }
 
 void shader_program_gl::setUniform(const std::string& name, glm::vec4& vec4, bool optional) {
-    glUniform4f(getUniformLocation(name, optional), vec4.x,vec4.y,vec4.z,vec4.w);
+	const int loc = getUniformLocation(name, optional);
+	if (loc > -1) {
+		glUniform4f(loc, vec4.x,vec4.y,vec4.z,vec4.w);
+	}
 }
 
 void shader_program_gl::setUniform(const std::string& name, float value, bool optional) {
-    glUniform1f(getUniformLocation(name, optional), value);
+	const int loc = getUniformLocation(name, optional);
+	if (loc > -1) {
+		glUniform1f(loc, value);
+	}
 }
 
 void shader_program_gl::setUniform(const std::string& name, int value, bool optional) {
-    glUniform1i(getUniformLocation(name, optional), value);
+	const int loc = getUniformLocation(name, optional);
+	if (loc > -1) {
+		glUniform1i(loc, value);
+	}
 }
 
 void shader_program_gl::setUniform(const std::string& name, glm::mat4& mat, bool optional) {
-    glUniformMatrix4fv(getUniformLocation(name, optional), 1, false, glm::value_ptr(mat));
+	const int loc = getUniformLocation(name, optional);
+	if (loc > -1) {
+		glUniformMatrix4fv(loc, 1, false, glm::value_ptr(mat));
+	}
 }
 
 void shader_program_gl::setUniform(const std::string& name, bool value, bool optional)
 {
-	//TODO have to verify this 
-	glUniform1i(getUniformLocation(name, optional), value);
+	const int loc = getUniformLocation(name, optional);
+	if (loc > -1) {
+		glUniform1i(loc, value);
+	}
 }
 
 
@@ -183,16 +203,17 @@ void shader_program_gl::validateLinking()
 	}
 }
 
-void shader_program_gl::applyPipelineState()
-{
+void shader_program_gl::applyPipelineState() const {
 	switch (m_FaceMode) {
 		case cull_face_mode::front:
 			glEnable(GL_CULL_FACE);
 			glCullFace(GL_FRONT);
+			
 			break;
 		case cull_face_mode::back:
 			glEnable(GL_CULL_FACE);
 			glCullFace(GL_BACK);
+			break;
 		case cull_face_mode::disabled:
 			glDisable(GL_CULL_FACE);
 			break;
@@ -288,6 +309,17 @@ bool shader_program_gl::bindTexture(const std::string& name, std::shared_ptr<ren
 void shader_program_gl::setAlphaBlending(bool enabled)
 {
 	m_AlphaBlending = enabled;
+}
+
+topology_mode shader_program_gl::getTopology()
+{
+	return m_Topology;
+}
+
+void shader_program_gl::setTopology(topology_mode topology)
+{
+	//TODO maybe use it somewhere 
+	m_Topology = topology;
 }
 
 

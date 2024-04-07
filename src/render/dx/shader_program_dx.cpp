@@ -1,4 +1,5 @@
 ﻿#include "shader_program_dx.h"
+#include "dx_util.h"
 #include <d3dcompiler.h>
 
 using namespace modelViewer::render;
@@ -303,7 +304,7 @@ void shader_program_dx::createPipelineState(std::vector<D3D12_INPUT_ELEMENT_DESC
 	m_PsoDescription.SampleDesc.Count = 1;
 	m_PsoDescription.SampleDesc.Quality = 0;
 	m_PsoDescription.DSVFormat = mDepthStencilFormat;
-	m_Device->CreateGraphicsPipelineState(&m_PsoDescription, IID_PPV_ARGS(&m_PSO));
+	attempt(m_Device->CreateGraphicsPipelineState(&m_PsoDescription, IID_PPV_ARGS(&m_PSO)));
 }
 
 void shader_program_dx::bind()
@@ -415,7 +416,7 @@ bool shader_program_dx::hasUniform(const std::string& name) const
 
 void shader_program_dx::updatePipeline()
 {
-	m_Device->CreateGraphicsPipelineState(&m_PsoDescription, IID_PPV_ARGS(&m_PSO));
+	attempt(m_Device->CreateGraphicsPipelineState(&m_PsoDescription, IID_PPV_ARGS(&m_PSO)));
 }
 
 void shader_program_dx::setDepthMap(bool enable)
@@ -472,13 +473,19 @@ void shader_program_dx::bindTexture(int slotIndex, std::shared_ptr<render::textu
 
 void shader_program_dx::clearHeap()
 {
-	m_CBV_SRV_UAV_GPUHeap->clear();
+	if (m_CBV_SRV_UAV_GPUHeap)
+	{
+		m_CBV_SRV_UAV_GPUHeap->clear();
+	}
 }
 
 void shader_program_dx::setGPUHeap(ComPtr<ID3D12GraphicsCommandList>& commandList)
 {
-	ID3D12DescriptorHeap* descriptorHeaps[] = {m_CBV_SRV_UAV_GPUHeap->getHeap() };
-	commandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+	if (m_CBV_SRV_UAV_GPUHeap)
+	{
+		ID3D12DescriptorHeap* descriptorHeaps[] = {m_CBV_SRV_UAV_GPUHeap->getHeap() };
+		commandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+	}
 }
 
 int shader_program_dx::getTextureSlot(const std::string& textureName)
@@ -503,6 +510,34 @@ bool shader_program_dx::bindTexture(const std::string& name, std::shared_ptr<ren
 		return true;
 	}
 	return false;
+}
+
+void shader_program_dx::setTopology(topology_mode topology)
+{
+	if	(m_CurrentTopology == topology)
+	{
+		return;
+	}
+	
+	switch (topology) {
+
+		case topology_mode::triangles:
+			m_PsoDescription.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+			break;
+		case topology_mode::lines:
+			m_PsoDescription.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+		case topology_mode::point:
+			m_PsoDescription.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
+			break;
+	}
+	
+	m_CurrentTopology = topology;
+	updatePipeline();
+}
+
+topology_mode shader_program_dx::getTopology()
+{
+	return m_CurrentTopology;
 }
 
 

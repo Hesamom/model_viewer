@@ -1,6 +1,7 @@
-﻿#include <comdef.h>
+﻿
 #include "texture_dx.h"
 #include "../../resource/DDSTextureLoader.h"
+#include "dx_util.h"
 #include "../../common/string_util.h"
 
 using namespace modelViewer::render::dx;
@@ -62,21 +63,13 @@ void texture_dx::createTextureFromRawData(modelViewer::render::texture_setup& se
 		D3D12_RESOURCE_FLAG_NONE
 	);
 
-	auto result = device->CreateCommittedResource(
+	attempt(device->CreateCommittedResource(
 		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 		D3D12_HEAP_FLAG_NONE,
 		&desc,
 		D3D12_RESOURCE_STATE_COMMON,
 		nullptr,
-		IID_PPV_ARGS(&m_Resource)
-	);
-	if (FAILED(result))
-	{
-		_com_error err(result);
-		std::wstring msg = err.ErrorMessage();
-		std::cerr << "Failed to create texture from resource." << ConvertWideToANSI(msg) << std::endl;
-		throw std::runtime_error("Failed to create texture from resource");
-	}
+		IID_PPV_ARGS(&m_Resource)));
 	
 	std::vector<D3D12_SUBRESOURCE_DATA> subresources;
 	subresources.reserve(setup.assets.size());

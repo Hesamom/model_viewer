@@ -103,11 +103,18 @@ std::shared_ptr<mesh> generatePlaneMesh(const model_platform_info& info, gfx_dev
 	indices->emplace_back(0);
 	indices->emplace_back(2);
 	indices->emplace_back(3);
+
+	auto UV0 = std::make_shared<std::vector<glm::vec2>>();
+	UV0->emplace_back(0, 0);
+	UV0->emplace_back(0, 1);
+	UV0->emplace_back(1, 0);
+	UV0->emplace_back(1, 1);
 	
 	auto meshAsset = std::make_shared<mesh_asset>();
 	meshAsset->positions = positions;
 	meshAsset->indices = indices;
 	meshAsset->normals = normals;
+	meshAsset->UV0 = UV0;
 	meshAsset->name = "plane";
 
 	auto meshPtr = device.createMesh(meshAsset);
@@ -134,8 +141,8 @@ std::shared_ptr<object_renderer> model_platform_buffer::generateGrid(object_fact
 	auto defaults = objectFactory.getDefaultTextures();
 	auto mat = std::make_shared<material>(device, materialInfo, textures, program, defaults);
 	auto grid = std::make_shared<object_renderer>(mat, mesh, "platform_grid");
-	
-	grid->setRenderMode(render_mode::lines);
+
+	mat->getShaderProgram()->setTopology(topology_mode::lines);
 	grid->setCastShadow(false);
 	grid->setReceiveShadows(false);
 	grid->setCastReflection(false);
@@ -157,7 +164,7 @@ std::shared_ptr<object_renderer> model_platform_buffer::generatePlane(object_fac
 	auto diffuseTextureAsset = objectFactory.getTextureLoader().load(m_PlaneDiffuseTexture,3);
 	texture_setup textureSetup;
 	textureSetup.assets.push_back(diffuseTextureAsset);
-	auto diffuseTexture = std::make_shared<texture_2D_gl>(textureSetup);
+	auto diffuseTexture = device->createTexture2D(textureSetup);
 	
 	std::vector<texture_binding> textures;
 	texture_binding binding;

@@ -1,12 +1,14 @@
-﻿#define GLM_FORCE_LEFT_HANDED
+﻿#include "src/window/modelviewer_app.h"
 
-#include "src/window/modelviewer_app.h"
-#include "src/window/window_win32.h"
-#include "src/render/dx/gfx_device_dx.h"
-#include "src/render/gl/gfx_device_gl.h"
+#ifdef GFX_DX
+	#define GLM_FORCE_LEFT_HANDED
+	#include "src/window/window_win32.h"
+	#include "src/render/dx/gfx_device_dx.h"
+#else
+	#include "src/render/gl/gfx_device_gl.h"
+#endif
 
-void getWindow(bool dx);
-bool isUsingDX(int count, const char** cmd);
+void initWindow();
 bool attachRenderdoc(int count, const char** cmd);
 bool containsArg(int count, const char** cmd, const char* arg);
 
@@ -24,7 +26,7 @@ int main(int count, const char** cmd)
 		renderDoc = renderdoc;
 	}
 
-	getWindow(isUsingDX(count, cmd));
+	initWindow();
 	
 	if(renderDoc)
 	{
@@ -33,27 +35,27 @@ int main(int count, const char** cmd)
 	}
 
 	std::shared_ptr<modelViewer::debug::tracer> tracer = renderDoc;
-	modelviewer_app app(window, device, tracer, true);
+	modelviewer_app app(window, device, tracer, false);
 	
 	app.loop();
 	
     return 0;
 }
 
-void getWindow(bool dx)
+void initWindow()
 {
-	if(dx)
+#ifdef GFX_DX
 	{
 		auto win32 = std::make_shared<window_win32>(1024,1024, "dx12", false);
 		auto dx = std::make_shared<modelViewer::render::gfx_device_dx>(win32);
 		device = dx;
 		window = win32;
-		return;
 	}
-
-	auto winGL =  std::make_shared<window_glfw>(1024, 1024, "Playground", false);
+#else
+	auto winGL =  std::make_shared<window_glfw>(1024, 1024, "gl", false);
 	device = std::make_shared<modelViewer::render::gfx_device_gl>(winGL);
 	window = winGL;
+#endif
 }
 
 bool attachRenderdoc(int count, const char** cmd)
@@ -61,11 +63,6 @@ bool attachRenderdoc(int count, const char** cmd)
 	return containsArg(count, cmd, "-doc");
 }
 
-
-bool isUsingDX(int count, const char** cmd)
-{
-	return containsArg(count, cmd, "-dx");
-}
 
 bool containsArg(int count, const char** cmds, const char* arg)
 {

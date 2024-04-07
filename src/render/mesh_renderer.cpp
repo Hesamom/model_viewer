@@ -25,25 +25,21 @@ void mesh_renderer::render(glm::mat4 view, glm::mat4 projection)
 
 	m_Mesh->bind();
 
-	switch (m_Mode)
+	switch (m_Material->getShaderProgram()->getTopology())
 	{
-		case render_mode::triangles:
-			m_Mesh->draw();
+		case topology_mode::triangles:
+			m_Mesh->drawTriangles();
 			break;
-		case render_mode::lines:
+		case topology_mode::lines:
 			m_Mesh->drawLines();
 			break;
 	}
 }
 
-void mesh_renderer::setRenderMode(render_mode mode)
-{
-	m_Mode = mode;
-}
 
 void mesh_renderer::renderShadow() const {
 	m_Mesh->bind();
-	m_Mesh->draw();
+	m_Mesh->drawTriangles();
 }
 
 std::shared_ptr<material> mesh_renderer::getMaterial()

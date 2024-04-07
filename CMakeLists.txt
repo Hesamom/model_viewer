@@ -18,11 +18,14 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_COMPILE_WARNING_AS_ERROR OFF)
 file(GLOB_RECURSE SRC_FILES src/*)
 
-if (DX_12)
+if (dx_12)
+    add_compile_definitions("GFX_DX")
     add_executable(model_viewer main.cpp ${SRC_FILES})
 else ()
+    add_compile_definitions("GFX_GL")
     add_executable(model_viewer main.cpp ${SRC_FILES})
 endif ()
+
 
 if (USE_PRE_COMPILED_HEADERS)
     target_precompile_headers(model_viewer PRIVATE std_pch.h)
@@ -38,6 +41,7 @@ endif ()
 if (MSVC)
     add_definitions(/permissive /D "_WINDOWS" /D "_UNICODE" /D "UNICODE")
 endif ()
+
 
 target_include_directories(model_viewer PRIVATE libs/include)
 find_library(ASSIMP_LIB assimp libs/libs)

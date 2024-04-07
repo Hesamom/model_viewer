@@ -25,6 +25,8 @@ namespace modelViewer::render::dx
 		void setCullFaceMode(res::cull_face_mode mode) override;
 		void setAlphaBlending(bool enabled) override;
 		void setDepthMap(bool enable) override;
+		void setTopology(topology_mode topology) override;
+		topology_mode getTopology() override;
 		
 		bool hasUniform(const std::string &name) const override;
 		void setUniform(const std::string& name, float value, bool optional) override;
@@ -74,6 +76,8 @@ namespace modelViewer::render::dx
 		static CD3DX12_STATIC_SAMPLER_DESC staticSamplers[6];
 
 		shader_texture_type getTextureType(D3D_SRV_DIMENSION dimension);
+
+		topology_mode m_CurrentTopology = topology_mode::triangles;
 	};
 }
 

@@ -123,7 +123,7 @@ void modelViewer::render::dx::descriptor_heap::copyTo(UINT start,
 		throw std::invalid_argument("destination descriptor type mismatch");
 	}
 	
-	if(start >= m_Size)
+	if(start > m_Size)
 	{
 		throw std::invalid_argument("start index out of range");
 	}

@@ -46,7 +46,7 @@ modelViewer::render::mesh_gl::~mesh_gl() {
     
 }
 
-void modelViewer::render::mesh_gl::draw()
+void modelViewer::render::mesh_gl::drawTriangles()
 {
 	m_VertexArray.bind();
     m_IndexBuffer->drawShaded();
@@ -61,7 +61,7 @@ std::shared_ptr<modelViewer::res::mesh_asset> modelViewer::render::mesh_gl::getA
     return m_Asset;
 }
 
-void modelViewer::render::mesh_gl::bindLayout(std::shared_ptr<shader_program>& program)
+void modelViewer::render::mesh_gl::bindLayout(const std::shared_ptr<shader_program>& program)
 {
 	auto programGL = std::dynamic_pointer_cast<shader_program_gl>(program);
 	assert(programGL);

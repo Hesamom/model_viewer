@@ -11,9 +11,10 @@ using namespace modelViewer::common;
 
 glm::vec3 getPosition(float pitch, float yaw, float zoomLevel);
 
-void modelviewer_app::onRender(float elapsed) {
+void modelviewer_app::onRender(float elapsed) 
+{
     addNewModels();
-	m_Renderer->render(m_Scene, m_Camera, true, true);
+	m_Renderer->render(m_Scene, m_Camera, false, false);
 }
 
 
@@ -35,6 +36,7 @@ modelviewer_app::modelviewer_app(std::shared_ptr<window>& window, std::shared_pt
 	}
 	else {
 		m_Renderer = std::make_unique<renderer_forward>(m_Device, m_ObjectFactory);
+		//m_Renderer->setClearMode(clear_mode::skybox);
 		m_Renderer->setClearFlag(glm::vec4{0,0,0,1});
 		m_Renderer->setReflectionPosition({0,0,0});
 		m_Renderer->setReflectionClearFlag({0,0,0,0});
@@ -45,9 +47,9 @@ modelviewer_app::modelviewer_app(std::shared_ptr<window>& window, std::shared_pt
 		info.lineSpace = 1;
 
 		auto plane = m_Platform.generatePlane(m_ObjectFactory, info, m_Device);
-		auto grid = m_Platform.generateGrid(m_ObjectFactory, info, m_Device);
+		//auto grid = m_Platform.generateGrid(m_ObjectFactory, info, m_Device);
 		m_Scene.addStaticObject(plane);
-		m_Scene.addStaticObject(grid);
+		//m_Scene.addStaticObject(grid);
 	}
 
 	m_Window->setOnMouseButtonCallback(std::bind(&modelviewer_app::onMouseButtonCallback, this, std::placeholders::_1));
@@ -110,11 +112,13 @@ glm::vec3 getPosition(float pitch, float yaw, float zoomLevel)
 }
 
 void modelviewer_app::onScrollChanged(int yOffset) {
-    
-    //down -1, up 1
+	
+	std::cout << "offset: " << yOffset << "\n";
+	//down -1, up 1
     m_ZoomLevel += yOffset * -1 * 3;
     m_ZoomLevel = std::clamp<float>(m_ZoomLevel, 1, 50);
-    
+
+	std::cout << "zoom lvl: " << m_ZoomLevel << "\n";
     updateCameraPosition();
 }
 
@@ -133,7 +137,7 @@ void modelviewer_app::onMouseButtonCallback(window::mouse_event event) {
 		m_PitchAngle = std::clamp<float>(m_PitchAngle, PitchAngleRange.x,PitchAngleRange.y);
 
 		auto deltaX = m_LastMousePosition.x - event.x;
-		m_YawAngle += deltaX * AngleChangeMul;
+		m_YawAngle += -deltaX * AngleChangeMul;
 
 		updateCameraPosition();
 	}
@@ -318,9 +322,11 @@ void modelviewer_app::displayLightPanel() {
 	ImGui::PopStyleColor();
 }
 
-void modelviewer_app::updateCameraPosition() {
+void modelviewer_app::updateCameraPosition()
+{
     auto pos = getPosition(m_PitchAngle, m_YawAngle, m_ZoomLevel);
 	m_Camera.setPosition(pos);
+	//std::cout << "camera pos: (" << pos.x << "," << pos.y << "," << pos.z << ") \n";
 }
 
 

@@ -52,12 +52,14 @@ object_renderer::object_renderer(std::vector<std::shared_ptr<material>>& materia
 
 	for (int i = 0; i < meshes.size(); ++i) {
 		std::string meshName = m_Name + "_" + std::to_string(i);
+		meshes[i]->bindLayout(materials[i]->getShaderProgram());
+		materials[i]->bindProgram();
+		
 		auto meshRender = std::make_shared<mesh_renderer>(materials[i], meshes[i], m_Transform, meshName);
 		m_MeshRenders.push_back(meshRender);
 	}
 
 	setReceiveShadows(true);
-	
 	setCastReflection(true);
 	setReflectionMode(reflection_mode::disabled);
     m_BaseBoundingBox = calculateBoundingBox(meshes);
@@ -70,6 +72,8 @@ object_renderer::object_renderer(std::shared_ptr<material>& material,
 {
 	m_Name = name;
 	std::string meshName = m_Name + "_0";
+	mesh_1->bindLayout(material->getShaderProgram());
+	material->bindProgram();
 	auto meshRender = std::make_shared<mesh_renderer>(material, mesh_1, m_Transform, meshName);
 	m_MeshRenders.push_back(meshRender);
 
@@ -129,12 +133,6 @@ std::vector<std::shared_ptr<mesh_renderer>>& object_renderer::getRenderers()
 	return m_MeshRenders;
 }
 
-void object_renderer::setRenderMode(render_mode mode)
-{
-	for (auto& renderer : m_MeshRenders) {
-		renderer->setRenderMode(mode);
-	}
-}
 
 bool object_renderer::getCastReflection() const
 {

@@ -52,13 +52,50 @@ namespace modelViewer::res::literals
 		const std::string skybox_front = skybox_sample_path + "/front.jpg";
 		const std::string skybox_back = skybox_sample_path + "/back.jpg";
 	}
+	
+	
 	namespace shaders
 	{
-		const std::string default_path = "res/shaders/sample";
+#ifdef GFX_DX
+		const std::string default_path = "res/shaders/dx";
 		const std::string include_path = "res/shaders/include/";
+			
+		const std::string skybox_vert = default_path + "/skybox.hlsl";
+		const std::string skybox_frag = skybox_vert;
+
+		const std::string sample_vert = default_path + "/sample.hlsl";
+		const std::string sample_frag = sample_vert;
+		
+		const std::string lit_vert = default_path + "/phong_phong.hlsl";
+		const std::string lit_frag = lit_vert;
+
+		const std::string line_vert = default_path + "/lines.hlsl";
+		const std::string line_frag = line_vert;
+
+		//TODO port these shader to hlsl:
+		const std::string shadow_vert = default_path + "/simple_depth_vert.glsl";
+		const std::string shadow_frag = default_path + "/simple_depth_frag.glsl";
+
+		const std::string lit_vertex_vert = default_path + "/phong_gouraud_vert.glsl";
+		const std::string lit_vertex_frag = default_path + "/phong_gouraud_frag.glsl";
+		
+		const std::string normal_map_vert = default_path + "/phong_phong_normal_map_vert.glsl";
+		const std::string normal_map_frag = default_path + "/phong_phong_normal_map_frag.glsl";
+
+		const std::string parallax_vert = normal_map_vert;
+		const std::string parallax_frag = default_path + "/phong_phong_parallax_mapping_frag.glsl";;
+		
+#endif
+#ifdef GFX_GL
+	
+		const std::string default_path = "res/shaders/gl/sample";
+		const std::string include_path = "res/shaders/gl/include/";
 		
 		const std::string shadow_vert = default_path + "/simple_depth_vert.glsl";
 		const std::string shadow_frag = default_path + "/simple_depth_frag.glsl";
+		
+		const std::string sample_vert = default_path + "/sample_vert.glsl";
+		const std::string sample_frag = default_path + "/sample_frag.glsl";
 
 		const std::string lit_vertex_vert = default_path + "/phong_gouraud_vert.glsl";
 		const std::string lit_vertex_frag = default_path + "/phong_gouraud_frag.glsl";
@@ -77,6 +114,7 @@ namespace modelViewer::res::literals
 
 		const std::string skybox_vert = default_path + "/skybox_vert.glsl";
 		const std::string skybox_frag = default_path + "/skybox_frag.glsl";
+#endif
 	}
 	
 }

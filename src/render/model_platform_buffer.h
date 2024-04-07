@@ -21,8 +21,8 @@ namespace modelViewer::render
 		const std::string m_GridVertShaderPath = res::literals::shaders::line_vert;
         const std::string m_GridFragShaderPath = res::literals::shaders::line_frag;
 
-		const std::string m_PlaneVertShaderPath = res::literals::shaders::lit_vert;
-		const std::string m_PlaneFragShaderPath = res::literals::shaders::lit_frag;
+		const std::string m_PlaneVertShaderPath = res::literals::shaders::sample_vert;
+		const std::string m_PlaneFragShaderPath = res::literals::shaders::sample_frag;
 
 		const std::string m_PlaneDiffuseTexture = res::literals::textures::default_white;
 		

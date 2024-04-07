@@ -25,7 +25,6 @@ namespace modelViewer::render
         void setTransform(const common::transform& t);
 		
         void render(glm::mat4 view, glm::mat4 projection) override;
-		void setRenderMode(render_mode mode);
 		void setCastShadow(bool enabled);
 		void setReceiveShadows(bool enabled);
 		bool getReceiveShadows();

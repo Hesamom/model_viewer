@@ -30,6 +30,8 @@ namespace modelViewer::render
     	void setCullFaceMode(res::cull_face_mode mode) override;
 		void setAlphaBlending(bool enabled) override;
 		void setDepthMap(bool enable) override;
+		void setTopology(topology_mode topology) override;
+		topology_mode getTopology() override;
 		
         void setUniform(const std::string& name, glm::vec3& vec3, bool optional) override;
         void setUniform(const std::string& name, glm::vec4& vec4, bool optional) override;
@@ -49,7 +51,7 @@ namespace modelViewer::render
 		std::vector<shader_texture_slot> m_TextureSlots;
 		std::vector<std::shared_ptr<texture_gl>> m_BoundTextures;
 		
-		void applyPipelineState();
+		void applyPipelineState() const;
 		void reflectTextures();
 	
 		int getActiveUniformsCount();
@@ -57,6 +59,7 @@ namespace modelViewer::render
 		void bindTextures();
 
 		bool m_AlphaBlending;
+		topology_mode m_Topology = topology_mode::triangles;
 	}; 
 }
 

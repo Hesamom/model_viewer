@@ -54,7 +54,8 @@ namespace modelViewer::render
 		std::shared_ptr<framebuffer> createFramebuffer(std::string& name) override;
 
 	private:
-
+		void openCommandList();
+		void closeCommandList();
 		void initContext();
 		void createDescriptorHeaps();
 		void createSwapChain();
@@ -71,10 +72,12 @@ namespace modelViewer::render
 		void createFence();
 		D3D12_CPU_DESCRIPTOR_HANDLE getCurrentBackBufferView() const;
 		D3D12_CPU_DESCRIPTOR_HANDLE getDepthStencilView() const;
+		
 		void createSRVHeap();
 		ID3D12Resource* getCurrentBackBuffer();
 		void createSampleGeometry();
-		
+		void createSkyboxShaderSamples();
+		void testRender();
 
 		const int meshCount = 2;
 		std::vector<std::shared_ptr<dx::shader_program_dx>> m_SamplePrograms;
@@ -110,10 +113,11 @@ namespace modelViewer::render
 	
 		UINT mCurrBackBuffer = 0;
 		bool m4xMsaaState = false;
+		bool m_IsCommandListOpen = false;
 		UINT m4xMsaaQuality = 0;
 		std::shared_ptr<dx::texture_dx> m_SampleTexture;
 		std::shared_ptr<texture> m_SkyBoxTexture;
-		void createSkyboxShaderSamples();
+		
 	};
 }
 

@@ -7,18 +7,10 @@
 
 namespace modelViewer::render
 {
-	enum class render_mode
-	{
-		triangles,
-		lines
-	};
-
-	
 	class mesh_renderer {
 	
 	public:
 		mesh_renderer(std::shared_ptr<material>& material, std::shared_ptr<mesh>& mesh, common::transform& transform, std::string& name);
-		void setRenderMode(render_mode mode);
 		void render(glm::mat4 view, glm::mat4 projection);
 		void renderShadow() const;
 		std::shared_ptr<material> getMaterial();
@@ -35,7 +27,6 @@ namespace modelViewer::render
 		common::transform& m_Transform;
 		std::shared_ptr <material> m_Material;
 		std::shared_ptr <mesh> m_Mesh;
-		render_mode m_Mode = render_mode::triangles;
 		bool m_ReceivesShadow = true;
 		std::string m_Name;
 		reflection_mode m_ReflectionMode;

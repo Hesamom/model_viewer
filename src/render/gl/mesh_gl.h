@@ -13,9 +13,9 @@ namespace modelViewer::render {
     class mesh_gl : public mesh {
 
     public:
-        void bindLayout(std::shared_ptr<shader_program> &program) override;
+        void bindLayout(const std::shared_ptr<shader_program> &program) override;
         void bind() override;
-        void draw() override;
+        void drawTriangles() override;
         void drawLines() override;
         std::shared_ptr<res::mesh_asset> getAsset() override;
         explicit mesh_gl(std::shared_ptr<res::mesh_asset>& asset);

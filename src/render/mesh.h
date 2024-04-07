@@ -15,9 +15,9 @@ namespace modelViewer::render
     {
         public:
 		virtual ~mesh() = default;
-		virtual void bindLayout(std::shared_ptr<shader_program>& program) = 0;
+		virtual void bindLayout(const std::shared_ptr<shader_program>& program) = 0;
         virtual void bind()  = 0;
-        virtual void draw()  = 0;
+        virtual void drawTriangles()  = 0;
         virtual void drawLines()  = 0;
         virtual std::shared_ptr<res::mesh_asset> getAsset()  = 0;
     };
