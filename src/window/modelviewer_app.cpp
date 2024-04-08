@@ -34,9 +34,10 @@ modelviewer_app::modelviewer_app(std::shared_ptr<window>& window, std::shared_pt
 		m_Renderer = std::make_unique<renderer_simple>(m_Device);
 		m_Renderer->setClearFlag(glm::vec4{1,0,0,1});
 	}
-	else {
+	else
+	{
 		m_Renderer = std::make_unique<renderer_forward>(m_Device, m_ObjectFactory);
-		//m_Renderer->setClearMode(clear_mode::skybox);
+		m_Renderer->setClearMode(clear_mode::skybox);
 		m_Renderer->setClearFlag(glm::vec4{0,0,0,1});
 		m_Renderer->setReflectionPosition({0,0,0});
 		m_Renderer->setReflectionClearFlag({0,0,0,0});

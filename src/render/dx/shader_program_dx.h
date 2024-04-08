@@ -24,7 +24,7 @@ namespace modelViewer::render::dx
 		
 		void setCullFaceMode(res::cull_face_mode mode) override;
 		void setAlphaBlending(bool enabled) override;
-		void setDepthMap(bool enable) override;
+		void setDepthMap(res::depth_buffer_options& options) override;
 		void setTopology(topology_mode topology) override;
 		topology_mode getTopology() override;
 		

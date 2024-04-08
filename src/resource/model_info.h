@@ -80,18 +80,37 @@ namespace modelViewer::res
 		T value;
 	};
 	
-    
+	enum depth_buffer_compare
+	{
+		never,
+		less,
+		equal,
+		lessOrEqual,
+		greater,
+		notEqual,
+		greaterOrEqual,
+		always,
+	};
+	
+    struct depth_buffer_options
+	{
+	    bool enabled = true;
+    	bool writeEnabled = true;
+    	depth_buffer_compare compare = less;
+    };
     struct material_property_set
     {
-		std::vector<material_property<float>> floats;
-		std::vector<material_property<color>> colors;
-		std::vector<material_property<bool>> booleans;
-		std::vector<material_property<int>> ints;
-		
-	   bool depthWriteEnabled = true;
-	   bool alphaBlendingEnabled = false;
-	   int renderQueue = render_queue_opaque;
-	   cull_face_mode cullFaceMode = cull_face_mode::back;
+    	std::vector<material_property<float>> floats;
+    	std::vector<material_property<color>> colors;
+    	std::vector<material_property<bool>> booleans;
+    	std::vector<material_property<int>> ints;
+
+    	//TODO add stencil support 
+    	depth_buffer_options depthOptions;
+    	//TODO add more options to blending such as factors and operation for supporting more effects 
+    	bool alphaBlendingEnabled = false;
+    	int renderQueue = render_queue_opaque;
+    	cull_face_mode cullFaceMode = cull_face_mode::back;
 	};
     
     struct material_asset

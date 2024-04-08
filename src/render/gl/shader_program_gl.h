@@ -29,7 +29,7 @@ namespace modelViewer::render
 		bool hasUniform(const std::string &name) const override;
     	void setCullFaceMode(res::cull_face_mode mode) override;
 		void setAlphaBlending(bool enabled) override;
-		void setDepthMap(bool enable) override;
+		void setDepthMap(res::depth_buffer_options& options) override;
 		void setTopology(topology_mode topology) override;
 		topology_mode getTopology() override;
 		
@@ -46,7 +46,7 @@ namespace modelViewer::render
 
     private:
     	unsigned int m_ProgramId = 0;
-		bool m_DepthEnabled = false;
+        res::depth_buffer_options m_DepthOptions;
 		res::cull_face_mode m_FaceMode = res::cull_face_mode::back;
 		std::vector<shader_texture_slot> m_TextureSlots;
 		std::vector<std::shared_ptr<texture_gl>> m_BoundTextures;

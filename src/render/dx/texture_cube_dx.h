@@ -8,7 +8,7 @@ namespace modelViewer::render::dx
 {
 	class texture_cube_dx : public texture_dx {
 	public:
-		texture_cube_dx(modelViewer::render::texture_setup& texture_setup, Microsoft::WRL::ComPtr<ID3D12Device>& device,
+		texture_cube_dx(texture_setup& texture_setup, Microsoft::WRL::ComPtr<ID3D12Device>& device,
 			Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList);
 		
 		shader_texture_type getType() const override;

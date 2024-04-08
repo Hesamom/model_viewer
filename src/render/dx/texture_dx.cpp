@@ -86,7 +86,7 @@ void texture_dx::createTextureFromRawData(modelViewer::render::texture_setup& se
 
 	// Transition the texture to a copy destination state
 	auto uploadHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);;
-	UINT64 requiredSize = GetRequiredIntermediateSize( m_Resource.Get(), 0, subresources.size());
+	UINT64 requiredSize = GetRequiredIntermediateSize( m_Resource.Get(), 0, 1) * subresources.size();
 
 	device->CreateCommittedResource(
 		&uploadHeapProperties,

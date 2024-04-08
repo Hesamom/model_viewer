@@ -52,9 +52,6 @@ object_renderer::object_renderer(std::vector<std::shared_ptr<material>>& materia
 
 	for (int i = 0; i < meshes.size(); ++i) {
 		std::string meshName = m_Name + "_" + std::to_string(i);
-		meshes[i]->bindLayout(materials[i]->getShaderProgram());
-		materials[i]->bindProgram();
-		
 		auto meshRender = std::make_shared<mesh_renderer>(materials[i], meshes[i], m_Transform, meshName);
 		m_MeshRenders.push_back(meshRender);
 	}

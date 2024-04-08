@@ -1,4 +1,4 @@
-TextureCube cubeTexture : register(t0);
+TextureCube u_skybox : register(t0);
 
 SamplerState samPointWrap : register(s0); 
 SamplerState samPointClamp : register(s1); 
@@ -31,14 +31,16 @@ VertexOut VS(VertexIn vin)
 	VertexOut vout;
 	
 	// Transform to homogeneous clip space.
-	vout.Pos = mul(float4(vin.Pos, 1.0f), m_Projection * m_MV);
+	vout.Pos = mul(float4(vin.Pos, 1.0f),  m_MV);
+	vout.Pos = mul(vout.Pos,  m_Projection);
 	vout.UV = vin.Pos.xyz;
     return vout;
 }
 
 float4 PS(VertexOut pin) : SV_Target
 {
-    return cubeTexture.Sample(samPointWrap, pin.UV);
+    return u_skybox.Sample(samPointWrap, pin.UV);
+	//return float4(0,1,0,1);
 }
 
 

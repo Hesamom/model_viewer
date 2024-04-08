@@ -203,6 +203,30 @@ void shader_program_gl::validateLinking()
 	}
 }
 
+GLenum getDepthCompareFunction(depth_buffer_compare compare)
+{
+	switch (compare) {
+		case depth_buffer_compare::never:
+			return GL_NEVER;
+		case depth_buffer_compare::always:
+			return GL_ALWAYS;
+		case depth_buffer_compare::lessOrEqual:
+			return GL_LEQUAL;
+		case depth_buffer_compare::less:
+			return GL_LESS;
+		case depth_buffer_compare::greaterOrEqual:
+			return GL_GEQUAL;
+		case depth_buffer_compare::greater:
+			return GL_GREATER;
+		case depth_buffer_compare::equal:
+			return GL_EQUAL;
+		case depth_buffer_compare::notEqual:
+			return GL_NOTEQUAL;
+		default:
+			throw std::runtime_error("not supported!");
+	}
+}
+
 void shader_program_gl::applyPipelineState() const {
 	switch (m_FaceMode) {
 		case cull_face_mode::front:
@@ -221,7 +245,17 @@ void shader_program_gl::applyPipelineState() const {
 			throw std::runtime_error("not imp");
 	}
 
-	glDepthMask(m_DepthEnabled);
+	if (m_DepthOptions.enabled)
+	{
+		glEnable(GL_DEPTH_TEST);
+		glDepthMask(m_DepthOptions.writeEnabled);
+		glDepthFunc(getDepthCompareFunction(m_DepthOptions.compare));
+	}
+	else
+	{
+		glDisable(GL_DEPTH_TEST);
+	}
+	
 
 	if (m_AlphaBlending)
 	{
@@ -243,9 +277,9 @@ bool shader_program_gl::hasUniform(const std::string& name) const
 	return getUniformLocation(name, true) > -1;
 }
 
-void shader_program_gl::setDepthMap(bool enable)
+void shader_program_gl::setDepthMap(depth_buffer_options& options)
 {
-	m_DepthEnabled = enable;
+	m_DepthOptions = options;
 }
 
 const std::vector<shader_texture_slot>& shader_program_gl::getTextureSlots()

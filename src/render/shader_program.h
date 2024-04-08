@@ -28,7 +28,7 @@ namespace modelViewer::render {
         virtual void bind() = 0;
 		virtual void setCullFaceMode(res::cull_face_mode mode) = 0;
 		virtual void setAlphaBlending(bool enabled) = 0;
-		virtual void setDepthMap(bool enable) = 0;
+		virtual void setDepthMap(res::depth_buffer_options& options) = 0;
 		virtual void setTopology(topology_mode topology) = 0;
 		virtual topology_mode getTopology() = 0;
 		

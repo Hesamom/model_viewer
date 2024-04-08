@@ -182,6 +182,7 @@ std::shared_ptr<object_renderer> model_platform_buffer::generatePlane(object_fac
 	materialInfo.propertySet.floats.push_back({Literals::Shininess, 1});
 	materialInfo.propertySet.floats.push_back({Literals::Reflectivity, 0.3f});
 	materialInfo.propertySet.renderQueue = render_queue_transparent;
+	materialInfo.propertySet.cullFaceMode = cull_face_mode::back;
 	auto defaults = objectFactory.getDefaultTextures();
 	auto mat = std::make_shared<material>(device, materialInfo, textures, program, defaults);
 

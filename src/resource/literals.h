@@ -66,8 +66,8 @@ namespace modelViewer::res::literals
 		const std::string sample_vert = default_path + "/sample.hlsl";
 		const std::string sample_frag = sample_vert;
 		
-		const std::string lit_vert = default_path + "/phong_phong.hlsl";
-		const std::string lit_frag = lit_vert;
+		const std::string lit_vert = sample_vert;
+		const std::string lit_frag = sample_frag;
 
 		const std::string line_vert = default_path + "/lines.hlsl";
 		const std::string line_frag = line_vert;

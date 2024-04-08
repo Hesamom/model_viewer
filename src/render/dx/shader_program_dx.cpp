@@ -366,8 +366,9 @@ void shader_program_dx::createRootSignature()
 		IID_PPV_ARGS(&m_RootSignature));
 }
 
-void shader_program_dx::setCullFaceMode(modelViewer::res::cull_face_mode mode)
+void shader_program_dx::setCullFaceMode(res::cull_face_mode mode)
 {
+	
 	switch (mode)
 	{
 		case res::cull_face_mode::disabled:
@@ -380,7 +381,6 @@ void shader_program_dx::setCullFaceMode(modelViewer::res::cull_face_mode mode)
 			m_PsoDescription.RasterizerState.CullMode = D3D12_CULL_MODE_BACK;
 			break;
 	}
-
 	updatePipeline();
 }
 
@@ -423,9 +423,35 @@ void shader_program_dx::updatePipeline()
 	attempt(m_Device->CreateGraphicsPipelineState(&temp, IID_PPV_ARGS(&m_PSO)));
 }
 
-void shader_program_dx::setDepthMap(bool enable)
+D3D12_COMPARISON_FUNC getDepthFunction(modelViewer::res::depth_buffer_compare compare)
 {
-	m_PsoDescription.DepthStencilState.DepthEnable = enable;
+	switch (compare) {
+		case modelViewer::res::never:
+			return D3D12_COMPARISON_FUNC_NEVER;
+		case modelViewer::res::less:
+			return D3D12_COMPARISON_FUNC_LESS;
+		case modelViewer::res::equal:
+			return D3D12_COMPARISON_FUNC_EQUAL;
+		case modelViewer::res::lessOrEqual:
+			return D3D12_COMPARISON_FUNC_LESS_EQUAL;
+		case modelViewer::res::greater:
+			return D3D12_COMPARISON_FUNC_GREATER;
+		case modelViewer::res::notEqual:
+			return D3D12_COMPARISON_FUNC_NOT_EQUAL;
+		case modelViewer::res::greaterOrEqual:
+			return D3D12_COMPARISON_FUNC_GREATER_EQUAL;
+		case modelViewer::res::always:
+			return D3D12_COMPARISON_FUNC_ALWAYS;
+		default:
+			throw std::runtime_error("not supported");
+	}
+}
+
+void shader_program_dx::setDepthMap(res::depth_buffer_options& options)
+{
+	m_PsoDescription.DepthStencilState.DepthEnable = options.enabled;
+	m_PsoDescription.DepthStencilState.DepthFunc = getDepthFunction(options.compare);
+	m_PsoDescription.DepthStencilState.DepthWriteMask = options.writeEnabled ? D3D12_DEPTH_WRITE_MASK_ALL : D3D12_DEPTH_WRITE_MASK_ZERO;
 	updatePipeline();
 }
 

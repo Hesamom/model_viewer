@@ -68,7 +68,7 @@ void material::applyMaterialProperties() {
 	}
 
 	//TODO the current dx imp creates a pipeline state per each of these calls which is not optimal, we need to either change the api to become chunky and contain all the options or improve dx imp by lazy constructing the pipeline state object and caching the changes 
-	m_Program->setDepthMap(m_Info.propertySet.depthWriteEnabled);
+	m_Program->setDepthMap(m_Info.propertySet.depthOptions);
 	m_Program->setCullFaceMode(m_Info.propertySet.cullFaceMode);
 	m_Program->setAlphaBlending(m_Info.propertySet.alphaBlendingEnabled);
 }

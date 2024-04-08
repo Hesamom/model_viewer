@@ -1,5 +1,4 @@
-﻿
-#include "mesh_renderer.h"
+﻿#include "mesh_renderer.h"
 #include "object_renderer.h"
 
 using namespace modelViewer::render;
