@@ -470,14 +470,14 @@ model_loader::model_loader()
 	m_DefaultMaterialAsset->shaders.emplace_back(literals::shaders::lit_vert, shaderType::vertex);
 	m_DefaultMaterialAsset->shaders.emplace_back(literals::shaders::lit_frag, shaderType::fragment);
 
-	Assimp::DefaultLogger::create("logger", Assimp::Logger::DEBUGGING);
-	auto stream = Assimp::LogStream::createDefaultStream(aiDefaultLogStream_STDOUT);
-	Assimp::DefaultLogger::get()->attachStream(stream);
+	//Assimp::DefaultLogger::create("logger", Assimp::Logger::DEBUGGING);
+	//auto stream = Assimp::LogStream::createDefaultStream(aiDefaultLogStream_STDOUT);
+	//Assimp::DefaultLogger::get()->attachStream(stream);
 }
 
 model_loader::~model_loader()
 {
-	Assimp::DefaultLogger::kill();
+	//Assimp::DefaultLogger::kill();
 }
 
 

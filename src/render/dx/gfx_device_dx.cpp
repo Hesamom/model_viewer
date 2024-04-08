@@ -169,7 +169,7 @@ void gfx_device_dx::createSRVHeap()
 {
 	D3D12_DESCRIPTOR_HEAP_DESC desc = {};
 	desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	desc.NumDescriptors = 1;
+	desc.NumDescriptors = 256;
 	desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	m_device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_SRVHeap));
 }
@@ -516,12 +516,14 @@ std::shared_ptr<framebuffer> gfx_device_dx::createFramebuffer(std::string& name)
 
 void gfx_device_dx::onPreRenderImGUI()
 {
+	openCommandList();
 	ImGui_ImplDX12_NewFrame();
 }
 
 void gfx_device_dx::onPostRenderImGUI()
 {
-	m_CommandList->SetDescriptorHeaps(1, &m_SRVHeap);
+	ID3D12DescriptorHeap* heaps[] = {m_SRVHeap.Get()};
+	m_CommandList->SetDescriptorHeaps(1, heaps);
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_CommandList.Get());
 }
 
@@ -533,7 +535,7 @@ void gfx_device_dx::onInitImGUI()
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; 
 	
 	m_Window->onInitImGUI();
-	//BUG not sure about the second arg 
+	
 	ImGui_ImplDX12_Init(m_device.Get(), SwapChainBufferCount, m_BackBufferFormat,
 		m_SRVHeap.Get(), m_SRVHeap->GetCPUDescriptorHandleForHeapStart(),
 		m_SRVHeap->GetGPUDescriptorHandleForHeapStart());

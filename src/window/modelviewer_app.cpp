@@ -748,11 +748,11 @@ void modelviewer_app::loop()
 		watch.start();
 
 		m_Window->pollEvents();
-		//onPreRenderImGUI();
-		//onRenderImGUI();
+		onPreRenderImGUI();
+		onRenderImGUI();
 		m_Device->onStartRender();
 		onRender((float)elapsed);
-		//onPostRenderImGUI();
+		onPostRenderImGUI();
 		m_Device->swapBuffers();
 		
 		watch.stop();
