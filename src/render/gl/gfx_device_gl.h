@@ -2,7 +2,7 @@
 #ifndef GFX_DEVICE_GL_H
 #define GFX_DEVICE_GL_H
 #include "../gfx_device.h"
-#include "../../window/window_glfw.h"
+#include "../../window/gl/window_glfw.h"
 
 namespace modelViewer::render {
 	class gfx_device_gl : public gfx_device {

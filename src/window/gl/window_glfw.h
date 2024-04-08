@@ -1,7 +1,7 @@
 ﻿#ifndef MODEL_VIEWER_WINDOW_H
 #define MODEL_VIEWER_WINDOW_H
 
-#include "window.h"
+#include "../window.h"
 
 class GLFWwindow;
 class GLFWmonitor;

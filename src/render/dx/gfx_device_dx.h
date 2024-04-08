@@ -13,7 +13,7 @@
 #include <DirectXColors.h>
 #include <DirectXCollision.h>
 #include "d3dx12.h"
-#include "../../window/window_win32.h"
+#include "../../window/dx/window_win32.h"
 #include "../texture.h"
 #include "../../resource/model_info.h"
 #include "shader_dx.h"

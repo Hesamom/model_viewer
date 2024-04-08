@@ -2,7 +2,7 @@
 
 #ifdef GFX_DX
 	#define GLM_FORCE_LEFT_HANDED
-	#include "src/window/window_win32.h"
+	#include "src/window/dx/window_win32.h"
 	#include "src/render/dx/gfx_device_dx.h"
 #else
 	#include "src/render/gl/gfx_device_gl.h"

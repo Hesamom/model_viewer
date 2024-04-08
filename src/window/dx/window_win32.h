@@ -5,7 +5,7 @@
 
 #include <windows.h>
 #include <wrl.h>
-#include "window.h"
+#include "../window.h"
 
 class window_win32 : public window{
 	

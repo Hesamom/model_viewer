@@ -1,7 +1,7 @@
 ﻿
 #include "window_win32.h"
 #include <WindowsX.h>
-#include "imgui/imgui_impl_win32.h"
+#include "imgui/dx/imgui_impl_win32.h"
 
 using namespace Microsoft::WRL;
 

@@ -5,8 +5,8 @@
 #include "mesh_dx.h"
 #include "buffer_constant_dx.h"
 #include <WindowsX.h>
-#include <imgui/imgui.h>
-#include <imgui/imgui_impl_dx12.h>
+#include <imgui/core/imgui.h>
+#include <imgui/dx/imgui_impl_dx12.h>
 #include "../../resource/texture_loader.h"
 #include "texture_cube_dx.h"
 #include "texture_2D_dx.h"

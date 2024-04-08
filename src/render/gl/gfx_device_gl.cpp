@@ -1,7 +1,7 @@
 ﻿#include "gfx_device_gl.h"
 #include <../../../libs/glew/include/GL/glew.h>
-#include <imgui/imgui.h>
-#include <imgui/imgui_impl_opengl3.h>
+#include <imgui/core/imgui.h>
+#include <imgui/gl/imgui_impl_opengl3.h>
 #include "framebuffer_gl.h"
 #include "mesh_gl.h"
 #include "shader_gl.h"

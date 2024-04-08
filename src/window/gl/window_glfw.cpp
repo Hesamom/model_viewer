@@ -3,7 +3,7 @@
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
-#include "imgui/imgui_impl_glfw.h"
+#include "imgui/gl/imgui_impl_glfw.h"
 
 window_glfw::window_glfw(int width, int height, const std::string& title, bool fullscreen, bool vSync,  int mssaLevel ) 
 {
