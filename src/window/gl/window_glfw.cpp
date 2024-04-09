@@ -21,7 +21,8 @@ window_glfw::window_glfw(int width, int height, const std::string& title, bool f
     {
         m_Monitor = glfwGetPrimaryMonitor();
     }
-    
+
+    glfwWindowHint(GLFW_SCALE_TO_MONITOR, 1);
     //BUG fullscreen mode casues exception 
     m_Window = glfwCreateWindow(width, height, title.c_str(), m_Monitor, nullptr);
     glViewport(0, 0, width, height);

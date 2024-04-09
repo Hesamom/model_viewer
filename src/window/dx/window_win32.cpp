@@ -2,24 +2,32 @@
 #include "window_win32.h"
 #include <WindowsX.h>
 #include "imgui/dx/imgui_impl_win32.h"
+#include <shellscalingapi.h>
 
 using namespace Microsoft::WRL;
 
 window_win32* window_win32::current = nullptr;
+bool window_win32::m_DPIAwarenessSet = false;
 
 window_win32::window_win32(int width, int height, const std::string& title, bool fullscreen)
 {
-	if(window_win32::current)
+	if(current)
 	{
 		std::runtime_error("there can be only once active instance!");
 	}
 
-	window_win32::current = this;
+	current = this;
 	
 	//TODO add validations 
-	m_ClientWidth = width;
-	m_ClientHeight = height;
+	m_RawClientWidth = width;
+	m_RawClientHeight = height;
 	m_Instance = GetModuleHandle(nullptr);
+
+	auto result = SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
+	if (result != S_OK) {
+		throw std::runtime_error("failed to set DPI awareness");
+	}
+	m_DPIAwarenessSet = true;
 
 	if (!createWindow())
 	{
@@ -30,6 +38,26 @@ window_win32::window_win32(int width, int height, const std::string& title, bool
 LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	return window_win32::current->MsgProc(hwnd, msg, wParam, lParam);
+}
+
+void window_win32::updateWindowForDpi() 
+{ 
+	int x, y;
+	getPosition(x,y);
+	int dpiScaledX = MulDiv(x, m_DPI, USER_DEFAULT_SCREEN_DPI); 
+	int dpiScaledY = MulDiv(y, m_DPI, USER_DEFAULT_SCREEN_DPI); 
+	int dpiScaledWidth = MulDiv(m_RawWindowWidth, m_DPI, USER_DEFAULT_SCREEN_DPI); 
+	int dpiScaledHeight = MulDiv(m_RawWindowHeight, m_DPI, USER_DEFAULT_SCREEN_DPI);
+	
+	SetWindowPos(m_Handle, m_Handle, dpiScaledX, dpiScaledY, dpiScaledWidth, dpiScaledHeight, SWP_NOZORDER | SWP_NOACTIVATE); 
+}
+
+void window_win32::computeWindowSize()
+{
+	RECT R = { 0, 0, m_RawClientWidth, m_RawClientHeight };
+	AdjustWindowRect(&R, WS_OVERLAPPEDWINDOW, false);
+	m_RawWindowWidth  = R.right - R.left;
+	m_RawWindowHeight = R.bottom - R.top;
 }
 
 bool window_win32::createWindow()
@@ -52,19 +80,17 @@ bool window_win32::createWindow()
 		return false;
 	}
 
-	// Compute window rectangle dimensions based on requested client area dimensions.
-	RECT R = { 0, 0, m_ClientWidth, m_ClientHeight };
-	AdjustWindowRect(&R, WS_OVERLAPPEDWINDOW, false);
-	int width  = R.right - R.left;
-	int height = R.bottom - R.top;
-
-	m_Handle = CreateWindow(L"MainWnd", mMainWndCaption.c_str(), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, width, height, nullptr, nullptr, m_Instance, nullptr);
+	computeWindowSize();
+	m_Handle = CreateWindow(L"MainWnd", mMainWndCaption.c_str(), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, m_RawWindowWidth, m_RawWindowHeight, nullptr, nullptr, m_Instance, nullptr);
+	
 	if (!m_Handle)
 	{
 		MessageBox(nullptr, L"CreateWindow Failed.", 0, 0);
 		return false;
 	}
 
+	m_DPI = GetDpiForWindow(m_Handle);
+	updateWindowForDpi();
 	ShowWindow(m_Handle, SW_SHOW);
 	UpdateWindow(m_Handle);
 
@@ -73,17 +99,32 @@ bool window_win32::createWindow()
 
 void window_win32::setSize(int width, int height)
 {
-
+	if (width <= 0 || height <= 0) {
+		throw std::invalid_argument("out of range values");
+	}
+	m_RawClientHeight = height;
+	m_RawClientWidth = width;
+	computeWindowSize();
+	updateWindowForDpi();
 }
 
 int window_win32::getHeight()
 {
-	return m_ClientHeight;
+	int scaled = MulDiv(m_RawClientHeight, m_DPI, USER_DEFAULT_SCREEN_DPI); 
+	return scaled;
 }
 
 int window_win32::getWidth()
 {
-	return m_ClientWidth;
+	int scaled = MulDiv(m_RawClientWidth, m_DPI, USER_DEFAULT_SCREEN_DPI); 
+	return scaled;
+}
+
+void window_win32::getPosition(int& x, int& y) const {
+	RECT windowRect;
+	GetWindowRect(m_Handle, &windowRect);
+	 x = windowRect.left;
+	 y = windowRect.top;
 }
 
 
@@ -142,10 +183,12 @@ void window_win32::onMousePosChanged(int x, int y)
 	onMouseCallback();
 }
 
+IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 LRESULT window_win32::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	//if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wParam, lParam))
-		//return true;
+	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wParam, lParam))
+		return 0;
 	
 	switch (msg) {
 		case WM_ACTIVATE:
@@ -188,15 +231,15 @@ LRESULT window_win32::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			onMousePosChanged(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 			return 0;
 		case WM_SIZE:
-			m_ClientWidth  = LOWORD(lParam);
-			m_ClientHeight = HIWORD(lParam);
+			m_RawClientWidth  = LOWORD(lParam);
+			m_RawClientHeight = HIWORD(lParam);
 			break;
 		case WM_ENTERSIZEMOVE:
 				m_Paused = true;
 			break;
 		case WM_EXITSIZEMOVE:
 				m_Paused = false;
-				m_SizeChangedCallback(m_ClientWidth, m_ClientHeight);
+				m_SizeChangedCallback(m_RawClientWidth, m_RawClientHeight);
 		break;
 				
 		default:

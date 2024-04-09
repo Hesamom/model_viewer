@@ -46,13 +46,13 @@ void initWindow()
 {
 #ifdef GFX_DX
 	{
-		auto win32 = std::make_shared<window_win32>(1024,1024, "dx12", false);
+		auto win32 = std::make_shared<window_win32>(720,720, "dx12", false);
 		auto dx = std::make_shared<modelViewer::render::gfx_device_dx>(win32);
 		device = dx;
 		window = win32;
 	}
 #else
-	auto winGL =  std::make_shared<window_glfw>(1024, 1024, "gl", false);
+	auto winGL =  std::make_shared<window_glfw>(720, 720, "gl", false);
 	device = std::make_shared<modelViewer::render::gfx_device_gl>(winGL);
 	window = winGL;
 #endif

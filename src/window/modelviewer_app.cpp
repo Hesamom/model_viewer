@@ -60,9 +60,9 @@ modelviewer_app::modelviewer_app(std::shared_ptr<window>& window, std::shared_pt
 	m_Window->setOnSizeChangedCallback(std::bind(&modelviewer_app::onSizeChanged, this, std::placeholders::_1, std::placeholders::_2));
 	m_Window->setOnMouseScrollCallback(std::bind(&modelviewer_app::onScrollChanged, this, std::placeholders::_1));
 	
+	onSizeChanged(m_Window->getWidth(), m_Window->getHeight());
 	setTargetFrameRate(360);
     updateCameraPosition();
-	m_Camera.setViewPort(m_Window->getWidth(), m_Window->getHeight());
 	m_Device->onInitImGUI();
 }
 
