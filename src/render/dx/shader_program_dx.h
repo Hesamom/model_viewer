@@ -27,7 +27,9 @@ namespace modelViewer::render::dx
 		void setDepthMap(res::depth_buffer_options& options) override;
 		void setTopology(topology_mode topology) override;
 		topology_mode getTopology() override;
-		
+
+		bool hasUniformBufferSlot(const std::string& name) const override;
+		void setUniformBuffer(std::shared_ptr<uniform_buffer>& buffer, const std::string& name) override;
 		bool hasUniform(const std::string &name) const override;
 		void setUniform(const std::string& name, float value, bool optional) override;
 		void setUniform(const std::string& name, int value, bool optional) override;
@@ -44,6 +46,10 @@ namespace modelViewer::render::dx
 		void createRootSignature();
 		void reflectShader(std::shared_ptr<shader_dx>& shader);
 		void createConstantBuffers();
+
+		void getVariableOffsetWithSubscript(std::string& blockName, std::string& memberName, int& bufferIndex,
+		                                    constant_variable& var) const;
+
 		void getVariableOffset(const std::string& name, int& bufferIndex, constant_variable& offset) const;
 		void setUniform(const std::string& name, void* dataPtr, UINT size, bool optional = true);
 		bool isDuplicatedConstant(UINT bindPoint);
@@ -71,7 +77,9 @@ namespace modelViewer::render::dx
 	
 		std::vector<shader_texture_slot> m_TextureSlots;
 		std::map<int, int> m_TextureDesc;
-		
+		const char SubscriptCharacter = '.';
+		std::map<std::string, std::shared_ptr<uniform_buffer>> m_UniformBufferBindings;
+
 		static std::shared_ptr<descriptor_heap> m_CBV_SRV_UAV_GPUHeap;
 		static CD3DX12_STATIC_SAMPLER_DESC staticSamplers[6];
 

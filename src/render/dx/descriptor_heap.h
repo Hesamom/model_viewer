@@ -17,11 +17,14 @@ namespace modelViewer::render::dx
 			UINT capacity, const std::string& name);
 
 		int pushBack(D3D12_CONSTANT_BUFFER_VIEW_DESC& bufferDesc);
-		int pushBack(D3D12_SHADER_RESOURCE_VIEW_DESC& desc,
-			ID3D12Resource& resource);
+		int pushBack(D3D12_SHADER_RESOURCE_VIEW_DESC& desc, ID3D12Resource& resource);
 		int pushBack(D3D12_DEPTH_STENCIL_VIEW_DESC& desc, ID3D12Resource& resource);
+		
 		int insert(D3D12_DEPTH_STENCIL_VIEW_DESC& desc,ID3D12Resource& resource, UINT slot = 0);
 		int insert(D3D12_SHADER_RESOURCE_VIEW_DESC& desc,ID3D12Resource& resource, UINT slot = 0);
+		int insert(D3D12_CONSTANT_BUFFER_VIEW_DESC& desc, UINT slot = 0);
+
+		
 		[[nodiscard]] CD3DX12_GPU_DESCRIPTOR_HANDLE getGPUHandle(UINT index) const;
 		CD3DX12_CPU_DESCRIPTOR_HANDLE getCPUHandle(UINT index) const;
 		

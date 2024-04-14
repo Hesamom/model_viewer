@@ -67,6 +67,17 @@ void material::applyMaterialProperties() {
 		m_Program->setUniform(boolProp.name, boolProp.value, true);
 	}
 
+	//TODO set material uniform buffer
+	std::string name = "u_mat";
+	if (m_Program->hasUniformBufferSlot(name))
+	{
+		m_MaterialBuffer = m_Device->createUniformBuffer(sizeof(material_uniform_block), name);
+		const auto data = static_cast<void *>(&m_Info.propertySet.block);
+		m_MaterialBuffer->setData(data, 0, sizeof(material_uniform_block));
+		m_Program->setUniformBuffer(m_MaterialBuffer, name);
+	}
+	
+	
 	//TODO the current dx imp creates a pipeline state per each of these calls which is not optimal, we need to either change the api to become chunky and contain all the options or improve dx imp by lazy constructing the pipeline state object and caching the changes 
 	m_Program->setDepthMap(m_Info.propertySet.depthOptions);
 	m_Program->setCullFaceMode(m_Info.propertySet.cullFaceMode);
@@ -115,7 +126,7 @@ shader_texture_usage material::getUsageByName(const std::string& textureName)
 		return shader_texture_usage::specular;
 	}
 	
-	return shader_texture_usage::none;
+	return shader_texture_usage::diffuse;
 }
 
 void material::bindTexture(texture_binding& binding)

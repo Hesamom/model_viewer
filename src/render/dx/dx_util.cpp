@@ -8,7 +8,7 @@ void modelViewer::render::dx::attempt(HRESULT result)
 	{
 		_com_error err(result);
 		std::wstring msg = err.ErrorMessage();
-		std::cerr << ConvertWideToANSI(msg) << std::endl;
+		std::cerr << convertWideToANSI(msg) << std::endl;
 		throw std::runtime_error("Operation failed");
 	}
 }

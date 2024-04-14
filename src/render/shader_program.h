@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include "../resource/model_info.h"
 #include "texture.h"
+#include "uniform_buffer.h"
 
 namespace modelViewer::render {
 
@@ -30,11 +31,15 @@ namespace modelViewer::render {
 		virtual void setAlphaBlending(bool enabled) = 0;
 		virtual void setDepthMap(res::depth_buffer_options& options) = 0;
 		virtual void setTopology(topology_mode topology) = 0;
+    
 		virtual topology_mode getTopology() = 0;
 		
 		virtual const std::vector<shader_texture_slot>& getTextureSlots() = 0;
 		virtual int getTextureSlot(const std::string& textureName) = 0;
         virtual bool hasUniform(const std::string& name) const = 0;
+
+    	virtual void setUniformBuffer(std::shared_ptr<uniform_buffer>& buffer, const std::string& name) = 0;
+    	virtual bool hasUniformBufferSlot(const std::string& name) const = 0;
 		virtual void bindTexture(int slotIndex, std::shared_ptr<render::texture>& texture) = 0;
 		virtual bool bindTexture(const std::string& name, std::shared_ptr<render::texture>& texture) = 0;
 		

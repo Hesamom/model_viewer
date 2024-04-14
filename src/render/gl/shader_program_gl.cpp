@@ -3,35 +3,26 @@
 #include "texture_gl.h"
 #include <glm/gtc/type_ptr.hpp>
 
+#include "uniform_buffer_gl.h"
+
 using namespace modelViewer::render;
 using namespace modelViewer::res;
 
-//TODO find a way to remove ctors duplications 
+
 shader_program_gl::shader_program_gl(std::vector<shader_gl> &shaders) {
-    
-    m_ProgramId = glCreateProgram();
-
-    for(auto& shader : shaders)
-    {
-        glAttachShader(m_ProgramId, shader.getId());
-        shader.destroy();
-    }
-
-    glLinkProgram(m_ProgramId);
-}
-
-shader_program_gl::shader_program_gl(std::initializer_list<shader_gl> shaders) {
 	
     m_ProgramId = glCreateProgram();
-    
+	reflectConsts();
+	
     for(auto& shader : shaders)
     {
         glAttachShader(m_ProgramId, shader.getId());
         shader.destroy();
     }
-    
-    glLinkProgram(m_ProgramId);
-	reflectTextures();
+	
+	glLinkProgram(m_ProgramId);
+	reflectUniformBlocks();
+	reflectUniforms();
 }
 
 
@@ -54,13 +45,17 @@ bool shader_program_gl::isLinked() {
     return result == GL_TRUE;
 }
 
+
+
 void shader_program_gl::bind() {
 	
 	//TODO add guards 
     glUseProgram(m_ProgramId);
 	applyPipelineState();
 	bindTextures();
+	bindUniformBuffers();
 }
+
 
 shader_program_gl::~shader_program_gl() {
     glDeleteProgram(m_ProgramId);
@@ -127,7 +122,7 @@ void shader_program_gl::setUniform(const std::string& name, bool value, bool opt
 }
 
 
-shader_texture_type getUniformType(GLenum internalType) {
+shader_texture_type getSamplerType(GLenum internalType) {
     switch (internalType) {
 		case GL_SAMPLER_1D:
 			return shader_texture_type::texture1D;
@@ -143,7 +138,7 @@ shader_texture_type getUniformType(GLenum internalType) {
         case GL_SAMPLER_CUBE:
             return shader_texture_type::textureCube;
         default:
-            throw std::runtime_error("unsupported internal type");
+        	return shader_texture_type::none;
     }
 }
 
@@ -164,28 +159,67 @@ shader_texture_usage getSamplerUsage(std::string& name) {
 	
 	return shader_texture_usage::none;
 }
+void shader_program_gl::reflectUniformBlocks() {
+	
+	const int blockCount = getActiveUniformBlockCount();
+	GLint nameLength = 0;
+	
+	for (int i = 0; i < blockCount; ++i)
+	{
+		GLint size, membersCount;
+		glGetActiveUniformBlockiv(m_ProgramId, i, GL_UNIFORM_BLOCK_DATA_SIZE, &size);
+		glGetActiveUniformBlockiv(m_ProgramId, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &membersCount);
+		auto uniformIndices = new GLint[membersCount];
+		glGetActiveUniformBlockiv(m_ProgramId, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES, uniformIndices);
+		glGetActiveUniformBlockName(m_ProgramId, i , m_MaxUniformName, &nameLength, m_NameBuffer);
+		
+		uniform_buffer_slot slot{};
+		slot.size = size;
+		slot.slot = i;
+		m_BufferSlots[m_NameBuffer] = slot;
+	}
+}
 
-void shader_program_gl::reflectTextures() {
+void shader_program_gl::reflectUniforms() {
 	
     const int uniformsCount = getActiveUniformsCount();
-    const int bufSize = 64;
-    GLchar nameBuffer[bufSize];
     GLsizei length;
     GLint size;
     GLenum type;
 
-    for (int i = 0; i < uniformsCount; ++i) {
-        glGetActiveUniform(m_ProgramId, i, bufSize, &length, &size, &type, nameBuffer);
-		auto name = std::string(nameBuffer);
-        m_TextureSlots.push_back({name,getUniformType(type)});
-		m_BoundTextures.push_back(nullptr);
+	int textureSlot = 0;
+    for (int i = 0; i < uniformsCount; ++i)
+    {
+        glGetActiveUniform(m_ProgramId, i, m_MaxUniformName, &length, &size, &type, m_NameBuffer);
+		auto name = std::string(m_NameBuffer);
+    	auto samplerType = getSamplerType(type);
+    	if (samplerType != shader_texture_type::none)
+    	{
+    		m_TextureSlots.push_back({name,samplerType});
+    		m_BoundTextures.push_back(nullptr);
+    		setUniform(name, textureSlot, false);
+    		textureSlot++;
+    	}
     }
+}
+
+void shader_program_gl::reflectConsts()
+{
+	glGetProgramiv(m_ProgramId, GL_ACTIVE_UNIFORM_MAX_LENGTH, &m_MaxUniformName);
+	m_MaxUniformName = std::max(64,m_MaxUniformName);
+	m_NameBuffer = new GLchar[m_MaxUniformName];
 }
 
 int shader_program_gl::getActiveUniformsCount() {
     int count = 0;
     glGetProgramiv(m_ProgramId, GL_ACTIVE_UNIFORMS, &count);
     return count;
+}
+
+int shader_program_gl::getActiveUniformBlockCount() {
+	int count = 0;
+	glGetProgramiv(m_ProgramId, GL_ACTIVE_UNIFORM_BLOCKS, &count);
+	return count;
 }
 
 void shader_program_gl::validateLinking()
@@ -289,7 +323,7 @@ const std::vector<shader_texture_slot>& shader_program_gl::getTextureSlots()
 
 void shader_program_gl::bindTexture(int slotIndex, std::shared_ptr<render::texture>& texture)
 {
-	if (m_TextureSlots.size() >= slotIndex)
+	if (m_TextureSlots.size() <= slotIndex)
 	{
 		throw std::runtime_error("texture slot is out of bounds");
 	}
@@ -301,6 +335,21 @@ void shader_program_gl::bindTexture(int slotIndex, std::shared_ptr<render::textu
 	}
 	
 	m_BoundTextures[slotIndex] = texture_gl;
+}
+
+void shader_program_gl::bindUniformBuffers()
+{
+	int slot = 0;
+	for (auto& buffer: m_BoundBuffers)
+	{
+		auto bufferGL = std::dynamic_pointer_cast<uniform_buffer_gl>(buffer.second);
+		bufferGL->bind(slot);
+
+		auto uniformSlot = m_BufferSlots[buffer.first];
+		glUniformBlockBinding(m_ProgramId,    uniformSlot.slot, slot);
+
+		slot++;
+	}
 }
 
 void shader_program_gl::bindTextures()
@@ -338,6 +387,27 @@ bool shader_program_gl::bindTexture(const std::string& name, std::shared_ptr<ren
 		return true;
 	}
 	return false;
+}
+
+void shader_program_gl::setUniformBuffer(std::shared_ptr<uniform_buffer>& buffer, const std::string& name)
+{
+	if (m_BoundBuffers.contains(name) && m_BoundBuffers[name] == buffer)
+	{
+		return;
+	}
+	
+	auto slot = m_BufferSlots[name];
+	if (slot.size > buffer->getSize())
+	{
+		throw std::runtime_error("buffer slot size is more!");
+	}
+	
+	m_BoundBuffers[name] = buffer;
+}
+
+bool shader_program_gl::hasUniformBufferSlot(const std::string& name) const
+{
+	return m_BufferSlots.contains(name);
 }
 
 void shader_program_gl::setAlphaBlending(bool enabled)

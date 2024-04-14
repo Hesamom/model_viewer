@@ -13,13 +13,13 @@ void texture_dx::uploadData(modelViewer::render::texture_setup& texture_setup, M
 	auto firstAsset = texture_setup.assets[0];
 	if (firstAsset->getName().ends_with(".dds"))
 	{
-		auto fileName = ConvertAnsiToWide(texture_setup.assets[0]->getName());
+		auto fileName = convertAnsiToWide(texture_setup.assets[0]->getName());
 		DirectX::CreateDDSTextureFromFile12( device.Get(), commandList.Get(), fileName.c_str(),m_Resource,m_UploadHeap);
 		return;
 	}
 
 	createTextureFromRawData(texture_setup, device, commandList);
-	auto wideName = ConvertAnsiToWide(firstAsset->getName());
+	auto wideName = convertAnsiToWide(firstAsset->getName());
 	m_Resource->SetName(wideName.data());
 }
 

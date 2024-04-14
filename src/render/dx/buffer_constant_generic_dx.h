@@ -3,16 +3,16 @@
 #define BUFFER_CONSTANT_H
 
 #include <d3d12.h>
-#include <cassert>
 #include <wrl.h>
 #include "d3dx12.h"
+#include "../../common/string_util.h"
 
 namespace modelViewer::render
 {
 	class buffer_constant_generic_dx
 	{
 	public:
-		buffer_constant_generic_dx(ID3D12Device& device, UINT size, const wchar_t * name)
+		buffer_constant_generic_dx(ID3D12Device& device, UINT size, const char * name)
 		{
 			m_Size = calcBufferByteSize(size);
 			device.CreateCommittedResource(
@@ -22,8 +22,9 @@ namespace modelViewer::render
 				D3D12_RESOURCE_STATE_GENERIC_READ,
 				nullptr,
 				IID_PPV_ARGS(&mUploadBuffer));
-			
-			mUploadBuffer->SetName(name);
+
+			auto wName = convertAnsiToWide(name);
+			mUploadBuffer->SetName(wName.data());
 			
 			mUploadBuffer->Map(0, nullptr, reinterpret_cast<void**>(&mMappedData));
 		}

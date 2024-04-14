@@ -32,6 +32,7 @@ namespace modelViewer::render {
 		std::shared_ptr<mesh> createMesh(std::shared_ptr<res::mesh_asset>& asset) override;
 		std::shared_ptr<shader_program> createProgram(std::vector<std::shared_ptr<res::shader_asset>>& assets) override;
 		std::shared_ptr<framebuffer> createFramebuffer(std::string& name) override;
+		std::shared_ptr<uniform_buffer> createUniformBuffer(int size, std::string& name) override;
 	
 	private:
 

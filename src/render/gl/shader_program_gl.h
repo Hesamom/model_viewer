@@ -12,15 +12,22 @@ namespace modelViewer::render
 		{
 
     public:
-        shader_program_gl(std::initializer_list<shader_gl> shaders);
+  
+
         explicit shader_program_gl(std::vector<shader_gl>& shaders);
         ~shader_program_gl() override;
 
      
         void bind() override;
 		void bindTexture(int slotIndex, std::shared_ptr<render::texture> &texture) override;
-		bool bindTexture(const std::string &name, std::shared_ptr<render::texture> &texture) override;
-		
+
+        void bindUniformBuffers();
+
+        bool bindTexture(const std::string &name, std::shared_ptr<render::texture> &texture) override;
+
+    	void setUniformBuffer(std::shared_ptr<uniform_buffer>& buffer, const std::string& name) override;
+    	bool hasUniformBufferSlot(const std::string& name) const override;
+    	
 		int getTextureSlot(const std::string &textureName) override;
 		const std::vector<shader_texture_slot> & getTextureSlots() override;
         int getAttributeLocation(const std::string& attributeName);
@@ -45,21 +52,34 @@ namespace modelViewer::render
 		bool isLinked();
 
     private:
+
+    	void applyPipelineState() const;
+        void reflectUniformBlocks();
+    	void reflectUniforms();
+    	void reflectConsts();
+    	int getActiveUniformsCount();
+        int getActiveUniformBlockCount();
+        void bindTextures();
+
     	unsigned int m_ProgramId = 0;
         res::depth_buffer_options m_DepthOptions;
 		res::cull_face_mode m_FaceMode = res::cull_face_mode::back;
 		std::vector<shader_texture_slot> m_TextureSlots;
 		std::vector<std::shared_ptr<texture_gl>> m_BoundTextures;
-		
-		void applyPipelineState() const;
-		void reflectTextures();
-	
-		int getActiveUniformsCount();
-
-		void bindTextures();
-
-		bool m_AlphaBlending;
+		bool m_AlphaBlending = false;
 		topology_mode m_Topology = topology_mode::triangles;
+
+
+    	struct uniform_buffer_slot
+    	{
+    		int size = 0;
+    		int slot = 0;
+    	};
+    	
+    	std::map<std::string,uniform_buffer_slot> m_BufferSlots;
+    	std::map<std::string, std::shared_ptr<uniform_buffer>> m_BoundBuffers;
+		int m_MaxUniformName;
+    	GLchar* m_NameBuffer;
 	}; 
 }
 

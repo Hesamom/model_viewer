@@ -9,16 +9,17 @@ namespace modelViewer::render::dx
 		std::string name;
 		UINT slot;
 	};
-	
+
+
 	struct constant_variable
 	{
 		int size = 0;
-		int offset = -1;
+		int absluteOffset = -1;
 		std::string name;
 
 		bool isEqual(constant_variable& other)
 		{
-			return size == other.size && offset == other.offset && name == other.name;
+			return size == other.size && absluteOffset == other.absluteOffset && name == other.name;
 		}
 	};
 
@@ -26,7 +27,7 @@ namespace modelViewer::render::dx
 	{
 		int size = 0;
 		UINT bindPoint = 0;
-		std::wstring name;
+		std::string name;
 		std::vector<constant_variable> variables;
 
 		bool isEqual(constant_block& block)

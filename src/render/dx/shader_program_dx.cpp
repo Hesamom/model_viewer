@@ -2,6 +2,8 @@
 #include "dx_util.h"
 #include <d3dcompiler.h>
 
+#include "uniform_buffer_dx.h"
+
 using namespace modelViewer::render;
 using namespace modelViewer::render::dx;
 using namespace Microsoft::WRL;
@@ -50,7 +52,7 @@ shader_program_dx::shader_program_dx(std::vector<std::shared_ptr<shader_dx>>& sh
 	//std::sort(m_Constants.begin(), m_Constants.end(), [](constant_block& b1, constant_block& b2) { return b1.bindPoint < b2.bindPoint; });
 	
 	m_CBVHeap = std::make_shared<descriptor_heap>(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-		D3D12_DESCRIPTOR_HEAP_FLAG_NONE, 4, "constant desc heap");
+		D3D12_DESCRIPTOR_HEAP_FLAG_NONE, m_Constants.size(), "constant desc heap");
 	m_TexturesHeap = std::make_shared<descriptor_heap>(m_Device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
 		D3D12_DESCRIPTOR_HEAP_FLAG_NONE, m_TextureSlots.size(), "texture desc heap");
 	
@@ -70,20 +72,50 @@ void shader_program_dx::createConstantBuffers()
 	UINT index = 0;
 	for (auto& block : m_Constants)
 	{
-		std::shared_ptr<buffer_constant_generic_dx> buffer = 
-			std::make_shared<buffer_constant_generic_dx>(*m_Device.Get(), (UINT)block.size, block.name.data());
-		auto view = buffer->getView();
-		m_CBVHeap->pushBack(view);
+		if (block.name == "u_globals")
+		{
+			std::shared_ptr<buffer_constant_generic_dx> buffer = 
+		std::make_shared<buffer_constant_generic_dx>(*m_Device.Get(), (UINT)block.size, block.name.data());
+			auto view = buffer->getView();
+			m_CBVHeap->insert(view, index);
+			m_ConstantBuffers.push_back(buffer);
+		}
 		
-		m_ConstantBuffers.push_back(buffer);
 		index++;
 	}
 }
 
+void shader_program_dx::getVariableOffsetWithSubscript(std::string& blockName, std::string& memberName, int& bufferIndex, constant_variable& var) const
+{
+	int i = 0;
+	for (auto& block : m_Constants)
+	{
+		if (block.name == blockName) {
+			for (auto& variable : block.variables)
+			{
+				if (variable.name == memberName)
+				{
+					bufferIndex = i;
+					var = variable;
+					return;
+				}
+			}
+		}
+	}
+}
 
 //TODO this is based on the assumption that two variables with the same name but different types can not exist in a block, verify that
 void shader_program_dx::getVariableOffset(const std::string& name, int& bufferIndex, constant_variable& var) const
 {
+	/*const auto subscriptIndex = name.find(SubscriptCharacter);
+	if (subscriptIndex > 0 && subscriptIndex < name.size())
+	{
+		auto blockName = name.substr(0, subscriptIndex);
+		auto memberName = name.substr(subscriptIndex + 1);
+		getVariableOffsetWithSubscript(blockName, memberName, bufferIndex, var);
+		return;
+	}*/
+	
 	int i = 0;
 	for (auto& block : m_Constants)
 	{
@@ -140,7 +172,7 @@ void shader_program_dx::setUniform(const std::string& name, void* dataPtr, UINT 
 	constant_variable variable;
 
 	getVariableOffset(name, blockIndex, variable);
-	if (variable.offset == -1)
+	if (variable.absluteOffset == -1)
 	{
 		if (optional)
 		{
@@ -155,7 +187,7 @@ void shader_program_dx::setUniform(const std::string& name, void* dataPtr, UINT 
 	}
 
 	auto buffer = m_ConstantBuffers[blockIndex];
-	buffer->set(variable.offset, dataPtr, size);
+	buffer->set(variable.absluteOffset, dataPtr, size);
 }
 
 bool shader_program_dx::isDuplicatedConstant(UINT bindPoint)
@@ -170,6 +202,28 @@ bool shader_program_dx::isDuplicatedConstant(UINT bindPoint)
 	
 	return false;
 }
+
+/*void reflectShaderVariable(ID3D12ShaderReflectionType* memberType, constant_variable* variable)
+{
+	D3D12_SHADER_TYPE_DESC typeDesc;
+	memberType->GetDesc(&typeDesc);
+	if (typeDesc.Class != D3D_SVC_STRUCT)
+	{
+		return;
+	}
+	
+	for (int i = 0; i < typeDesc.Members; i++) {
+		auto info = memberType->GetMemberTypeByIndex(i);
+		D3D12_SHADER_TYPE_DESC memDesc;
+		info->GetDesc(&memDesc);
+		constant_variable var;
+		var.absluteOffset = memDesc.Offset + variable->absluteOffset;
+		var.name = memDesc.Name;
+		var.size = 0;
+		variable->children.push_back(var);
+		reflectShaderVariable(info, &var);
+	}
+}*/
 
 void shader_program_dx::reflectShader(std::shared_ptr<shader_dx>& shader)
 {
@@ -210,13 +264,15 @@ void shader_program_dx::reflectShader(std::shared_ptr<shader_dx>& shader)
 		ID3D12ShaderReflectionConstantBuffer* constantBuffer = reflection->GetConstantBufferByIndex(i);
 		D3D12_SHADER_BUFFER_DESC bufferDesc;
 		constantBuffer->GetDesc(&bufferDesc);
-
+		
+		
 		constant_block block;
 		block.size = bufferDesc.Size;
-		block.name = std::wstring (bufferDesc.Name, bufferDesc.Name + strlen(bufferDesc.Name));
+		block.name = std::string (bufferDesc.Name, bufferDesc.Name + strlen(bufferDesc.Name));
 
 		D3D12_SHADER_INPUT_BIND_DESC bindDesc;
 		reflection->GetResourceBindingDescByName(bufferDesc.Name, &bindDesc);
+		
 		block.bindPoint = bindDesc.BindPoint;
 
 		bool duplicate = isDuplicatedConstant(block.bindPoint);
@@ -235,12 +291,15 @@ void shader_program_dx::reflectShader(std::shared_ptr<shader_dx>& shader)
 			ID3D12ShaderReflectionVariable* variable = constantBuffer->GetVariableByIndex(j);
 			D3D12_SHADER_VARIABLE_DESC variableDesc;
 			variable->GetDesc(&variableDesc);
-
+			
 			constant_variable variableBlock;
 			variableBlock.name = variableDesc.Name;
 			variableBlock.size = variableDesc.Size;
-			variableBlock.offset = variableDesc.StartOffset;
+			variableBlock.absluteOffset = variableDesc.StartOffset;
 			block.variables.push_back(variableBlock);
+			
+			//auto varType = variable->GetType();
+			//reflectShaderVariable(varType, &variableBlock);
 
 			std::cout << "  Variable #" << j << ": " << variableDesc.Name << std::endl;
 			std::cout << "    Size: " << variableDesc.Size << " bytes" << std::endl;
@@ -414,7 +473,7 @@ bool shader_program_dx::hasUniform(const std::string& name) const
 	int blockIndex = -1;
 	constant_variable var;
 	getVariableOffset(name, blockIndex, var);
-	return blockIndex > -1 && var.offset > -1;
+	return blockIndex > -1 && var.absluteOffset > -1;
 }
 
 void shader_program_dx::updatePipeline()
@@ -569,6 +628,42 @@ void shader_program_dx::setTopology(topology_mode topology)
 topology_mode shader_program_dx::getTopology()
 {
 	return m_CurrentTopology;
+}
+
+bool shader_program_dx::hasUniformBufferSlot(const std::string& name) const
+{
+	for (auto& c: m_Constants)
+	{
+		if (c.name == name)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void shader_program_dx::setUniformBuffer(std::shared_ptr<uniform_buffer>& buffer, const std::string& name)
+{
+	if (m_UniformBufferBindings.contains(name) && m_UniformBufferBindings.at(name) == buffer)
+	{
+		return;
+	}
+
+	int index = 0;
+	for (auto& c: m_Constants)
+	{
+		if (c.name == name)
+		{
+			assert(c.size <= buffer->getSize());
+			auto bufferDx = std::dynamic_pointer_cast<uniform_buffer_dx>(buffer);
+			assert(bufferDx != nullptr);
+			auto view = bufferDx->getView();
+			m_CBVHeap->insert(view, index);
+			m_UniformBufferBindings[name] = buffer;
+		}
+		index++;
+	}
 }
 
 

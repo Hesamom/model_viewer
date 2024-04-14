@@ -7,13 +7,10 @@ struct material
     vec3 ambient;
     vec3 diffuseAlbedo;
     vec3 specularAlbedo;
+    
     float shininess;
     float opacity;
     float reflectivity;
-
-    sampler2D diffuseSampler;
-    sampler2D specularSampler;
-    sampler2D normalSampler;
 };
 
 struct surface
@@ -153,7 +150,11 @@ vec3 computeSpotLights(surface surf, int lightCount, spotLight lights[NR_SPOT_LI
     for (int i =0; i < lightCount; i++)
     {
         vec3 lightDir = surf.fragPos - lights[i].position;
-        float shadow = getShadowValueIndexed(lightSpace[i], surf.normal , lightDir , sampler, i);
+        float shadow = 0;
+        #if SHADOW
+             shadow = getShadowValueIndexed(lightSpace[i], surf.normal , lightDir , sampler, i);
+        #endif
+        
         vec3 lighting = getSpotLight(surf, lights[i], shadow, mat);
         color += lighting;
     }

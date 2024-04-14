@@ -9,6 +9,7 @@
 #include "texture_gl.h"
 #include "texture_cube_gl.h"
 #include "texture_2D_gl.h"
+#include "uniform_buffer_gl.h"
 
 using namespace modelViewer::render;
 using namespace modelViewer::res;
@@ -104,7 +105,23 @@ void gfx_device_gl::initDevice() {
 
 	
 	std::cout << glGetString(GL_VERSION) << " OpenGL Driver Version \n";
+	
+	int vertex_uniform_max_size = 0;
+	int frag_uniform_max_size = 0;
+	int vertex_block_max = 0;
+	int frag_block_max = 0;
+	int block_max_size = 0;
+	glGetIntegerv(GL_MAX_VERTEX_UNIFORM_COMPONENTS, &vertex_uniform_max_size);
+	glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS, &frag_uniform_max_size);
+	glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &vertex_block_max);
+	glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, &frag_block_max);
+	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE , &block_max_size);
+	
+	std::cout << "max uniform count in vertex: " << vertex_uniform_max_size << ", max uniform count in frag: " << frag_uniform_max_size << "\n";
+	std::cout << "max uniform blocks in vertex: " << vertex_block_max << ", max uniform blocks in frag: " << frag_block_max << "\n";
+	std::cout << "max uniform block size: " << block_max_size << "\n";
 
+	
 	int maxSamples;
 	glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
 	int maxTexturesFrag;
@@ -146,6 +163,12 @@ std::shared_ptr<shader_program> gfx_device_gl::createProgram(std::vector<std::sh
 
 std::shared_ptr<framebuffer> gfx_device_gl::createFramebuffer(std::string& name) {
 	auto buffer = std::make_shared<framebuffer_gl>(name);
+	return buffer;
+}
+
+std::shared_ptr<uniform_buffer> gfx_device_gl::createUniformBuffer(int size, std::string& name)
+{
+	auto buffer = std::make_shared<uniform_buffer_gl>(size, name);
 	return buffer;
 }
 

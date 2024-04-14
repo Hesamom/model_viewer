@@ -47,6 +47,8 @@ namespace modelViewer::render
 
 		const std::set<int> m_AssignedTextureLocations;
     	std::shared_ptr<gfx_device> m_Device;
+        std::shared_ptr<uniform_buffer> m_MaterialBuffer;
+
         void applyMaterialProperties();
 
         std::shared_ptr<texture> getTextureForSampler(const shader_texture_slot& slot, const std::vector<texture_binding>& bindings);

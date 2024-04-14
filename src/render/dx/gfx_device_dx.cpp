@@ -3,7 +3,6 @@
 #include "../../error/not_implemented_error.h"
 #include "../../resource/model_loader.h"
 #include "mesh_dx.h"
-#include "buffer_constant_dx.h"
 #include <WindowsX.h>
 #include <imgui/core/imgui.h>
 #include <imgui/dx/imgui_impl_dx12.h>
@@ -14,6 +13,8 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <WinPixEventRuntime/pix3.h>
+
+#include "uniform_buffer_dx.h"
 
 #if defined(DEBUG) || defined(_DEBUG)
 #define _CRTDBG_MAP_ALLOC
@@ -512,6 +513,12 @@ std::shared_ptr<framebuffer> gfx_device_dx::createFramebuffer(std::string& name)
 	
 	auto frameBuffer = std::make_shared<dx::framebuffer_dx>(m_device, m_CommandList, name);
 	return frameBuffer;
+}
+
+std::shared_ptr<uniform_buffer> gfx_device_dx::createUniformBuffer(int size, std::string& name)
+{
+	auto buffer = std::make_shared<dx::uniform_buffer_dx>(*m_device.Get(), size, name.data());
+	return buffer;
 }
 
 void gfx_device_dx::onPreRenderImGUI()

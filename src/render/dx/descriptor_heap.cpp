@@ -21,7 +21,7 @@ modelViewer::render::dx::descriptor_heap::descriptor_heap(Microsoft::WRL::ComPtr
 	m_Name = name;
 	
 	m_Device->CreateDescriptorHeap(&m_Desc,IID_PPV_ARGS(&m_Heap));
-	auto wideName = ConvertAnsiToWide(m_Name);
+	auto wideName = convertAnsiToWide(m_Name);
 	m_Heap->SetName(wideName.data());
 	m_CpuHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_Heap->GetCPUDescriptorHandleForHeapStart());
 
@@ -36,17 +36,7 @@ modelViewer::render::dx::descriptor_heap::descriptor_heap(Microsoft::WRL::ComPtr
 
 int modelViewer::render::dx::descriptor_heap::pushBack(D3D12_CONSTANT_BUFFER_VIEW_DESC& bufferDesc)
 {
-	auto handle = m_CpuHandle;
-	auto slot = m_Size;
-	handle.Offset(slot, m_DescriptorSize);
-
-	m_Device->CreateConstantBufferView(&bufferDesc, handle);
-	m_Size++;
-	if(m_Size >= m_Capacity)
-	{
-		resizeHeap();
-	}
-	return slot;
+	return insert(bufferDesc, m_Size);
 }
 
 
@@ -67,7 +57,7 @@ void modelViewer::render::dx::descriptor_heap::resizeHeap()
 	m_Device->CopyDescriptorsSimple(m_Size, newCPUHandle, m_CpuHandle, m_Desc.Type);
 	m_Heap->Release();
 	m_Heap = newHeap;
-	auto wideName = ConvertAnsiToWide(m_Name);
+	auto wideName = convertAnsiToWide(m_Name);
 	m_Heap->SetName(wideName.data());
 	
 	m_CpuHandle = newCPUHandle;
@@ -180,7 +170,7 @@ void modelViewer::render::dx::descriptor_heap::checkSize(UINT slot)
 
 void modelViewer::render::dx::descriptor_heap::checkSlot(UINT slot) const
 {
-	if(slot > m_Size)
+	if(slot >= m_Capacity)
 	{
 		throw std::invalid_argument("slot index out of range");
 	}
@@ -198,6 +188,18 @@ int modelViewer::render::dx::descriptor_heap::insert(D3D12_SHADER_RESOURCE_VIEW_
 
 	checkSize(slot);
 
+	return slot;
+}
+
+int modelViewer::render::dx::descriptor_heap::insert(D3D12_CONSTANT_BUFFER_VIEW_DESC& desc, UINT slot)
+{
+	checkSlot(slot);
+	
+	auto handle = m_CpuHandle;
+	handle.Offset(slot, m_DescriptorSize);
+	m_Device->CreateConstantBufferView(&desc, handle);
+
+	checkSize(slot);
 	return slot;
 }
 

@@ -72,6 +72,6 @@ texture_2D_dx::texture_2D_dx(int width, int height,  std::string& name, Microsof
 		D3D12_RESOURCE_STATE_GENERIC_READ, &optClear,
 		IID_PPV_ARGS(&m_Resource));
 	
-	auto wideName = ConvertAnsiToWide(name);
+	auto wideName = convertAnsiToWide(name);
 	m_Resource->SetName(wideName.data());
 }

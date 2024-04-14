@@ -176,20 +176,34 @@ void object_factory::createDefaultTextures()
 	shader_uniform_texture_pair diffuseSampler { shader_texture_type::texture2D, shader_texture_usage::diffuse};
 	assets.emplace_back(diffuseSampler, literals::textures::default_white);
 
+	shader_uniform_texture_pair defaultSampler { shader_texture_type::texture2D, shader_texture_usage::none};
+	assets.emplace_back(defaultSampler, literals::textures::default_white);
+
 	shader_uniform_texture_pair specularSampler { shader_texture_type::texture2D, shader_texture_usage::specular};
 	assets.emplace_back(specularSampler, literals::textures::default_white);
 
 	shader_uniform_texture_pair normalSampler { shader_texture_type::texture2D, shader_texture_usage::normal};
 	assets.emplace_back(normalSampler, literals::textures::default_normal);
 
+	shader_uniform_texture_pair cubeSampler { shader_texture_type::textureCube, shader_texture_usage::diffuse};
+	assets.emplace_back(cubeSampler, literals::textures::default_white);
+
 	for (const auto & asset : assets) {
 		texture_asset_info info;
-		info.paths.push_back(asset.second);
+		
 		switch (asset.first.type) {
 			
 			case shader_texture_type::texture2D:
+				info.paths.push_back(asset.second);
 				info.type = texture_asset_type::texture2D;
 				break;
+			case shader_texture_type::textureCube:
+				for (int i = 0; i < 6; ++i)
+				{
+					info.paths.push_back(asset.second);
+				}
+				info.type = texture_asset_type::textureCube;
+			break;
 			default:
 				throw std::runtime_error("not implemented yet!");
 		}

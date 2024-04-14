@@ -9,6 +9,7 @@
 
 using color = glm::vec3;
 
+
 namespace modelViewer::res
 {
 	enum class cull_face_mode {
@@ -98,6 +99,35 @@ namespace modelViewer::res
     	bool writeEnabled = true;
     	depth_buffer_compare compare = less;
     };
+	
+	namespace Literals
+	{
+		const std::string  AmbientAlbedo = "u_mat.ambient";
+		const std::string  DiffuseAlbedo = "u_mat.diffuseAlbedo";
+		const std::string  SpecularAlbedo = "u_mat.specularAlbedo";
+		const std::string  Shininess = "u_mat.shininess";
+		const std::string  Opacity = "u_mat.opacity";
+		const std::string  Reflectivity = "u_mat.reflectivity";
+
+		const color DefaultAmbientAlbedo{0.5f};
+		const color DefaultDiffuseAlbedo{0.2f};
+		const color DefaultSpecularAlbedo{0.5f};
+		const float DefaultShininess = 16;
+		const float DefaultOpacity = 1;
+		const float DefaultReflectivity = 0;
+	}
+	
+	struct  material_uniform_block 
+	{
+		alignas(16) glm::vec3 ambient = Literals::DefaultAmbientAlbedo; 
+		alignas(16) glm::vec3 diffuseAlbedo = Literals::DefaultDiffuseAlbedo;
+		alignas(16) glm::vec3 specularAlbedo = Literals::DefaultSpecularAlbedo;
+
+		float shininess = Literals::DefaultShininess;
+		float opacity = Literals::DefaultOpacity; 
+		float reflectivity = Literals::DefaultReflectivity;
+	};
+	
     struct material_property_set
     {
     	std::vector<material_property<float>> floats;
@@ -105,6 +135,7 @@ namespace modelViewer::res
     	std::vector<material_property<bool>> booleans;
     	std::vector<material_property<int>> ints;
 
+    	material_uniform_block block;
     	//TODO add stencil support 
     	depth_buffer_options depthOptions;
     	//TODO add more options to blending such as factors and operation for supporting more effects 
@@ -129,22 +160,7 @@ namespace modelViewer::res
         std::string path;
     };
 
-	namespace Literals
-	{
-		const std::string  AmbientAlbedo = "u_mat.ambient";
-		const std::string  DiffuseAlbedo = "u_mat.diffuseAlbedo";
-		const std::string  SpecularAlbedo = "u_mat.specularAlbedo";
-		const std::string  Shininess = "u_mat.shininess";
-		const std::string  Opacity = "u_mat.opacity";
-		const std::string  Reflectivity = "u_mat.reflectivity";
 
-		const color DefaultAmbientAlbedo{0.5f};
-		const color DefaultDiffuseAlbedo{0.2f};
-		const color DefaultSpecularAlbedo{0.5f};
-		const float DefaultShininess = 16;
-		const float DefaultOpacity = 1;
-		const float DefaultReflectivity = 0;
-	}
 }
 
 #endif

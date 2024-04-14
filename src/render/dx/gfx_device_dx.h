@@ -7,17 +7,10 @@
 #include <wrl.h>
 #include <dxgi1_4.h>
 #include <d3d12.h>
-#include <D3Dcompiler.h>
-#include <DirectXMath.h>
-#include <DirectXPackedVector.h>
-#include <DirectXColors.h>
-#include <DirectXCollision.h>
-#include "d3dx12.h"
 #include "../../window/dx/window_win32.h"
 #include "../texture.h"
 #include "../../resource/model_info.h"
 #include "shader_dx.h"
-#include "buffer_constant_dx.h"
 #include "mesh_dx.h"
 #include "shader_program_dx.h"
 
@@ -52,6 +45,7 @@ namespace modelViewer::render
 		std::shared_ptr<mesh> createMesh(std::shared_ptr<res::mesh_asset>& asset) override;
 		std::shared_ptr<shader_program> createProgram(std::vector<std::shared_ptr<res::shader_asset>>& assets) override;
 		std::shared_ptr<framebuffer> createFramebuffer(std::string& name) override;
+		std::shared_ptr<uniform_buffer> createUniformBuffer(int size, std::string& name) override;
 
 	private:
 		void openCommandList();

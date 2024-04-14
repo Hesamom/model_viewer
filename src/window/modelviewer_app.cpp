@@ -53,7 +53,7 @@ modelviewer_app::modelviewer_app(std::shared_ptr<window>& window, std::shared_pt
 		auto grid = m_Platform.generateGrid(m_ObjectFactory, info, m_Device);
 		m_Scene.addStaticObject(grid);
 
-		openDemoModel("cube");
+		//openDemoModel("cube");
 	}
 
 	m_Window->setOnMouseButtonCallback(std::bind(&modelviewer_app::onMouseButtonCallback, this, std::placeholders::_1));

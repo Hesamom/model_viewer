@@ -8,7 +8,7 @@ SamplerState samAnisotropicWrap : register(s4);
 SamplerState samAnisotropicClamp : register(s5);
 
 
-cbuffer globals_vert : register(b0)
+cbuffer u_globals : register(b0)
 {
 	float4x4 m_MV;
     float4x4 m_Projection;

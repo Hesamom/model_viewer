@@ -47,10 +47,15 @@ texture_2D_gl::texture_2D_gl(texture_setup& texture_setup)
         //TODO have to check if specifying the level before generation affects generation or not 
         glGenerateMipmap(GL_TEXTURE_2D);
         setMipMapLevels(m_Setup.mipMapMinLevel, m_Setup.mipMapMaxLevel);
+        setFilteringModeMag(m_Setup.filteringMag);
+        setFilteringModeMin(m_Setup.filteringMin);
+    }
+    else
+    {
+        setFilteringModeMag(texture_filtering_mode::nearest);
+        setFilteringModeMin(texture_filtering_mode::nearest);
     }
 
-    setFilteringModeMag(m_Setup.filteringMag);
-    setFilteringModeMin(m_Setup.filteringMin);
     setWrappingMode(m_Setup.wrapping);
 
     setBind(false);

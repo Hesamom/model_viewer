@@ -2,8 +2,21 @@
 #define MODEL_VIEWER_STD_PCH_H
 
 //TODO add more std headers here when needed 
-#define GLM_FORCE_LEFT_HANDED
+//#ifdef GFX_DX
+    #define GLM_FORCE_LEFT_HANDED
+//#endif
+
 #include "glm/glm.hpp"
+//#define GLM_FORCE_ALIGNED_GENTYPES GLM_ENABLE
+//#define GLM_CONFIG_ALIGNED_GENTYPES GLM_ENABLE
+
+//#include <glm/gtc/type_aligned.hpp>
+
+/*namespace glm
+{
+    typedef aligned_vec3 vec3a;
+    typedef packed_vec3 vec3p;
+}*/
 
 //streams
 #include <iostream>
