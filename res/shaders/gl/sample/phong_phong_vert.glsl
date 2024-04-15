@@ -4,9 +4,14 @@ in vec3 v_normal;
 in vec2 v_uv0;
 
 
+layout(std140) uniform u_PerFrameGlobals
+{
+	mat4 m_ViewProjection;
+	mat4 m_Projection;
+};
+
 uniform mat4 m_Model;
 uniform mat4 m_MV;
-uniform mat4 m_Projection;
 
 uniform mat4 m_LightViewProjection;
 uniform mat4[4] m_SpotLightViewProjection;

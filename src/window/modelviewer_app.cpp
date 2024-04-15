@@ -38,7 +38,7 @@ modelviewer_app::modelviewer_app(std::shared_ptr<window>& window, std::shared_pt
 	{
 		m_Renderer = std::make_unique<renderer_forward>(m_Device, m_ObjectFactory);
 		m_Renderer->setClearMode(clear_mode::skybox);
-		m_Renderer->setClearFlag(glm::vec4{0,0,0,1});
+		m_Renderer->setClearFlag(glm::vec4{1,1,1,1});
 		m_Renderer->setReflectionPosition({0,0,0});
 		m_Renderer->setReflectionClearFlag({0,0,0,0});
 
@@ -753,7 +753,7 @@ void modelviewer_app::loop()
 		m_Device->onStartRender();
 		onRender((float)elapsed);
 		onPostRenderImGUI();
-		m_Device->swapBuffers();
+		m_Device->onEndRender();
 		
 		watch.stop();
 		m_elapsedTimeSinceStart += watch.getSeconds();

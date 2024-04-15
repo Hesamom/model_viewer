@@ -16,7 +16,7 @@ namespace modelViewer::render {
 		virtual ~gfx_device() = default;
 
 		virtual void onStartRender() = 0;
-		virtual void swapBuffers() = 0;
+		virtual void onEndRender() = 0;
 		virtual void resize(int width, int height) = 0;
 		virtual void setViewport(int width, int height) = 0;
 		virtual int getMaxSamplersPerProgram() = 0;

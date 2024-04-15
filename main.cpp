@@ -46,7 +46,7 @@ void initWindow()
 #ifdef GFX_DX
 	{
 		auto win32 = std::make_shared<window_win32>(720,720, "dx12", false);
-		auto dx = std::make_shared<modelViewer::render::gfx_device_dx>(win32);
+		auto dx = std::make_shared<modelViewer::render::dx::gfx_device_dx>(win32);
 		device = dx;
 		window = win32;
 	}

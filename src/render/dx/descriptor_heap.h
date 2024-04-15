@@ -28,32 +28,28 @@ namespace modelViewer::render::dx
 		[[nodiscard]] CD3DX12_GPU_DESCRIPTOR_HANDLE getGPUHandle(UINT index) const;
 		CD3DX12_CPU_DESCRIPTOR_HANDLE getCPUHandle(UINT index) const;
 		
-		ID3D12DescriptorHeap* getHeap();
+		ID3D12DescriptorHeap* getHeap() const;
 		
 		int getSize() const;
 		int getCapacity() const;
 		void clear();
-		void copyTo(UINT start, UINT count, UINT destinationStart, descriptor_heap& destination);
+		void copyTo(UINT start, UINT count, UINT destinationStart, descriptor_heap& destination) const;
 		
 	private:
+
+		void checkSlot(UINT slot) const;
+		void resizeHeap();
+		void checkSize(UINT slot);
 		
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_Heap;
 		UINT m_Capacity = 0;
 		int m_Size = 0;
 		UINT m_DescriptorSize = 0;
-		D3D12_DESCRIPTOR_HEAP_DESC m_Desc;
+		D3D12_DESCRIPTOR_HEAP_DESC m_Desc{};
 		Microsoft::WRL::ComPtr<ID3D12Device> m_Device;
 		CD3DX12_CPU_DESCRIPTOR_HANDLE m_CpuHandle;
 		CD3DX12_GPU_DESCRIPTOR_HANDLE m_GpuHandle;
-		
-		void resizeHeap();
-
-
 		std::string m_Name;
-
-		void checkSlot(UINT slot) const;
-
-		void checkSize(UINT slot);
 	};
 }
 

@@ -11,9 +11,13 @@ SamplerState samAnisotropicClamp : register(s5);
 cbuffer u_globals : register(b0)
 {
 	float4x4 m_MV;
-    float4x4 m_Projection;
 };
 
+cbuffer u_PerFrameGlobals : register(b1)
+{
+	float4x4 m_ViewProjection;
+	float4x4 m_Projection;
+};
 
 struct VertexIn
 {
@@ -30,9 +34,8 @@ VertexOut VS(VertexIn vin)
 {
 	VertexOut vout;
 	
-	// Transform to homogeneous clip space.
 	vout.Pos = mul(float4(vin.Pos, 1.0f),  m_MV);
-	vout.Pos = mul(vout.Pos,  m_Projection);
+	vout.Pos = mul(vout.Pos,  m_Projection);	
 	vout.UV = vin.Pos.xyz;
     return vout;
 }

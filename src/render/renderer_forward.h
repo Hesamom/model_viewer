@@ -19,6 +19,26 @@ namespace modelViewer::render
 	class renderer_forward : public renderer_pipeline {
 		
 	private:
+
+		//TODO need a more scalable solution for storing matrices in uniform buffers for dx 
+		struct PerFrameBlock
+		{
+			glm::mat4x4 m_ViewProjection;
+			glm::mat4x4 m_Projection;
+			PerFrameBlock(glm::mat4x4& viewProj, glm::mat4x4& proj)
+			{
+#ifdef GFX_DX
+				m_Projection = glm::transpose(proj);
+				m_ViewProjection =  glm::transpose(viewProj);
+#else
+				m_Projection = proj;
+				m_ViewProjection = viewProj;
+#endif
+				
+				
+			}
+		};
+		
 		glm::vec4 m_ClearFlag;
 		glm::vec4 m_ReflectionClearFlag;
 		clear_mode m_ClearMode = clear_mode::color;
@@ -38,6 +58,7 @@ namespace modelViewer::render
 		const std::string m_DepthShaderVert = modelViewer::res::literals::shaders::shadow_vert;
 		const std::string m_DepthShaderFrag = modelViewer::res::literals::shaders::shadow_frag;
 		const std::string m_MVPUniformName = "u_MVP";
+		std::string m_PerFrameUniformBufferName = "u_PerFrameGlobals";
 
 		std::shared_ptr<framebuffer> m_shadowBuffer;
 		std::shared_ptr<framebuffer> m_ReflectionBuffer;
@@ -56,6 +77,7 @@ namespace modelViewer::render
 		glm::vec3  m_ReflectionPosition;
 		
 		std::vector<render_object_order_item> m_Renderers;
+		std::shared_ptr<uniform_buffer> m_PerFrameBuffer;
 
 		static bool compareRenderQueue(render_object_order_item& o1, render_object_order_item& o2);
 		void renderSpotShadows(render_scene& scene);

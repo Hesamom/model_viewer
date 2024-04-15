@@ -1,5 +1,4 @@
-﻿
-#include <d3d12.h>
+﻿#include <d3d12.h>
 #include <d3dx12.h>
 #include "framebuffer_dx.h"
 #include "texture_2D_dx.h"
@@ -64,7 +63,7 @@ void framebuffer_dx::clearDepthBuffer()
 	}
 }
 
-std::shared_ptr<modelViewer::render::texture> framebuffer_dx::getDepthMap()
+std::shared_ptr<texture> framebuffer_dx::getDepthMap()
 {
 	return m_DepthTexture;
 }

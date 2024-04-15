@@ -4,25 +4,26 @@
 #include "../gfx_device.h"
 
 #include <windows.h>
-#include <wrl.h>
 #include <dxgi1_4.h>
 #include <d3d12.h>
 #include "../../window/dx/window_win32.h"
 #include "../texture.h"
-#include "../../resource/model_info.h"
 #include "shader_dx.h"
 #include "mesh_dx.h"
 #include "shader_program_dx.h"
 
-namespace modelViewer::render
+namespace modelViewer::render::dx
 {
 	class gfx_device_dx : public gfx_device {
 
 	public:
 		explicit gfx_device_dx(std::shared_ptr<window_win32>& window);
 		
-		void swapBuffers() override;
+		void onEndRender() override;
 		void onStartRender() override;
+		void presentFrame();
+
+	
 		void setViewport(int width, int height) override;
 		void resize(int width, int height) override;
 		
@@ -55,13 +56,12 @@ namespace modelViewer::render
 		void createSwapChain();
 		void createRenderTargets();
 		void createStencilDepthBuffer();
-		void createShaderSamples();
 		void flushCommandQueue();
 		void setScissorRect(int x, int y, int width, int height);
-		void enableDebugLayer() const;
+		void enableDebugLayer(bool enableGPULayer) const;
 		void createDevice();
 		void queryDescriptorSizes();
-		void initMSAA();
+		void queryMSAASupport();
 		void createCommandList();
 		void createFence();
 		D3D12_CPU_DESCRIPTOR_HANDLE getCurrentBackBufferView() const;
@@ -69,11 +69,8 @@ namespace modelViewer::render
 		
 		void createSRVHeap();
 		ID3D12Resource* getCurrentBackBuffer();
-		void createSampleGeometry();
-		void createSkyboxShaderSamples();
-		void testRender();
 
-		const int meshCount = 2;
+		int m_Vsync = 0;
 		std::vector<std::shared_ptr<dx::shader_program_dx>> m_SamplePrograms;
 		std::vector<std::unique_ptr<mesh_dx>> m_sampleMeshes;
 		std::shared_ptr<window_win32> m_Window;
@@ -93,7 +90,7 @@ namespace modelViewer::render
 
 		static constexpr int SwapChainBufferCount = 2;
 		Microsoft::WRL::ComPtr<ID3D12Resource> m_SwapChainBuffer[SwapChainBufferCount];
-		Microsoft::WRL::ComPtr<ID3D12Resource> mDepthStencilBuffer;
+		Microsoft::WRL::ComPtr<ID3D12Resource> m_DepthStencilBuffer;
 
 		UINT mRtvDescriptorSize = 0;
 		UINT mDsvDescriptorSize = 0;
@@ -108,7 +105,7 @@ namespace modelViewer::render
 		UINT mCurrBackBuffer = 0;
 		bool m4xMsaaState = false;
 		bool m_IsCommandListOpen = false;
-		UINT m4xMsaaQuality = 0;
+		UINT m_MsaaQuality = 0;
 		std::shared_ptr<dx::texture_dx> m_SampleTexture;
 		std::shared_ptr<texture> m_SkyBoxTexture;
 		

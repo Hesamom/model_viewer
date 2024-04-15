@@ -3,8 +3,13 @@ in vec4 v_position;
 
 out vec3 TexCoord;
 
+layout(std140) uniform u_PerFrameGlobals
+{
+    mat4 m_ViewProjection;
+    mat4 m_Projection;
+};
+
 uniform mat4 m_MV;
-uniform mat4 m_Projection;
 
 void main()
 {

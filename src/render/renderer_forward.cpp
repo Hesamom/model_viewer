@@ -290,7 +290,10 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 
 	auto viewMatrix = camera.getView();
 	auto projection = camera.getProjection();
-	
+	auto viewProjection = projection * viewMatrix;
+
+	PerFrameBlock block {viewProjection, projection};
+	m_PerFrameBuffer->setData(&block, 0, sizeof(PerFrameBlock));
 	
 	auto directionalShadowMap = getDirShadowMap();
 	auto spotShadowMap = getSpotShadowMap();
@@ -338,6 +341,7 @@ void renderer_forward::renderObjects(render_scene& scene, camera& camera, bool s
 		renderer->getMaterial()->setSpotLights(scene.getSpotLights());
 		
 		m_Device->pushDebugGroup(renderer->getName().c_str());
+		renderer->getMaterial()->getShaderProgram()->setUniformBuffer(m_PerFrameBuffer, m_PerFrameUniformBufferName);
 		renderer->render(viewMatrix, projection);
 		m_Device->popDebugGroup();
 	}
@@ -354,6 +358,7 @@ renderer_forward::renderer_forward(const std::shared_ptr<gfx_device>& device, ob
 	//initShadowmap(factory, shaderLoader);
 	//initReflectionMap(factory);
 	initSkybox(factory);
+	m_PerFrameBuffer = device->createUniformBuffer(sizeof(PerFrameBlock), m_PerFrameUniformBufferName);
 }
 
 void renderer_forward::setClearFlag(glm::vec4 color)

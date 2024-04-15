@@ -5,7 +5,7 @@
 
 namespace modelViewer::render::dx
 {
-	void attempt(HRESULT result);
+    void attempt(HRESULT result);
 }
 
 

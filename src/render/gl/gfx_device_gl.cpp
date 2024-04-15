@@ -14,7 +14,7 @@
 using namespace modelViewer::render;
 using namespace modelViewer::res;
 
-void gfx_device_gl::swapBuffers()
+void gfx_device_gl::onEndRender()
 {
 	m_Window->swapBuffers();
 }

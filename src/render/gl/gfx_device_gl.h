@@ -9,7 +9,7 @@ namespace modelViewer::render {
 
 	public:
 		explicit gfx_device_gl(std::shared_ptr<window_glfw>& window);
-		void swapBuffers() override;
+		void onEndRender() override;
 		void setViewport(int width, int height) override;
 		void clearDepthBuffer() override;
 		void resize(int width, int height) override;

@@ -46,7 +46,6 @@ cbuffer u_globals : register(b0)
 {
 	float4x4 m_MV;
 	float4x4 m_Model;
-	float4x4 m_Projection;
 	
 	float3 u_lightAmbient;
 	float3 u_lightDiffuse;
@@ -58,6 +57,12 @@ cbuffer u_globals : register(b0)
 cbuffer u_mat : register(b1)
 {
 	material mat;
+};
+
+cbuffer u_PerFrameGlobals : register(b2)
+{
+	float4x4 m_ViewProjection;
+	float4x4 m_Projection;
 };
 
 

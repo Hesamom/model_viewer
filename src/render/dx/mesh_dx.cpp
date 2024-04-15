@@ -1,8 +1,9 @@
-﻿
-#include "mesh_dx.h"
+﻿#include "mesh_dx.h"
 #include "shader_program_dx.h"
 
-modelViewer::render::mesh_dx::mesh_dx(std::shared_ptr<modelViewer::res::mesh_asset>& asset,
+using namespace modelViewer::render::dx;
+
+mesh_dx::mesh_dx(std::shared_ptr<res::mesh_asset>& asset,
 	Microsoft::WRL::ComPtr<ID3D12Device>& device,
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> & commandList)
 {
@@ -42,23 +43,23 @@ modelViewer::render::mesh_dx::mesh_dx(std::shared_ptr<modelViewer::res::mesh_ass
 	m_IndexBuffer = std::make_unique<buffer_vertex_dx<unsigned int>>(*asset->indices, *device.Get(), *commandList.Get());
 }
 
-std::vector<D3D12_INPUT_ELEMENT_DESC>& modelViewer::render::mesh_dx::getLayout()
+std::vector<D3D12_INPUT_ELEMENT_DESC>& mesh_dx::getLayout()
 {
 	return m_InputLayout;
 }
 
-unsigned int modelViewer::render::mesh_dx::getIndicesCount()
+unsigned int mesh_dx::getIndicesCount()
 {
 	return m_Asset->indices->size();
 }
 
-void modelViewer::render::mesh_dx::drawTriangles()
+void mesh_dx::drawTriangles()
 {
 	m_CommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	m_CommandList->DrawIndexedInstanced(getIndicesCount(),1, 0, 0, 0);
 }
 
-void modelViewer::render::mesh_dx::bind()
+void mesh_dx::bind()
 {
 	m_CommandList->IASetVertexBuffers(0, m_VertexBufferViews.size(), m_VertexBufferViews.data());
 
@@ -66,19 +67,19 @@ void modelViewer::render::mesh_dx::bind()
 	m_CommandList->IASetIndexBuffer(&indexBufferView);
 }
 
-void modelViewer::render::mesh_dx::drawLines()
+void mesh_dx::drawLines()
 {
 	//TODO gotta confirm this 
 	m_CommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 	m_CommandList->DrawIndexedInstanced(getIndicesCount(),1, 0, 0, 0);
 }
 
-std::shared_ptr<modelViewer::res::mesh_asset> modelViewer::render::mesh_dx::getAsset()
+std::shared_ptr<modelViewer::res::mesh_asset> mesh_dx::getAsset()
 {
 	return m_Asset;
 }
 
-void modelViewer::render::mesh_dx::bindLayout(const std::shared_ptr<shader_program>& program)
+void mesh_dx::bindLayout(const std::shared_ptr<shader_program>& program)
 {
 	auto programDX = std::dynamic_pointer_cast<dx::shader_program_dx>(program);
 	assert(programDX != nullptr);

@@ -2,11 +2,13 @@
 
 #include <d3dx12.h>
 #include "descriptor_heap.h"
+#include "dx_util.h"
 #include "../../common/string_util.h"
 
 const UINT MinCapacity = 4;
+using namespace modelViewer::render::dx;
 
-modelViewer::render::dx::descriptor_heap::descriptor_heap(Microsoft::WRL::ComPtr<ID3D12Device>& device,
+descriptor_heap::descriptor_heap(Microsoft::WRL::ComPtr<ID3D12Device>& device,
 	D3D12_DESCRIPTOR_HEAP_TYPE type,
 	D3D12_DESCRIPTOR_HEAP_FLAGS flags,
 	UINT capacity, const std::string& name)
@@ -20,7 +22,7 @@ modelViewer::render::dx::descriptor_heap::descriptor_heap(Microsoft::WRL::ComPtr
 	m_Desc.NodeMask = 0;
 	m_Name = name;
 	
-	m_Device->CreateDescriptorHeap(&m_Desc,IID_PPV_ARGS(&m_Heap));
+	attempt(m_Device->CreateDescriptorHeap(&m_Desc,IID_PPV_ARGS(&m_Heap)));
 	auto wideName = convertAnsiToWide(m_Name);
 	m_Heap->SetName(wideName.data());
 	m_CpuHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(m_Heap->GetCPUDescriptorHandleForHeapStart());
@@ -34,25 +36,25 @@ modelViewer::render::dx::descriptor_heap::descriptor_heap(Microsoft::WRL::ComPtr
 	m_DescriptorSize = m_Device->GetDescriptorHandleIncrementSize( type);
 }
 
-int modelViewer::render::dx::descriptor_heap::pushBack(D3D12_CONSTANT_BUFFER_VIEW_DESC& bufferDesc)
+int descriptor_heap::pushBack(D3D12_CONSTANT_BUFFER_VIEW_DESC& bufferDesc)
 {
 	return insert(bufferDesc, m_Size);
 }
 
 
-int modelViewer::render::dx::descriptor_heap::pushBack(D3D12_SHADER_RESOURCE_VIEW_DESC& desc,
+int descriptor_heap::pushBack(D3D12_SHADER_RESOURCE_VIEW_DESC& desc,
 	ID3D12Resource& resource)
 {
 	return insert(desc, resource, m_Size);
 }
 
-void modelViewer::render::dx::descriptor_heap::resizeHeap()
+void descriptor_heap::resizeHeap()
 {
 	m_Capacity *= 2;
 	
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> newHeap;
 	m_Desc.NumDescriptors = m_Capacity;
-	m_Device->CreateDescriptorHeap(&m_Desc,IID_PPV_ARGS(&newHeap));
+	attempt(m_Device->CreateDescriptorHeap(&m_Desc,IID_PPV_ARGS(&newHeap)));
 	auto newCPUHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(newHeap->GetCPUDescriptorHandleForHeapStart());
 	m_Device->CopyDescriptorsSimple(m_Size, newCPUHandle, m_CpuHandle, m_Desc.Type);
 	m_Heap->Release();
@@ -67,7 +69,7 @@ void modelViewer::render::dx::descriptor_heap::resizeHeap()
 	}
 }
 
-CD3DX12_GPU_DESCRIPTOR_HANDLE modelViewer::render::dx::descriptor_heap::getGPUHandle(UINT index) const
+CD3DX12_GPU_DESCRIPTOR_HANDLE descriptor_heap::getGPUHandle(UINT index) const
 {
 	assert(m_Desc.Flags & D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
 	if (index > m_Size)
@@ -81,7 +83,7 @@ CD3DX12_GPU_DESCRIPTOR_HANDLE modelViewer::render::dx::descriptor_heap::getGPUHa
 	return handle;
 }
 
-CD3DX12_CPU_DESCRIPTOR_HANDLE modelViewer::render::dx::descriptor_heap::getCPUHandle(UINT index) const
+CD3DX12_CPU_DESCRIPTOR_HANDLE descriptor_heap::getCPUHandle(UINT index) const
 {
 	if (index > m_Size)
 	{
@@ -93,20 +95,20 @@ CD3DX12_CPU_DESCRIPTOR_HANDLE modelViewer::render::dx::descriptor_heap::getCPUHa
 	return handle;
 }
 
-ID3D12DescriptorHeap* modelViewer::render::dx::descriptor_heap::getHeap()
+ID3D12DescriptorHeap* descriptor_heap::getHeap() const
 {
 	return m_Heap.Get();
 }
 
-void modelViewer::render::dx::descriptor_heap::clear()
+void descriptor_heap::clear()
 {
 	m_Size = 0;
 }
 
-void modelViewer::render::dx::descriptor_heap::copyTo(UINT start,
+void descriptor_heap::copyTo(UINT start,
 	UINT count,
 	UINT destinationStart,
-	descriptor_heap& destination)
+	descriptor_heap& destination) const
 {
 	if(destination.m_Desc.Type != m_Desc.Type)
 	{
@@ -140,7 +142,7 @@ void modelViewer::render::dx::descriptor_heap::copyTo(UINT start,
 	destination.m_Size = std::max((int)lastElement, destination.m_Size);
 }
 
-int modelViewer::render::dx::descriptor_heap::insert(D3D12_DEPTH_STENCIL_VIEW_DESC& desc,
+int descriptor_heap::insert(D3D12_DEPTH_STENCIL_VIEW_DESC& desc,
 	ID3D12Resource& resource,
 	UINT slot)
 {
@@ -155,7 +157,7 @@ int modelViewer::render::dx::descriptor_heap::insert(D3D12_DEPTH_STENCIL_VIEW_DE
 	return slot;
 }
 
-void modelViewer::render::dx::descriptor_heap::checkSize(UINT slot)
+void descriptor_heap::checkSize(UINT slot)
 {
 	if(slot == m_Size)
 	{
@@ -168,7 +170,7 @@ void modelViewer::render::dx::descriptor_heap::checkSize(UINT slot)
 	}
 }
 
-void modelViewer::render::dx::descriptor_heap::checkSlot(UINT slot) const
+void descriptor_heap::checkSlot(UINT slot) const
 {
 	if(slot >= m_Capacity)
 	{
@@ -176,7 +178,7 @@ void modelViewer::render::dx::descriptor_heap::checkSlot(UINT slot) const
 	}
 }
 
-int modelViewer::render::dx::descriptor_heap::insert(D3D12_SHADER_RESOURCE_VIEW_DESC& desc,
+int descriptor_heap::insert(D3D12_SHADER_RESOURCE_VIEW_DESC& desc,
 	ID3D12Resource& resource,
 	UINT slot)
 {
@@ -191,7 +193,7 @@ int modelViewer::render::dx::descriptor_heap::insert(D3D12_SHADER_RESOURCE_VIEW_
 	return slot;
 }
 
-int modelViewer::render::dx::descriptor_heap::insert(D3D12_CONSTANT_BUFFER_VIEW_DESC& desc, UINT slot)
+int descriptor_heap::insert(D3D12_CONSTANT_BUFFER_VIEW_DESC& desc, UINT slot)
 {
 	checkSlot(slot);
 	
@@ -203,17 +205,17 @@ int modelViewer::render::dx::descriptor_heap::insert(D3D12_CONSTANT_BUFFER_VIEW_
 	return slot;
 }
 
-int modelViewer::render::dx::descriptor_heap::getSize() const
+int descriptor_heap::getSize() const
 {
 	return m_Size;
 }
 
-int modelViewer::render::dx::descriptor_heap::getCapacity() const
+int descriptor_heap::getCapacity() const
 {
 	return m_Capacity;
 }
 
-int modelViewer::render::dx::descriptor_heap::pushBack(D3D12_DEPTH_STENCIL_VIEW_DESC& desc, ID3D12Resource& resource)
+int descriptor_heap::pushBack(D3D12_DEPTH_STENCIL_VIEW_DESC& desc, ID3D12Resource& resource)
 {
 	return insert(desc, resource, m_Size);
 }

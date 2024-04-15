@@ -2,6 +2,8 @@
 #ifndef SHADER_PROGRAM_DX_H
 #define SHADER_PROGRAM_DX_H
 
+#include <d3d12shader.h>
+
 #include "shader_dx.h"
 #include "shader_constant.h"
 #include "../shader_program.h"
@@ -12,9 +14,11 @@ namespace modelViewer::render::dx
 {
 	class shader_program_dx : public shader_program {
 	public:
+		void createDescriptorHeaps();
+
 		explicit shader_program_dx(std::vector<std::shared_ptr<shader_dx>>& shaders,
-			Microsoft::WRL::ComPtr<ID3D12Device>& device,
-			Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList);
+		                           Microsoft::WRL::ComPtr<ID3D12Device>& device,
+		                           Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& commandList);
 		
 		void bindTexture(int slotIndex, std::shared_ptr<render::texture> &texture) override;
 		bool bindTexture(const std::string &name, std::shared_ptr<render::texture> &texture) override;
@@ -52,7 +56,12 @@ namespace modelViewer::render::dx
 
 		void getVariableOffset(const std::string& name, int& bufferIndex, constant_variable& offset) const;
 		void setUniform(const std::string& name, void* dataPtr, UINT size, bool optional = true);
-		bool isDuplicatedConstant(UINT bindPoint);
+		bool isDuplicatedConstant(UINT bindPoint) const;
+
+		void reflectTextures(ID3D12ShaderReflection* reflection, D3D12_SHADER_DESC shaderDesc);
+
+		void reflectConstantBuffers(ID3D12ShaderReflection* reflection, D3D12_SHADER_DESC shaderDesc);
+
 		std::shared_ptr<shader_dx> getShaderByType(res::shaderType type);
 		std::shared_ptr<shader_dx> getVertexShader();
 		std::shared_ptr<shader_dx> getFragShader();

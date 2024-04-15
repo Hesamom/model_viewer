@@ -50,6 +50,8 @@ endif ()
 
 if (MSVC)
     add_definitions(/permissive /D "_WINDOWS" /D "_UNICODE" /D "UNICODE")
+else ()
+    add_compile_options(-Wno-address-of-temporary)
 endif ()
 
 

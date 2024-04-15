@@ -5,11 +5,11 @@
 #include "../../resource/mesh_asset.h"
 #include "../mesh.h"
 
-namespace modelViewer::render
+namespace modelViewer::render::dx
 {
 	class mesh_dx : public mesh {
 	public:
-		explicit mesh_dx(std::shared_ptr<modelViewer::res::mesh_asset>& asset, Microsoft::WRL::ComPtr<ID3D12Device>& device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> & commandList);
+		explicit mesh_dx(std::shared_ptr<res::mesh_asset>& asset, Microsoft::WRL::ComPtr<ID3D12Device>& device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> & commandList);
 		std::vector<D3D12_INPUT_ELEMENT_DESC>& getLayout();
 		unsigned int getIndicesCount();
 

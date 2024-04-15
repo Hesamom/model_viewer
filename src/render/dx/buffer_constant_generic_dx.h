@@ -5,9 +5,10 @@
 #include <d3d12.h>
 #include <wrl.h>
 #include "d3dx12.h"
+#include "dx_util.h"
 #include "../../common/string_util.h"
 
-namespace modelViewer::render
+namespace modelViewer::render::dx
 {
 	class buffer_constant_generic_dx
 	{
@@ -15,18 +16,17 @@ namespace modelViewer::render
 		buffer_constant_generic_dx(ID3D12Device& device, UINT size, const char * name)
 		{
 			m_Size = calcBufferByteSize(size);
-			device.CreateCommittedResource(
-				&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-				D3D12_HEAP_FLAG_NONE,
-				&CD3DX12_RESOURCE_DESC::Buffer(m_Size),
+			const auto heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+			const auto buffer = CD3DX12_RESOURCE_DESC::Buffer(m_Size);
+			attempt(device.CreateCommittedResource(&heapProp,
+				D3D12_HEAP_FLAG_NONE,&buffer,
 				D3D12_RESOURCE_STATE_GENERIC_READ,
 				nullptr,
-				IID_PPV_ARGS(&mUploadBuffer));
+				IID_PPV_ARGS(&mUploadBuffer)));
 
 			auto wName = convertAnsiToWide(name);
-			mUploadBuffer->SetName(wName.data());
-			
-			mUploadBuffer->Map(0, nullptr, reinterpret_cast<void**>(&mMappedData));
+			attempt(mUploadBuffer->SetName(wName.data()));
+			attempt(mUploadBuffer->Map(0, nullptr, reinterpret_cast<void**>(&mMappedData)));
 		}
 
 		D3D12_CONSTANT_BUFFER_VIEW_DESC getView()
@@ -46,7 +46,9 @@ namespace modelViewer::render
 		~buffer_constant_generic_dx()
 		{
 			if(mUploadBuffer != nullptr)
+			{
 				mUploadBuffer->Unmap(0, nullptr);
+			}
 
 			mMappedData = nullptr;
 		}

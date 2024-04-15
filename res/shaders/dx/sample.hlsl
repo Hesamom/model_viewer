@@ -2,8 +2,14 @@ cbuffer u_globals : register(b0)
 {
 	float4x4 m_MV;
 	float4x4 m_Model;
+};
+
+cbuffer u_PerFrameGlobals : register(b1)
+{
+	float4x4 m_ViewProjection;
 	float4x4 m_Projection;
 };
+
 
 struct VertexIn
 {
